@@ -1,18 +1,21 @@
-# claude-skills
+# Agent skills
 
-Personal, project-agnostic [Agent Skills](https://code.claude.com/docs/en/skills)
-for Claude Code, kept in one place for reuse across machines and projects.
+Personal, project-agnostic agent skills for Claude and Codex, kept in one place
+for reuse across machines and projects. The repository retains its historical
+`claude-skills` name for now, but new platform-specific material is separated
+by directory.
 
 ## Skills
 
-| Skill | What it does |
-| --- | --- |
-| [maestro](skills/maestro/SKILL.md) | Orchestrator pattern for dev tasks: a premium session model (Fable/Mythos, Opus) plans and reviews; cheaper workers (Claude Opus/Sonnet via the Agent tool, or GPT via Codex CLI, Gemini CLI) implement. The maestro verifies every result itself and iterates with the same worker until the work matches the plan. |
+| Platform | Skill | What it does |
+| --- | --- | --- |
+| Claude | [maestro](skills/maestro/SKILL.md) | A premium Claude session model plans and reviews while bounded Claude or external-CLI workers implement. |
+| Codex | [codex-maestro](codex/skills/codex-maestro/SKILL.md) | GPT-5.6 Sol plans and reviews; GPT-5.6 Luna at max reasoning implements bounded work items. Includes a native custom-agent template and a Codex CLI fallback. |
 
-## Install
+## Install Claude Maestro
 
-**Globally (all projects on a machine)** — copy or symlink into the personal
-skills directory:
+Globally for all projects on a machine, copy or symlink the skill into the
+personal Claude skills directory:
 
 ```bash
 git clone git@github.com:akoita/claude-skills.git
@@ -20,18 +23,51 @@ ln -s "$(pwd)/claude-skills/skills/maestro" ~/.claude/skills/maestro
 # or: cp -r claude-skills/skills/maestro ~/.claude/skills/
 ```
 
-A symlink keeps the installed skill in sync with `git pull`; a copy freezes it.
+## Install Codex Maestro
 
-**Per project (checked in, shared with the team)** — copy into the repo:
+Run the installer with the Python environment used to launch Codex:
 
 ```bash
-cp -r claude-skills/skills/maestro <repo>/.claude/skills/
+python codex/skills/codex-maestro/scripts/install.py
 ```
+
+It installs:
+
+- `codex-maestro` under `~/.agents/skills/`, making the skill available in all
+  projects for that user;
+- `luna_worker` under `$CODEX_HOME/agents/` (or `~/.codex/agents/`), pinning
+  `gpt-5.6-luna` with max reasoning.
+
+Use `--link` while developing the skill from this checkout. Rerun with
+`--force` to replace an existing installation. Restart Codex or open a new task
+after installation, select GPT-5.6 Sol for the root task, and invoke
+`$codex-maestro` explicitly or let its description trigger on non-trivial
+implementation work.
+
+Run the installer once in Windows and once in WSL if you use separate Codex
+installations in both environments; each environment has its own home and
+Codex configuration directories.
+
+## Per-project installation
+
+Copy a skill into the platform's repository-scoped skills directory when it
+should be checked in and shared with only that project:
+
+```bash
+cp -r codex/skills/codex-maestro <repo>/.agents/skills/
+cp -r skills/maestro <repo>/.claude/skills/
+```
+
+The Luna custom agent remains a user-level Codex configuration. To make its
+template project-scoped, copy it to `<repo>/.codex/agents/luna-worker.toml`.
 
 ## Conventions
 
-- One directory per skill under `skills/`, with the skill's `SKILL.md`
-  (plus optional `references/`, `scripts/`, `assets/`).
-- Skills here must be project-agnostic: no repo-specific paths, secrets, or
-  company context. Project-specific skills belong in that project's
-  `.claude/skills/`.
+- Keep every skill project-agnostic: no repository-specific paths, secrets, or
+  company context.
+- Put Claude skills under `skills/` for backward compatibility.
+- Put Codex skills under `codex/skills/` and reusable Codex agent templates in
+  the skill's `references/` directory.
+- Use a skill for one reusable workflow. Add a plugin wrapper only when the
+  workflow is stable enough for marketplace or team distribution, or when it
+  needs bundled connectors, MCP configuration, or hooks.
