@@ -77,13 +77,22 @@ capacity, or when a second opinion from a different model family is valuable.
 
 | Worker | How | When |
 | --- | --- | --- |
-| Claude Opus | Agent tool, `model: "opus"`, high effort | Default implementer — features, fixes, refactors, tests. |
-| Claude Sonnet | Agent tool, `model: "sonnet"`, max effort | Well-specified mechanical/bulk work: renames, scaffolding, doc updates, repetitive tests, straightforward CRUD. |
+| **Claude Opus 4.8 (high effort)** | Agent tool, `model: "opus"`, high effort | **Default worker — use this first.** Anything correctness-sensitive: features, fixes, refactors, non-trivial UI/logic, tests whose assertions matter. A wrong diff costs far more than the tokens saved, so quality wins by default. |
+| Claude Sonnet 5 (max effort) | Agent tool, `model: "sonnet"`, max effort | Only for well-specified, low-risk, high-volume mechanical work where the plan leaves the worker almost no judgment: bulk renames, scaffolding, doc/string updates, repetitive fixtures, straightforward CRUD. If a subtle bug would be expensive, use Opus 4.8 instead. |
 | GPT (Codex CLI) | `codex exec --sandbox workspace-write "<prompt>"` via background Bash | When the user prefers GPT workers, Codex quota is the cheap capacity at hand, or a different model family should sanity-check a design. |
 | Gemini CLI / other CLIs | analogous non-interactive exec mode | Same reasoning, if installed and authenticated. |
 
-Never use a worker from the maestro's own premium tier — it defeats the
-purpose. The Agent tool inherits the session's reasoning effort; when
+**Quality-first worker choice.** Prefer **Claude Opus 4.8 at high effort** as
+the default worker, ahead of Sonnet 5 (max). Even when the maestro is itself
+Opus, delegating to Opus-4.8-high workers is still worth it: you get
+parallelism, context offload, and an independent diff you review fresh — and a
+correct implementation beats the marginal token saving. Reserve Sonnet 5 (max)
+for the mechanical, low-judgment work above. (Earlier guidance to "never use
+the maestro's own tier" over-optimized for cost and pushed correctness-sensitive
+work onto a weaker worker — don't; the cost arbitrage is a *bonus* when the
+maestro is a pricier tier like Fable/Mythos, not a reason to risk quality. The
+one thing to still avoid is spending a *pricier* tier than the maestro on
+routine work.) The Agent tool inherits the session's reasoning effort; when
 orchestrating through the Workflow tool instead, set it explicitly
 (`effort: 'high'` for opus, `effort: 'max'` for sonnet). For external CLIs,
 inherit the model/effort configured in the CLI's own config unless the user
