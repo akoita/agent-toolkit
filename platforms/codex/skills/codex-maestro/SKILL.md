@@ -23,11 +23,11 @@ bounded implementation work to Luna workers, then verify their work directly.
 - Never claim a worker used Luna Max unless its custom-agent configuration or
   CLI invocation proves it.
 
-For one-time cross-project setup, run `python scripts/install.py`. This installs
-the skill under the user's global Agent Skills directory and the worker under
-the user's Codex agents directory. Do not run the installer silently during a
-task. See `references/luna-worker.toml` when checking or repairing the worker
-configuration.
+For one-time cross-project setup, run `python scripts/install.py` from this
+skill directory. It installs the skill under the user's global Agent Skills
+directory and the worker under the user's Codex agents directory. Do not run
+the installer silently during a task. See `references/luna-worker.toml` when
+checking or repairing the worker configuration.
 
 ## Phase 1: analyze and plan as Sol
 
