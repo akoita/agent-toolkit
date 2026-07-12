@@ -30,7 +30,7 @@ installation scopes, and runtime capabilities differ.
 | Platform | Skill | What it does |
 | --- | --- | --- |
 | Claude | [maestro](platforms/claude/skills/maestro/SKILL.md) | A premium Claude session model plans and reviews while bounded Claude or external-CLI workers implement. |
-| Codex | [codex-maestro](platforms/codex/skills/codex-maestro/SKILL.md) | GPT-5.6 Sol plans and reviews; GPT-5.6 Luna at max reasoning implements bounded work items. |
+| Codex | [codex-maestro](platforms/codex/skills/codex-maestro/SKILL.md) | Adaptive GPT-5.6 orchestration: Luna direct for economy, Sol Medium for serious development, Sol High for critical escalation, and Luna Max workers. |
 
 ## Install Claude Maestro
 
@@ -59,11 +59,13 @@ It installs:
 - `codex-maestro` under `~/.agents/skills/`, making the skill available in all
   projects for that user;
 - `luna_worker` under `$CODEX_HOME/agents/` (or `~/.codex/agents/`), pinning
-  `gpt-5.6-luna` with max reasoning.
+  `gpt-5.6-luna` with max reasoning. The default Balanced profile uses Sol
+  Medium as the root planner; select Sol High for Quality work and Luna directly
+  for Economy work.
 
 Use `--link` while developing the skill from this checkout. Rerun with
 `--force` to replace an existing installation. Restart Codex or open a new task
-after installation, select GPT-5.6 Sol for the root task, and invoke
+after installation, select Sol Medium for the Balanced profile, and invoke
 `$codex-maestro` explicitly or let its description trigger on non-trivial
 implementation work.
 
