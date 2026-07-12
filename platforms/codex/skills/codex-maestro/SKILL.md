@@ -3,7 +3,7 @@ name: codex-maestro
 description: >-
   Orchestrate non-trivial software implementation with an adaptive GPT-5.6
   model policy: Luna for economical direct work, Sol Medium as the default
-  planner and integrator, and Sol Max for high-risk escalation. Delegate
+  planner and integrator, and Sol High for critical escalation. Delegate
   bounded implementation to Luna Max workers, review the actual diff, and
   verify results. Use for features, bug fixes, refactors, tests, configuration,
   and infrastructure; skip trivial edits, pure analysis/review, or explicit
@@ -25,12 +25,11 @@ the skill cannot change an already-running root session.
 | --- | --- | --- | --- |
 | Economy | Luna, direct | None | Small, mechanical, low-risk work |
 | Balanced (default) | Sol Medium | Luna Max | Serious development: investigation, planning, implementation, tests, and review |
-| Quality | Sol Max | Luna Max | Architecture, security, migrations, ambiguity, or repeated worker failure |
+| Quality | Sol High | Luna Max | Critical architecture, security, migrations, ambiguity, or repeated worker failure |
 
-Use `Sol Ultra` only when the task has several genuinely independent
-workstreams and faster wall-clock completion is worth the extra parallel-token
-cost. Do not make Ultra the default. Do not add a separate model review pass to
-every task; automated tests and the master’s own diff review are usually enough.
+Keep Sol High as the critical-work ceiling for now; do not add higher-cost tiers
+to this policy. Do not add a separate model review pass to every task;
+automated tests and the master’s own diff review are usually enough.
 
 Use the `luna_worker` custom agent, configured as `gpt-5.6-luna` with
 `model_reasoning_effort = "max"`, for implementation. If native custom-agent
@@ -147,8 +146,8 @@ Treat the worker report as a claim, not evidence:
    and accidentally overwritten user work.
 5. Decide whether the item is complete. The worker does not decide "done."
 
-For Quality tasks, Sol Max owns the final review. For Balanced tasks, Sol Medium
-owns the normal review; escalate to Sol Max only when an escalation condition is
+For Quality tasks, Sol High owns the final review. For Balanced tasks, Sol Medium
+owns the normal review; escalate to Sol High only when an escalation condition is
 met.
 
 ## Phase 4: iterate with the same worker
@@ -166,7 +165,7 @@ python <skill-dir>/scripts/run_luna_worker.py \
 
 Name the file and location, explain the defect, and state the required result.
 After each fix, inspect the new diff and rerun verification. Escalate to Sol
-Max when the retry limit is reached or the defect is architectural or risky.
+High when the retry limit is reached or the defect is architectural or risky.
 
 ## Phase 5: present and publish
 
