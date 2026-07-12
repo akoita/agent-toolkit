@@ -1,0 +1,4 @@
+interface:
+  display_name: "Set Up Agent Toolkit"
+  short_description: "Safely install and configure Agent Toolkit"
+  default_prompt: "Use $setup-agent-toolkit to inspect, preview, and safely configure Agent Toolkit."
