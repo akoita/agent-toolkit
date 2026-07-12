@@ -2,7 +2,7 @@
 name: codex-maestro
 description: >-
   Orchestrate non-trivial software implementation with an adaptive GPT-5.6
-  model policy: Luna for economical direct work, Terra Max as the default
+  model policy: Luna for economical direct work, Sol Medium as the default
   planner and integrator, and Sol Max for high-risk escalation. Delegate
   bounded implementation to Luna Max workers, review the actual diff, and
   verify results. Use for features, bug fixes, refactors, tests, configuration,
@@ -24,7 +24,7 @@ the skill cannot change an already-running root session.
 | Profile | Root/master | Worker | Use for |
 | --- | --- | --- | --- |
 | Economy | Luna, direct | None | Small, mechanical, low-risk work |
-| Balanced (default) | Terra Max | Luna Max | Normal features, fixes, tests, and refactors |
+| Balanced (default) | Sol Medium | Luna Max | Serious development: investigation, planning, implementation, tests, and review |
 | Quality | Sol Max | Luna Max | Architecture, security, migrations, ambiguity, or repeated worker failure |
 
 Use `Sol Ultra` only when the task has several genuinely independent
@@ -48,8 +48,8 @@ checking or repairing the worker configuration.
 
 1. Skip orchestration and use Luna directly for a trivial one-file edit or
    mechanical change with no meaningful design decision.
-2. Use Balanced for the normal path: Terra Max plans and decomposes; Luna Max
-   implements; Terra or the root session synthesizes and reviews the result.
+2. Use Balanced for the normal serious-development path: Sol Medium investigates,
+   plans, decomposes, and reviews; Luna Max implements and tests.
 3. Escalate to Quality when requirements are ambiguous, the change affects
    security, migrations, permissions, payments, public contracts, or lifecycle
    state; when tests fail for a reason the worker cannot isolate; or when the
@@ -147,9 +147,9 @@ Treat the worker report as a claim, not evidence:
    and accidentally overwritten user work.
 5. Decide whether the item is complete. The worker does not decide "done."
 
-For Quality tasks, Sol Max owns the final review. For Balanced tasks, Terra Max
-or the root session owns it; do not spend Sol tokens unless an escalation
-condition is met.
+For Quality tasks, Sol Max owns the final review. For Balanced tasks, Sol Medium
+owns the normal review; escalate to Sol Max only when an escalation condition is
+met.
 
 ## Phase 4: iterate with the same worker
 
