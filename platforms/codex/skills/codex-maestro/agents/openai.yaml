@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex Maestro"
-  short_description: "Plan with Sol, implement with Luna Max"
-  default_prompt: "Use $codex-maestro to plan with Sol, delegate implementation to Luna Max, and independently verify the result."
+  short_description: "Adaptive Terra/Sol planning with Luna workers"
+  default_prompt: "Use $codex-maestro with the Balanced profile by default: plan with Terra Max, delegate to Luna Max, and escalate to Sol Max only when risk justifies it."
