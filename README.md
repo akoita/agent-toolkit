@@ -35,6 +35,7 @@ installation scopes, and runtime capabilities differ.
 | Platform | Skill | What it does |
 | --- | --- | --- |
 | Claude | [maestro](platforms/claude/skills/maestro/SKILL.md) | A premium Claude session model plans and reviews while bounded Claude or external-CLI workers implement. |
+| Claude | [remote-session-keeper](platforms/claude/skills/remote-session-keeper/SKILL.md) | Keeps remote (SSH/WSL) Claude Code sessions alive across desktop-GUI restarts with a per-project tmux launcher, and documents the `claude --continue` / `--resume` recovery path. Works around [claude-code#49790](https://github.com/anthropics/claude-code/issues/49790). |
 | Codex | [codex-maestro](platforms/codex/skills/codex-maestro/SKILL.md) | Adaptive GPT-5.6 orchestration: Luna direct for economy, Sol Medium for serious development, Sol High for critical escalation, and Luna Max workers. |
 | Codex | [setup-agent-toolkit](platforms/codex/skills/setup-agent-toolkit/SKILL.md) | Safely inspects, previews, installs, and configures Agent Toolkit without overwriting developer configuration. |
 
