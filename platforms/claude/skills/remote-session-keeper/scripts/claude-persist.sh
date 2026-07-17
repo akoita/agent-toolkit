@@ -61,12 +61,11 @@ if tmux has-session -t "=$SESSION" 2>/dev/null; then
 fi
 
 echo "claude-persist: starting persistent session '$SESSION' in $PWD (Ctrl-b d to detach)"
-# Start detached in this dir, run claude with any passed-through args, then attach.
-# `claude --continue` picks up the most recent session for this directory, so a
-# fresh keeper started in an existing project resumes rather than starts blank.
-if [ "$#" -gt 0 ]; then
-  tmux new-session -d -s "$SESSION" -c "$PWD" "claude $*"
-else
-  tmux new-session -d -s "$SESSION" -c "$PWD" "claude --continue || claude"
-fi
+# Pass claude + args as DIRECT arguments to tmux so claude runs as the pane's
+# own process. A shell string ("claude --continue || claude") does not track
+# reliably as the pane process — tmux can leave a bare shell in the pane
+# instead — so we avoid the compound form. Any args pass through, so
+# `claude-persist --continue` / `--resume` resume a prior session; with no args
+# a fresh session starts and then persists across disconnects.
+tmux new-session -d -s "$SESSION" -c "$PWD" claude "$@"
 exec tmux attach-session -t "=$SESSION"

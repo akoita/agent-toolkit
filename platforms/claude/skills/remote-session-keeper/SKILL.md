@@ -99,8 +99,11 @@ claude-persist               # create-or-attach a persistent session for this di
   session, full history intact.
 - `claude-persist --list` shows the running keeper sessions.
 - It is idempotent and derives the tmux session name from the project directory,
-  so each project gets its own persistent session and re-running never starts a
-  blank one (it runs `claude --continue` inside a fresh keeper).
+  so each project gets its own persistent session; re-running from that
+  directory **attaches to the live session** rather than starting a second one.
+- With no arguments it starts a fresh `claude`. To resume a prior session in a
+  new keeper (e.g. after a host reboot killed the tmux server), pass the flag
+  through: `claude-persist --continue` or `claude-persist --resume`.
 
 Requires `tmux` on the remote host (`sudo apt-get install -y tmux` on
 Debian/Ubuntu/WSL). The script fails clearly if `tmux` or `claude` is missing.
