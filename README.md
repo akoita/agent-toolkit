@@ -10,13 +10,18 @@ load the format it understands.
 ```text
 platforms/
 ├── claude/
+│   ├── agents/
+│   │   ├── maestro-economical-explorer.md
+│   │   ├── maestro-opus-implementation.md
+│   │   └── maestro-sonnet-mechanical.md
 │   └── skills/maestro/
 └── codex/
     └── skills/
         ├── codex-maestro/
         │   ├── SKILL.md
         │   ├── agents/openai.yaml
-        │   ├── references/luna-worker.toml
+        │   ├── references/implementation-worker.toml
+        │   ├── references/exploration-worker.toml
         │   └── scripts/
         └── setup-agent-toolkit/
             ├── SKILL.md
@@ -34,8 +39,8 @@ installation scopes, and runtime capabilities differ.
 
 | Platform | Skill | What it does |
 | --- | --- | --- |
-| Claude | [maestro](platforms/claude/skills/maestro/SKILL.md) | A premium Claude session model plans and reviews while bounded Claude or external-CLI workers implement. |
-| Codex | [codex-maestro](platforms/codex/skills/codex-maestro/SKILL.md) | Adaptive GPT-5.6 orchestration: Luna direct for economy, Sol Medium for serious development, Sol High for critical escalation, and Luna Max workers. |
+| Claude | [maestro](platforms/claude/skills/maestro/SKILL.md) | Capability-based orchestration across named subagents, experimental agent teams, and dynamic workflows. |
+| Codex | [codex-maestro](platforms/codex/skills/codex-maestro/SKILL.md) | Native-first GPT-5.6 orchestration with demanding implementation workers and economical read-only exploration. |
 | Codex | [setup-agent-toolkit](platforms/codex/skills/setup-agent-toolkit/SKILL.md) | Safely inspects, previews, installs, and configures Agent Toolkit without overwriting developer configuration. |
 
 ## Safe agent-led setup
@@ -78,17 +83,29 @@ file types cause a hard stop for manual review.
 
 ## Install Claude Maestro
 
-Globally for all projects on a machine, copy or symlink the skill into the
-personal Claude skills directory:
+Globally for all projects on a machine, copy or symlink the skill and copy its
+three named agents into the personal Claude directories:
 
 ```bash
 git clone git@github.com:akoita/agent-toolkit.git
+mkdir -p ~/.claude/skills ~/.claude/agents
 ln -s "$(pwd)/agent-toolkit/platforms/claude/skills/maestro" ~/.claude/skills/maestro
-# or: cp -r agent-toolkit/platforms/claude/skills/maestro ~/.claude/skills/
+cp agent-toolkit/platforms/claude/agents/*.md ~/.claude/agents/
 ```
 
-Claude also supports packaging this workflow as a plugin when it is ready for
-cross-project or team distribution.
+Use a normal copy instead of the skill symlink when the checkout should not
+remain the live source. Inspect existing destinations before either operation;
+do not overwrite a customized agent definition. Claude Code 2.1.212 or later is
+recommended for all subagent, resume, and worktree behavior described here.
+
+Claude routing is capability-based. Use `best` or `fable` for an unusually
+difficult main session, `opus` at high effort for correctness-sensitive
+implementation, `sonnet` at medium or high effort for mechanical work, and the
+provided Haiku explorer for economical read-only discovery. Aliases resolve
+differently by provider and organization policy, so pin provider model mappings
+only when reproducibility requires it. Dynamic workflows and Ultracode are for
+large repeatable fan-out; experimental agent teams are reserved for workers
+that must communicate directly.
 
 ## Install Codex Maestro
 
@@ -102,18 +119,21 @@ It installs:
 
 - `codex-maestro` under `~/.agents/skills/`, making the skill available in all
   projects for that user;
-- `luna_worker` under `$CODEX_HOME/agents/` (or `~/.codex/agents/`), pinning
-  `gpt-5.6-luna` with max reasoning. The default Balanced profile uses Sol
-  Medium as the root planner; select Sol High for Quality work and Luna directly
-  for Economy work.
+- `implementation_worker` under `$CODEX_HOME/agents/` (or `~/.codex/agents/`),
+  using `gpt-5.6` at medium effort by default;
+- `exploration_worker` in the same agents directory, using `gpt-5.6-terra` at
+  medium effort with a read-only sandbox.
 
 Use `--link` while developing the skill from this checkout. The installer
 refuses an existing destination by default. Use `--force` only after inspecting
 the existing installation, previewing the replacement, creating a verified
 backup, and explicitly approving the destructive replacement. Restart Codex or
-open a new task after installation, select Sol Medium for the Balanced profile,
-and invoke `$codex-maestro` explicitly or let its description trigger on
-non-trivial implementation work.
+open a new task after installation and invoke `$codex-maestro` explicitly or
+let its description trigger on non-trivial implementation work. Model and
+effort defaults are configurable; raise effort only for a concrete risk or
+failure signal. A legacy `luna-worker.toml` is not removed automatically during
+an upgrade—inspect, back up, and retire it separately after confirming nothing
+still references it.
 
 Run the installer once in Windows and once in WSL if you use separate Codex
 installations in both environments; each environment has its own home and
@@ -125,12 +145,15 @@ Copy a skill into the platform's repository-scoped skills directory when it
 should be checked in and shared with only that project:
 
 ```bash
-cp -r platforms/codex/skills/codex-maestro <repo>/.agents/skills/
-cp -r platforms/claude/skills/maestro <repo>/.claude/skills/
+cp -r platforms/codex/skills/codex-maestro /path/to/repo/.agents/skills/
+cp -r platforms/claude/skills/maestro /path/to/repo/.claude/skills/
+mkdir -p /path/to/repo/.codex/agents /path/to/repo/.claude/agents
+cp platforms/codex/skills/codex-maestro/references/*-worker.toml /path/to/repo/.codex/agents/
+cp platforms/claude/agents/*.md /path/to/repo/.claude/agents/
 ```
 
-The Luna custom agent remains a user-level Codex configuration. To make its
-template project-scoped, copy it to `<repo>/.codex/agents/luna-worker.toml`.
+Copy only the platform and scope requested. Existing agent files are user-owned
+configuration: compare and back them up rather than overwriting them.
 
 ## Make Maestro the default
 
@@ -144,22 +167,24 @@ rules in the repository's `AGENTS.md`:
 ```markdown
 ## Orchestration policy
 
-- Use `$codex-maestro` for non-trivial implementation, investigation,
-  architecture, planning, delegation, review, or multi-step debugging.
-- Default to Balanced: Sol Medium orchestrates and Luna Max implements.
-- Use Luna directly for trivial, localized, low-risk work.
+- Use `$codex-maestro` for non-trivial implementation and multi-step debugging.
+- Keep requirements, architecture, planning, review, and publication in the
+  root task; delegate only bounded work with disjoint ownership.
+- Default to Balanced: use the current capable root model, `gpt-5.6` workers
+  for demanding implementation, and `gpt-5.6-terra` for economical read-heavy
+  exploration.
+- Handle trivial, localized, low-risk work directly.
 - Escalate to Quality only for security-sensitive, architectural, migration,
   permissions, payments, public-contract, or highly ambiguous work.
-- Quality uses Sol High as master/reviewer and Luna Max as worker.
-- Do not use Sol Max or Sol Ultra unless the user explicitly changes this
-  policy.
+- Keep subagent nesting disabled by default and avoid parallel write-heavy work
+  unless file ownership and verification boundaries are disjoint.
 - Follow the installed `codex-maestro` skill for the complete workflow.
-- Do not delegate trivial work unnecessarily.
+- Do not delegate trivial work or pure analysis/review unnecessarily.
 ```
 
 The instruction expresses the desired routing policy, but it cannot change the
-model of an already-running root task. Select Sol Medium before starting normal
-Balanced work, or Sol High before critical Quality work.
+model of an already-running root task. Confirm the configured root and custom
+agent models before claiming which model or effort performed the work.
 
 For Claude Code, put personal defaults in `~/.claude/CLAUDE.md` and shared
 project instructions in `CLAUDE.md` or `.claude/CLAUDE.md`:
@@ -172,6 +197,11 @@ project instructions in `CLAUDE.md` or `.claude/CLAUDE.md`:
 - Keep analysis, design decisions, planning, review, and publication in the
   root session; delegate bounded implementation work as directed by the
   installed `maestro` skill.
+- Use a few subagents for independent bounded work, agent teams only when
+  workers must communicate, and dynamic workflows for large repeatable fan-out.
+- Prefer documented model aliases and capability-based effort: `opus` at high
+  effort for correctness-sensitive work and `sonnet` at medium or high effort
+  for mechanical work.
 - Do not orchestrate trivial edits, pure analysis or review, or tasks where the
   user explicitly requests direct implementation.
 - Follow the installed `maestro` skill for worker selection, verification, and

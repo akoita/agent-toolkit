@@ -1,206 +1,224 @@
 ---
 name: maestro
 description: >-
-  Maestro — the orchestrator pattern for development tasks: the session model
-  (the maestro, typically a premium tier like Fable/Mythos) does the analysis,
-  research and deep planning, then delegates the implementation to cheaper
-  worker agents — Claude workers (Opus at high effort, Sonnet at max effort)
-  or external-CLI workers (GPT via Codex CLI, Gemini CLI) — tracks the
-  workers, reviews their output against the plan, sends targeted fix
-  instructions until the work is right, and only then presents the verified
-  result. Use this for ANY non-trivial dev task — implementing a feature,
-  fixing a bug, refactoring, writing tests, wiring config or infra — even if
-  the user just says "implement X" or "fix Y" without mentioning delegation.
-  Do NOT use for pure analysis/planning/review questions with no code to
-  write, for trivial single-file edits, or when the user explicitly asks the
-  session model to write the code itself.
+  Orchestrate non-trivial development work in Claude Code. Keep requirements,
+  architecture, planning, review, verification, publication, and user-facing
+  communication in the main session; route bounded implementation to reusable
+  Claude subagents, use experimental agent teams only when workers must
+  communicate, and use dynamic workflows for large repeatable fan-out. Skip
+  trivial edits, pure analysis/review, or explicit no-delegation requests.
 ---
 
-# Maestro — plan on the expensive model, implement on the cheap one
+# Maestro for current Claude Code
 
-## Why this pattern
+Use the main session as the maestro. Spend its context on judgment and retain
+ownership of the result; use workers to isolate implementation and high-volume
+exploration. Treat cost/quality claims as hypotheses to measure on the actual
+repositories: record successful-task cost, latency, retries, tool calls, and
+regressions instead of relying on a universal benchmark percentage.
 
-Premium-model tokens are expensive and are best spent on judgment:
-understanding the problem, making design decisions, and catching mistakes.
-Token-heavy mechanical work — writing the code the plan already describes —
-lands almost as well on a cheaper model when the plan is detailed enough.
-Anthropic's own measurements (SWE-bench Pro) show a cheap executor steered by
-a premium planner reaches ~92% of the premium model's score at ~63% of the
-cost. The quality lever is the plan and the review, not the hands on the
-keyboard.
+## Choose the session and worker models
 
-The corollary that makes or breaks this pattern: **a worker's output is only
-as good as the plan you hand it, and its self-report is not evidence.** Invest
-in phase 1, verify in phase 3.
+Claude Code exposes capability aliases rather than requiring version-pinned
+names:
 
-## Roles
+- `best` selects Fable when the organization has access, otherwise the latest
+  Opus. Use it for the main session when the task is unusually difficult and
+  the automatic fallback is acceptable.
+- `fable` explicitly selects the longest-running, highest-capability tier. Use
+  it for highly ambiguous investigations, architecture, or critical review.
+- `opus` selects the current Opus family. Use an Opus worker at `high` effort
+  for correctness-sensitive features, fixes, refactors, and tests.
+- `sonnet` selects the current Sonnet family. Use a Sonnet worker at `medium`
+  or `high` effort for well-specified, low-risk, mechanical work.
 
-**The maestro is whatever model runs the session** — the pattern doesn't
-require a specific one. It pays off when the session model is meaningfully
-stronger and more expensive than the workers (Fable/Mythos orchestrating Opus
-or Sonnet; Opus orchestrating Sonnet or Haiku). If the session model is
-already in the cheap tier, skip the ceremony and implement directly.
+Aliases are intentionally moving targets. Their concrete model IDs and feature
+availability can differ across the Anthropic API, Bedrock, Google Cloud's Agent
+Platform, Foundry, gateways, plans, and organization allowlists. Provider
+administrators should pin the corresponding `ANTHROPIC_DEFAULT_*_MODEL`
+variables or model overrides when rollout control and reproducibility matter.
+Check `/status` and the active configuration before claiming a model ran.
 
-The maestro never delegates:
-- requirements analysis, codebase exploration, design decisions;
-- the implementation plan itself;
-- reviewing diffs, deciding "done", commits/PRs, and anything user-facing.
+Do not make `max` the routine worker setting. It removes the normal constraint
+on reasoning-token spending and can add substantial cost and latency. Escalate
+to `max` only for a specific difficult item after `high` was insufficient, or
+when the risk justifies it. Record the reason in the final report.
 
-The maestro never does itself (unless the escape hatches below apply):
-- bulk implementation the plan already fully describes.
+Reusable definitions in this distribution:
 
-## Phase 1 — Analyze and plan (maestro)
+- `maestro-opus-implementation`: Opus/high for correctness-sensitive work.
+- `maestro-sonnet-mechanical`: Sonnet/medium for mechanical changes; raise an
+  individual invocation to high when needed.
+- `maestro-economical-explorer`: Haiku, strictly read-only exploration.
 
-Do the expensive thinking first, exactly as if you were going to implement it
-yourself:
+Install them as project agents under `.claude/agents/`, as personal agents
+under `~/.claude/agents/`, or distribute them from a plugin's `agents/`
+directory. Definitions are loaded by `name`, not by filename.
 
-1. Understand the request; read the relevant code, docs, and project
-   conventions (CLAUDE.md, testing standards, existing patterns to imitate).
-   Use read-only Explore subagents for broad searches to keep your own context
-   lean.
-2. Make the design decisions and resolve ambiguities NOW — every decision left
-   open becomes a coin-flip inside the worker.
-3. Write a detailed, file-level implementation plan: which files to create or
-   change, what goes in each, function/route/schema names, edge cases, what
-   tests to write, and the exact verification commands. If the project keeps
-   plan docs (e.g. `docs/issue-NNN-implementation-plan.md`), write it there so
-   it survives the session.
-4. Split the plan into work items. One worker per coherent item. Items that
-   touch disjoint files can run in parallel; overlapping items must run
-   serially (or in isolated worktrees, merged by you).
+## Route the work
 
-## Phase 2 — Delegate (workers)
+Choose the smallest orchestration primitive that fits:
 
-Pick a worker per item. Default to Claude workers via the Agent tool; use an
-external-CLI worker when the user prefers it, when it's the available cheap
-capacity, or when a second opinion from a different model family is valuable.
+| Shape | Route |
+| --- | --- |
+| Trivial edit or one short dependent task | Main session directly |
+| Two or three bounded, independent items whose results only need to return to the maestro | Agent-tool subagents |
+| Workers must share findings, challenge competing hypotheses, or coordinate across layers | Experimental agent team, after user approval |
+| Large, repeatable fan-out such as repository-wide audits or migrations | Dynamic workflow; use a one-off Ultracode request first and save it only after validation |
 
-| Worker | How | When |
-| --- | --- | --- |
-| **Claude Opus 4.8 (high effort)** | Agent tool, `model: "opus"`, high effort | **Default worker — use this first.** Anything correctness-sensitive: features, fixes, refactors, non-trivial UI/logic, tests whose assertions matter. A wrong diff costs far more than the tokens saved, so quality wins by default. |
-| Claude Sonnet 5 (max effort) | Agent tool, `model: "sonnet"`, max effort | Only for well-specified, low-risk, high-volume mechanical work where the plan leaves the worker almost no judgment: bulk renames, scaffolding, doc/string updates, repetitive fixtures, straightforward CRUD. If a subtle bug would be expensive, use Opus 4.8 instead. |
-| GPT (Codex CLI) | `codex exec --sandbox workspace-write "<prompt>"` via background Bash | When the user prefers GPT workers, Codex quota is the cheap capacity at hand, or a different model family should sanity-check a design. |
-| Gemini CLI / other CLIs | analogous non-interactive exec mode | Same reasoning, if installed and authenticated. |
+Agent teams are experimental, disabled by default, and materially more
+expensive than subagents. They require `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`
+and user approval. Do not use them for sequential work, overlapping edits, or
+when reports flowing back to one maestro are sufficient.
 
-**Quality-first worker choice.** Prefer **Claude Opus 4.8 at high effort** as
-the default worker, ahead of Sonnet 5 (max). Even when the maestro is itself
-Opus, delegating to Opus-4.8-high workers is still worth it: you get
-parallelism, context offload, and an independent diff you review fresh — and a
-correct implementation beats the marginal token saving. Reserve Sonnet 5 (max)
-for the mechanical, low-judgment work above. (Earlier guidance to "never use
-the maestro's own tier" over-optimized for cost and pushed correctness-sensitive
-work onto a weaker worker — don't; the cost arbitrage is a *bonus* when the
-maestro is a pricier tier like Fable/Mythos, not a reason to risk quality. The
-one thing to still avoid is spending a *pricier* tier than the maestro on
-routine work.) The Agent tool inherits the session's reasoning effort; when
-orchestrating through the Workflow tool instead, set it explicitly
-(`effort: 'high'` for opus, `effort: 'max'` for sonnet). For external CLIs,
-inherit the model/effort configured in the CLI's own config unless the user
-says otherwise.
+Dynamic workflows are JavaScript orchestration programs that can fan out many
+agents while keeping intermediate results outside the main context. Ask for a
+workflow or include `ultracode` in an interactive prompt for a one-off run. Use
+`/effort ultracode` only when most substantive tasks in the current session
+deserve automatic workflow planning; it combines xhigh reasoning with workflow
+orchestration and therefore costs more. Inspect and approve the generated plan,
+verify its result, then save stable repeated workflows under
+`.claude/workflows/` or `~/.claude/workflows/`.
 
-External-CLI workers differ from Agent workers in ways that matter:
-- **Probe availability first** — e.g. `timeout 60 codex exec --sandbox
-  read-only "Reply OK"`; silence or a usage-limit error means pick another
-  worker instead of hanging the task.
-- **They don't read your harness context** (and may read different convention
-  files, e.g. AGENTS.md instead of CLAUDE.md) — fold the project conventions
-  that matter into the prompt itself.
-- **Run them in background Bash** so you keep working; there is no completion
-  notification beyond the process exiting.
-- **State the no-commit constraint explicitly** — they have their own git
-  habits.
+## Phase 1: analyze and plan in the main session
 
-The worker prompt must be fully self-contained — the worker sees none of your
-conversation. Use this contract:
+1. Read the request, relevant code, repository instructions, tests, and docs.
+2. Resolve requirements, architecture, security boundaries, and product
+   decisions before delegation. Ask the user only when a consequential choice
+   cannot be resolved from the repository.
+3. Write a file-level plan with behavior, symbols, edge cases, tests, docs, and
+   exact verification commands.
+4. Split it into coherent work items. Parallelize only disjoint edits; serialize
+   overlapping files or shared state.
+5. Keep commits, pushes, pull requests, deployments, messages, and all other
+   external publication in the main session.
 
-```
-You are implementing one work item of a reviewed plan. Work autonomously.
-Your final message is a report to the orchestrator, not to a human.
+### Exploration caveat
+
+As of current Claude Code, the built-in Explore agent inherits the main
+session's model instead of always using a cheaper tier. Built-in Explore and
+Plan also skip `CLAUDE.md` and the parent session's git status. This is useful
+for fast generic search but can hide repository rules or working-tree context.
+Use `maestro-economical-explorer` when model cost must be explicit or when the
+normal custom-agent startup context matters. It pins the documented `haiku`
+alias and omits `effort` because current Claude Code does not list Haiku among
+the models supporting adaptive effort. Its tools are deliberately read-only;
+include any task-specific conventions in its prompt anyway.
+
+## Phase 2: delegate bounded implementation
+
+Prefer named agents through the current `Agent` tool (`Task` is only a legacy
+alias). Start with no more than two or three independent workers. Current
+Claude Code normally places subagents in the background; background agents
+continue concurrently but auto-deny tool calls that would require new
+permission and cannot stop for interactive clarification. Use foreground
+execution when permission prompts or immediate answers are necessary.
+
+The implementation definitions omit `Agent` from their tool allowlist and
+explicitly deny it. Workers must not recursively delegate. If another layer of
+decomposition is genuinely needed, return the evidence to the maestro, which
+decides whether to create another bounded item. Keep recursion shallow even
+when a broader environment permits nested subagents.
+
+Give each worker a self-contained contract:
+
+```markdown
+You are implementing one work item from a reviewed plan. Work autonomously.
+Your final response is a report to the maestro, not to the user.
 
 ## Task
-<one-paragraph goal and why>
+<bounded goal and why it matters>
 
 ## Context
-- Working directory / branch: <path, branch>
-- Key files and their roles: <paths + one line each>
-- Conventions to follow: <the rules that actually matter for this item,
-  e.g. no hardcoded config, test file naming; for Claude workers CLAUDE.md
-  also applies automatically>
+- Working directory and branch: <path and branch>
+- Key files and roles: <paths and one line each>
+- Repository rules: <only the rules needed for this item>
 
 ## Implementation plan
-<the numbered, file-level steps for this item — copied from your plan>
+<numbered, file-level steps decided by the maestro>
 
 ## Constraints
-- Only touch: <file list / directory>. Do NOT commit, push, or create PRs.
-- If the plan turns out to be wrong or impossible, STOP and report why
-  instead of improvising a different design.
+- Only touch: <explicit paths or directory boundary>.
+- Do not spawn agents, commit, push, create or update pull requests, deploy,
+  message people, or perform external side effects.
+- Preserve unrelated changes.
+- If the plan is wrong or blocked, stop and report evidence; do not invent a
+  different design.
 
 ## Definition of done
 - <acceptance criteria>
-- <exact verification commands, e.g. `cd backend && npm run lint && npm run test`>
-  — run them; do not report success without their output.
+- Run: <exact focused verification commands>
 
 ## Report
-Files changed, commands run with results, deviations from plan, open questions.
+List files changed, commands and results, deviations, and open questions.
 ```
 
-Agent-tool workers run in the background by default — spawn independent
-workers in one message so they run concurrently, and keep doing useful maestro
-work (drafting docs, preparing the next item's plan, writing the review
-checklist) while they run. You are notified when each finishes.
+### Worktree isolation
 
-## Phase 3 — Review (maestro)
+Use `isolation: worktree` or ask for a worktree only when parallel writers need
+separate checkouts and the integration plan is explicit. It is not a universal
+safety switch:
 
-When a worker reports, verify with your own eyes — never accept the report as
-proof:
+- by default a subagent worktree branches from the repository's default branch,
+  not the parent session's current `HEAD`; set `worktree.baseRef` to `head` when
+  in-progress local commits are required;
+- untracked and gitignored files are absent unless deliberately included;
+- the maestro must inspect and integrate the worktree's changes;
+- worktrees with changes persist until safely integrated or cleaned up.
 
-1. Read the actual diff (`git diff`, or read the changed files).
-2. Run the verification commands yourself (tests, lint, build). The worker
-   saying "tests pass" is a claim, not a result.
-3. Check conformance: does it match the plan? project conventions? Any scope
-   creep, hardcoded values, silently skipped steps, missing docs/tests?
-4. Judge like a senior reviewer: correctness first, then simplicity, then
-   style.
+Never assume an isolated worker sees the main checkout's uncommitted edits.
 
-## Phase 4 — Iterate
+## Phase 3: review in the main session
 
-If the review finds problems, send fix instructions **to the same worker so it
-keeps its context** — much cheaper than re-briefing a fresh one:
+Treat every worker report as a claim:
 
-- Claude workers: SendMessage to the agent.
-- Codex workers: `codex exec --sandbox workspace-write resume --last "<fix
-  instructions>"` (global options go BEFORE the `resume` subcommand).
+1. Inspect the actual diff and every changed file.
+2. Compare it with the plan, scope boundary, repository rules, security and
+   privacy constraints, and existing patterns.
+3. Run focused tests, lint, type checks, builds, or other verification from the
+   integration checkout.
+4. Check for missing tests, docs, migrations, configuration, and overwritten
+   user work.
+5. Decide whether the item is complete. The worker never owns "done."
 
-Fix instructions must be as concrete as review comments: file, location, what
-is wrong, what correct looks like. Vague feedback ("improve error handling")
-produces a second bad round at full price.
+## Phase 4: resume and iterate
 
-Escape hatches — apply after **3 fix rounds** on the same item, or immediately
-if the worker reports the plan is wrong:
-- Small residual issues: fix them yourself inline; that's cheaper than another
-  round trip.
-- The plan was wrong: go back to phase 1, revise the plan, re-delegate.
-- The item is genuinely too hard for the worker: implement that item yourself
-  and say so in the final report. (Trying a stronger worker tier first — e.g.
-  Sonnet item escalated to Opus — is also fair.)
+Send precise findings to the same agent rather than starting over. Resume the
+agent by its returned agent ID, or send a follow-up through the Agent interface,
+so it retains its context and model selection. State the file and location,
+the defect, and the required result. After each fix, re-read the diff and rerun
+verification.
 
-## Phase 5 — Present (maestro)
+Allow one targeted fix round by default. For a small residual issue, fix it in
+the main session. If the plan was wrong, revise it before delegating again. If a
+Sonnet mechanical item exposes real judgment or repeated failure, escalate it
+to Opus/high; use max only with a documented risk or failure reason.
 
-Only after your own verification passes. Lead with the outcome, then:
-- what shipped (per work item), which worker did it, and how it was verified
-  (commands + results);
-- any deviations from the plan and why;
-- what was NOT done / follow-ups, with tracking if the project requires it.
+## Phase 5: present and publish
 
-Never present a worker's unverified claim as a result.
+Only the main maestro may present the result to the user or perform commits,
+pushes, pull requests, deployments, and other publication. Lead with the
+verified outcome, then report:
 
-## When NOT to orchestrate
+- the actual session/worker aliases and effort used;
+- which work items were delegated;
+- commands and results independently verified by the maestro;
+- worktree integration, deviations, escalations, and remaining work.
 
-- Trivial changes (roughly: one file, a few lines, no design decisions) — the
-  orchestration overhead costs more than it saves; just do it.
-- Pure analysis, planning, debugging-diagnosis, or review requests — the
-  deliverable is your judgment; there is nothing to delegate.
-- The session model is already the cheap tier — no arbitrage to capture.
-- The user explicitly asked you to implement directly ("don't delegate this
-  one") — per-request only; revert to orchestrating afterwards.
-- Mid-flight trivial corrections during review — fix inline.
+Never pass through a worker's unverified self-report.
+
+## When not to orchestrate
+
+- A trivial, localized edit with no meaningful design decision.
+- Pure analysis, diagnosis, planning, or review with no implementation.
+- A sequential task where delegation adds no context or latency benefit.
+- The user explicitly asks for direct implementation.
+- A small correction found during review.
+
+## Claude Code references
+
+- [Model configuration](https://code.claude.com/docs/en/model-config)
+- [Custom subagents](https://code.claude.com/docs/en/sub-agents)
+- [Agent teams](https://code.claude.com/docs/en/agent-teams)
+- [Dynamic workflows](https://code.claude.com/docs/en/workflows)
+- [Worktree isolation](https://code.claude.com/docs/en/worktrees)

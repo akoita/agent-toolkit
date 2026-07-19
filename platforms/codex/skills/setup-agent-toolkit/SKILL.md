@@ -37,8 +37,12 @@ change, and mutate only the requested platform and scope.
 Locate this repository and confirm the requested source exists:
 
 - Codex skill: `platforms/codex/skills/codex-maestro/`
-- Codex worker: `platforms/codex/skills/codex-maestro/references/luna-worker.toml`
+- Codex implementation worker:
+  `platforms/codex/skills/codex-maestro/references/implementation-worker.toml`
+- Codex exploration worker:
+  `platforms/codex/skills/codex-maestro/references/exploration-worker.toml`
 - Claude skill: `platforms/claude/skills/maestro/`
+- Claude agents: `platforms/claude/agents/`
 
 Resolve destinations without changing them:
 
@@ -46,6 +50,12 @@ Resolve destinations without changing them:
 | --- | --- | --- | --- | --- |
 | Codex | `~/.agents/skills/codex-maestro/` | `<repo>/.agents/skills/codex-maestro/` | `~/.codex/AGENTS.md` | `<repo>/AGENTS.md` |
 | Claude | `~/.claude/skills/maestro/` | `<repo>/.claude/skills/maestro/` | `~/.claude/CLAUDE.md` | `<repo>/CLAUDE.md` |
+
+Custom-agent destinations are `$CODEX_HOME/agents/` or `<repo>/.codex/agents/`
+for Codex, and `~/.claude/agents/` or `<repo>/.claude/agents/` for Claude.
+Inspect every individual destination before copying it. For Codex upgrades,
+also report a legacy `luna-worker.toml` if present; do not delete or overwrite it
+without a separate preview and approval.
 
 For Codex, resolve `$CODEX_HOME` before falling back to `~/.codex`. On Windows
 and WSL, treat each environment as a separate installation. Do not cross-write
@@ -88,13 +98,20 @@ python platforms/codex/skills/codex-maestro/scripts/install.py
 ```
 
 Use `--link` only when the user wants a development checkout to remain the
-live source. For project scope, copy only the requested skill directory and,
-if requested, the Luna worker template to `.codex/agents/luna-worker.toml`.
+live source. The installer adds `implementation-worker.toml` and
+`exploration-worker.toml`. For project scope, copy only the requested skill
+directory and, when agents are requested, those two templates to
+`.codex/agents/`. The deprecated `run_luna_worker.py` script is only a CLI
+compatibility entry point; do not install a new `luna_worker` custom agent.
 
 For Claude, copy or link `platforms/claude/skills/maestro/` to the selected
-skills directory. Refuse replacement when the destination exists. If the user
-approves replacement after reviewing a diff, create a timestamped sibling
-backup first and verify it before changing the destination.
+skills directory and copy the three Markdown definitions from
+`platforms/claude/agents/` to the selected agents directory. Refuse replacement
+when any destination exists. If the user approves replacement after reviewing
+a diff, create a timestamped sibling backup first and verify it before changing
+the destination. Recommend Claude Code 2.1.212 or later for the complete
+subagent/worktree behavior described by the skill; model availability remains
+provider- and organization-dependent.
 
 If the user wants to reuse this setup workflow later, copy or link this
 `setup-agent-toolkit` directory to `~/.agents/skills/setup-agent-toolkit/` only
@@ -110,11 +127,13 @@ After applying changes:
 
 1. Verify every destination exists and matches the intended source or approved
    managed policy block.
-2. Re-run the policy editor without `--apply`; expect no diff.
-3. Confirm backups exist when pre-existing files were changed.
-4. Tell the user to start a new agent task so skill discovery and base
+2. Parse Codex TOML and Claude YAML frontmatter, and confirm implementation
+   workers cannot spawn nested agents while exploration workers are read-only.
+3. Re-run the policy editor without `--apply`; expect no diff.
+4. Confirm backups exist when pre-existing files were changed.
+5. Tell the user to start a new agent task so skill discovery and base
    instructions reload.
-5. Report paths changed, paths intentionally untouched, validation results,
+6. Report paths changed, paths intentionally untouched, validation results,
    backup paths, and the exact rollback operation. Do not claim a model was
    selected or changed; configuration cannot switch an already-running root
    model.
