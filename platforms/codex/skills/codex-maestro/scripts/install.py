@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install Codex Maestro and its Luna worker for the current user."""
+"""Install Codex Maestro and its capability-based custom agents."""
 
 from __future__ import annotations
 
@@ -10,7 +10,11 @@ from pathlib import Path
 
 
 SKILL_NAME = "codex-maestro"
-AGENT_FILENAME = "luna-worker.toml"
+AGENT_TEMPLATES = (
+    "implementation-worker.toml",
+    "exploration-worker.toml",
+)
+LEGACY_AGENT_FILENAME = "luna-worker.toml"
 
 
 def parse_args() -> argparse.Namespace:
@@ -78,14 +82,12 @@ def install_agent(template: Path, destination: Path, force: bool) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     remove_existing(destination, force)
     shutil.copy2(template, destination)
-    print(f"Installed Luna worker: {destination}")
+    print(f"Installed custom agent: {destination}")
 
 
 def main() -> int:
     args = parse_args()
     skill_source = Path(__file__).resolve().parents[1]
-    agent_template = skill_source / "references" / "luna-worker.toml"
-
     if not args.agent_only:
         install_skill(
             skill_source,
@@ -94,11 +96,20 @@ def main() -> int:
             args.force,
         )
     if not args.skill_only:
-        install_agent(
-            agent_template,
-            args.codex_home.expanduser() / "agents" / AGENT_FILENAME,
-            args.force,
-        )
+        agents_root = args.codex_home.expanduser() / "agents"
+        legacy_agent = agents_root / LEGACY_AGENT_FILENAME
+        if legacy_agent.exists() or legacy_agent.is_symlink():
+            print(
+                "Warning: legacy custom agent remains in place: "
+                f"{legacy_agent}. Inspect and retire it separately after "
+                "confirming no callers still depend on it."
+            )
+        for filename in AGENT_TEMPLATES:
+            install_agent(
+                skill_source / "references" / filename,
+                agents_root / filename,
+                args.force,
+            )
     print("Restart Codex or start a new task so it discovers the installation.")
     return 0
 

@@ -16,17 +16,19 @@ from pathlib import Path
 POLICIES = {
     "codex": """## Orchestration policy
 
-- Use `$codex-maestro` for non-trivial implementation, investigation,
-  architecture, planning, delegation, review, or multi-step debugging.
-- Default to Balanced: Sol Medium orchestrates and Luna Max implements.
-- Use Luna directly for trivial, localized, low-risk work.
+- Use `$codex-maestro` for non-trivial implementation and multi-step debugging.
+- Keep requirements, architecture, planning, review, and publication in the
+  root task; delegate only bounded work with disjoint ownership.
+- Default to Balanced: use the current capable root model, `gpt-5.6` workers
+  for demanding implementation, and `gpt-5.6-terra` for economical read-heavy
+  exploration.
+- Handle trivial, localized, low-risk work directly.
 - Escalate to Quality only for security-sensitive, architectural, migration,
   permissions, payments, public-contract, or highly ambiguous work.
-- Quality uses Sol High as master/reviewer and Luna Max as worker.
-- Do not use Sol Max or Sol Ultra unless the user explicitly changes this
-  policy.
+- Keep subagent nesting disabled by default and avoid parallel write-heavy work
+  unless file ownership and verification boundaries are disjoint.
 - Follow the installed `codex-maestro` skill for the complete workflow.
-- Do not delegate trivial work unnecessarily.""",
+- Do not delegate trivial work or pure analysis/review unnecessarily.""",
     "claude": """## Orchestration policy
 
 - Use `/maestro` for non-trivial implementation work such as features, bug
@@ -34,6 +36,11 @@ POLICIES = {
 - Keep analysis, design decisions, planning, review, and publication in the
   root session; delegate bounded implementation work as directed by the
   installed `maestro` skill.
+- Use a few subagents for independent bounded work, agent teams only when
+  workers must communicate, and dynamic workflows for large repeatable fan-out.
+- Prefer documented model aliases and capability-based effort: `opus` at high
+  effort for correctness-sensitive work and `sonnet` at medium or high effort
+  for mechanical work.
 - Do not orchestrate trivial edits, pure analysis or review, or tasks where the
   user explicitly requests direct implementation.
 - Follow the installed `maestro` skill for worker selection, verification, and

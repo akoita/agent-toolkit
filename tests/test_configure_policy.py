@@ -47,6 +47,17 @@ class ConfigurePolicyTests(unittest.TestCase):
         self.assertTrue(updated.endswith("\n\nafter\n"))
         self.assertNotIn("old policy", updated)
 
+    def test_generated_policies_use_current_capability_routing(self) -> None:
+        codex = configure_policy.managed_block("codex", "\n")
+        claude = configure_policy.managed_block("claude", "\n")
+
+        self.assertIn("gpt-5.6-terra", codex)
+        self.assertNotIn("Luna", codex)
+        self.assertNotIn("Sol", codex)
+        self.assertIn("dynamic workflows", claude)
+        self.assertIn("`opus`", claude)
+        self.assertNotIn("Mythos", claude)
+
     def test_rejects_malformed_or_duplicate_markers(self) -> None:
         malformed = f"{configure_policy.START}\nmissing end\n"
         duplicate = (
