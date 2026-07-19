@@ -48,7 +48,7 @@ class CodexMaestroInstallerTests(unittest.TestCase):
                     encoding="utf-8"
                 )
             )
-            self.assertEqual(implementation["model"], "gpt-5.6")
+            self.assertEqual(implementation["model"], "gpt-5.6-sol")
             self.assertEqual(implementation["model_reasoning_effort"], "medium")
             self.assertEqual(exploration["model"], "gpt-5.6-terra")
             self.assertEqual(exploration["sandbox_mode"], "read-only")

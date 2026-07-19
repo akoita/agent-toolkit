@@ -120,7 +120,7 @@ It installs:
 - `codex-maestro` under `~/.agents/skills/`, making the skill available in all
   projects for that user;
 - `implementation_worker` under `$CODEX_HOME/agents/` (or `~/.codex/agents/`),
-  using `gpt-5.6` at medium effort by default;
+  using `gpt-5.6-sol` at medium effort by default;
 - `exploration_worker` in the same agents directory, using `gpt-5.6-terra` at
   medium effort with a read-only sandbox.
 
@@ -170,9 +170,8 @@ rules in the repository's `AGENTS.md`:
 - Use `$codex-maestro` for non-trivial implementation and multi-step debugging.
 - Keep requirements, architecture, planning, review, and publication in the
   root task; delegate only bounded work with disjoint ownership.
-- Default to Balanced: use the current capable root model, `gpt-5.6` workers
-  for demanding implementation, and `gpt-5.6-terra` for economical read-heavy
-  exploration.
+- Default to Balanced: use `gpt-5.6-sol` for the root orchestrator and demanding
+  workers, and `gpt-5.6-terra` for economical read-heavy exploration.
 - Handle trivial, localized, low-risk work directly.
 - Escalate to Quality only for security-sensitive, architectural, migration,
   permissions, payments, public-contract, or highly ambiguous work.

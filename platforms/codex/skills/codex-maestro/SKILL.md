@@ -2,11 +2,11 @@
 name: codex-maestro
 description: >-
   Orchestrate non-trivial software implementation with capability-based GPT-5.6
-  routing. Use gpt-5.6 for demanding implementation and review, use
-  gpt-5.6-terra for economical read-heavy exploration, delegate bounded work,
-  inspect the actual diff, and verify results. Use for features, bug fixes,
-  refactors, tests, configuration, and infrastructure; skip trivial edits, pure
-  analysis/review, or explicit no-delegation requests.
+  routing. Use gpt-5.6-sol for orchestration, demanding implementation, and
+  review; use gpt-5.6-terra for economical read-heavy exploration, delegate
+  bounded work, inspect the actual diff, and verify results. Use for features,
+  bug fixes, refactors, tests, configuration, and infrastructure; skip trivial
+  edits, pure analysis/review, or explicit no-delegation requests.
 ---
 
 # Codex Maestro
@@ -25,8 +25,8 @@ override:
 | --- | --- | --- |
 | Trivial, localized change | Current root session | Work directly; do not orchestrate |
 | Read-heavy discovery, repository search, logs, or test triage | `gpt-5.6-terra`, `medium` | `exploration_worker` or another read-only native agent |
-| Demanding implementation or review | `gpt-5.6`, `medium` | Root maestro or `implementation_worker` |
-| Critical or repeatedly failing work | `gpt-5.6`, `high` | Root maestro; delegate only a bounded implementation |
+| Demanding implementation or review | `gpt-5.6-sol`, `medium` | Root maestro or `implementation_worker` |
+| Critical or repeatedly failing work | `gpt-5.6-sol`, `high` | Root maestro; delegate only a bounded implementation |
 
 `medium` is the normal implementation default. Raise effort to `high` only for
 security-sensitive, architectural, migration, permissions, payments,
@@ -40,7 +40,7 @@ observe its lifecycle. Use `implementation_worker` for bounded writes and
 selection is unavailable, use `scripts/run_implementation_worker.py` as the CLI
 fallback. The implementation runner accepts `--model` and `--effort`, or
 `CODEX_MAESTRO_WORKER_MODEL` and `CODEX_MAESTRO_WORKER_EFFORT`; its defaults are
-`gpt-5.6` and `medium`. Never claim a model or effort was used without native
+`gpt-5.6-sol` and `medium`. Never claim a model or effort was used without native
 configuration or CLI evidence.
 
 Existing automation may temporarily call `scripts/run_luna_worker.py`; that
@@ -158,7 +158,7 @@ Treat every worker report as a claim, not evidence:
    external side effects, and accidentally overwritten user work.
 5. Decide whether the item is complete. The worker does not decide "done."
 
-The root maestro owns final review. For critical work, use `gpt-5.6` with
+The root maestro owns final review. For critical work, use `gpt-5.6-sol` with
 `high` effort when the running environment supports selecting it; do not add a
 separate expensive review pass without a concrete risk or failure signal.
 
