@@ -5,6 +5,12 @@ Code and Codex. Claude and Codex are first-class platforms in this repository;
 platform-specific configuration stays isolated so each tool can install and
 load the format it understands.
 
+> **Project status: experimental.** These skills are used regularly by the
+> maintainer, but are not yet comprehensively tested. Agent runtimes and models
+> evolve quickly, so behavior may change and some workflows or edge cases may
+> not yet be covered. Review generated changes and validate results before
+> relying on them.
+
 ## Repository layout
 
 ```text

@@ -11,6 +11,10 @@ description: >-
 
 # Codex Maestro
 
+This workflow is experimental. Codex and its models evolve quickly, and the
+skill is not yet comprehensively tested. Inspect changes and verify results
+before relying on them.
+
 Use the root task as the maestro. Keep requirements, design decisions, final
 review, Git publication, and user-facing communication in the root task.
 Delegate bounded work to agents selected by capability, then verify it directly.
