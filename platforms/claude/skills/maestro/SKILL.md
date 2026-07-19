@@ -11,6 +11,10 @@ description: >-
 
 # Maestro for current Claude Code
 
+This workflow is experimental. Claude Code and its models evolve quickly, and
+the skill is not yet comprehensively tested. Inspect changes and verify results
+before relying on them.
+
 Use the main session as the maestro. Spend its context on judgment and retain
 ownership of the result; use workers to isolate implementation and high-volume
 exploration. Treat cost/quality claims as hypotheses to measure on the actual
