@@ -6,27 +6,12 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CANONICAL_SKILL_ROOT = ROOT / "platforms" / "codex" / "skills" / "codex-maestro"
 PACKAGE_ROOT = ROOT / "plugins" / "codex" / "codex-maestro"
 PACKAGED_SKILL_ROOT = PACKAGE_ROOT / "skills" / "codex-maestro"
 PLUGIN_MANIFEST = PACKAGE_ROOT / ".codex-plugin" / "plugin.json"
 MARKETPLACE_MANIFEST = ROOT / ".agents" / "plugins" / "marketplace.json"
 IGNORED_DIRECTORY_NAMES = {"__pycache__", ".mypy_cache", ".pytest_cache", ".ruff_cache"}
 IGNORED_SUFFIXES = {".pyc", ".pyo"}
-
-
-def _ignored(relative_path: Path) -> bool:
-    return any(part in IGNORED_DIRECTORY_NAMES for part in relative_path.parts) or (
-        relative_path.suffix in IGNORED_SUFFIXES
-    )
-
-
-def _files_by_relative_path(root: Path) -> dict[Path, Path]:
-    return {
-        path.relative_to(root): path
-        for path in root.rglob("*")
-        if path.is_file() and not _ignored(path.relative_to(root))
-    }
 
 
 class CodexPluginPackageTests(unittest.TestCase):
@@ -61,18 +46,6 @@ class CodexPluginPackageTests(unittest.TestCase):
         )
         self.assertEqual(plugin["category"], "Developer Tools")
         self.assertNotIn("products", plugin["policy"])
-
-    def test_packaged_skill_matches_canonical_source(self) -> None:
-        canonical_files = _files_by_relative_path(CANONICAL_SKILL_ROOT)
-        packaged_files = _files_by_relative_path(PACKAGED_SKILL_ROOT)
-
-        self.assertEqual(set(packaged_files), set(canonical_files))
-        for relative_path, canonical_file in canonical_files.items():
-            self.assertEqual(
-                packaged_files[relative_path].read_bytes(),
-                canonical_file.read_bytes(),
-                relative_path.as_posix(),
-            )
 
     def test_package_has_no_cache_artifacts(self) -> None:
         cache_artifacts = [

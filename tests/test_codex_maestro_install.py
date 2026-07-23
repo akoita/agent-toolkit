@@ -11,8 +11,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = (
     ROOT
-    / "platforms"
+    / "plugins"
     / "codex"
+    / "codex-maestro"
     / "skills"
     / "codex-maestro"
     / "scripts"
