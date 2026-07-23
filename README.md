@@ -1,7 +1,7 @@
 # agent-toolkit
 
-Project-agnostic agent skills, workers, and future plugin packages for Claude
-Code and Codex. Claude and Codex are first-class platforms in this repository;
+Project-agnostic agent skills, workers, and plugin packages for Claude Code and
+Codex. Claude and Codex are first-class platforms in this repository;
 platform-specific configuration stays isolated so each tool can install and
 load the format it understands.
 
@@ -14,6 +14,9 @@ load the format it understands.
 ## Repository layout
 
 ```text
+plugins/
+├── claude/maestro/                 # Claude Code distribution package
+└── codex/codex-maestro/           # Codex distribution package
 platforms/
 ├── claude/
 │   ├── agents/
@@ -33,13 +36,15 @@ platforms/
             ├── SKILL.md
             ├── agents/openai.yaml
             └── scripts/configure_policy.py
+.claude-plugin/marketplace.json       # Claude Code catalog
+.agents/plugins/marketplace.json      # Codex catalog
 ```
 
-The current `maestro` and `codex-maestro` directories are standalone skills.
-When a workflow is ready for marketplace or team distribution, package it under
-`plugins/claude/` or `plugins/codex/` with the platform's manifest format. Do
-not force Claude and Codex into one plugin: their manifests, agent definitions,
-installation scopes, and runtime capabilities differ.
+The directories under `platforms/` are the canonical authoring sources. The
+corresponding directories under `plugins/` are self-contained generated
+payloads for installation. Do not force Claude and Codex into one plugin: their
+manifests, agent definitions, installation scopes, and runtime capabilities
+differ.
 
 ## Skills
 
@@ -48,6 +53,57 @@ installation scopes, and runtime capabilities differ.
 | Claude | [maestro](platforms/claude/skills/maestro/SKILL.md) | Capability-based orchestration across named subagents, experimental agent teams, and dynamic workflows. |
 | Codex | [codex-maestro](platforms/codex/skills/codex-maestro/SKILL.md) | Native-first GPT-5.6 orchestration with demanding implementation workers and economical read-only exploration. |
 | Codex | [setup-agent-toolkit](platforms/codex/skills/setup-agent-toolkit/SKILL.md) | Safely inspects, previews, installs, and configures Agent Toolkit without overwriting developer configuration. |
+
+## Install from the plugin marketplaces
+
+The repository exposes one marketplace catalog for each platform. From a local
+checkout, add the repository root and install the platform-specific package.
+
+For Claude Code:
+
+```bash
+claude plugin marketplace add .
+claude plugin install maestro@agent-toolkit
+```
+
+The Claude package includes the Maestro skill and its three custom agents. Run
+`/reload-plugins` in an existing session or start a new session after installing.
+
+For Codex:
+
+```bash
+codex plugin marketplace add .
+codex plugin add codex-maestro@agent-toolkit
+```
+
+The Codex package includes the skill, worker templates, installer, and CLI
+fallback runner. Plugin installation does not write custom-agent TOML files into
+`$CODEX_HOME/agents/`; the skill can use its bundled CLI fallback immediately.
+Use the existing safe setup flow when native custom agents and default routing
+policy should also be installed.
+
+To distribute directly from GitHub, replace `.` in the marketplace-add command
+with `akoita/agent-toolkit`.
+
+## Maintain plugin payloads
+
+Edit skills and agents only under `platforms/`, then regenerate the packaged
+copies:
+
+```bash
+python scripts/sync_plugin_packages.py
+python scripts/sync_plugin_packages.py --check
+```
+
+Tests fail when a packaged payload differs from its canonical source. Manifests
+and marketplace catalogs are maintained separately because they are
+platform-specific release metadata.
+
+Add future workflows to this repository while they share ownership and release
+practices. Give an independently installable workflow its own plugin directory
+and add it to both platform catalogs when both platforms support it; bundle
+multiple skills only when users should normally install and version them
+together.
 
 ## Safe agent-led setup
 
@@ -225,8 +281,8 @@ as thin platform adapters rather than duplicating the full skill in each one.
   company context.
 - Put Claude material under `platforms/claude/` and Codex material under
   `platforms/codex/`.
-- Keep standalone skills as the source workflow. Add a platform-specific
-  plugin package only when installation, versioning, marketplace distribution,
-  connectors, hooks, or bundled agents justify it.
+- Keep standalone skills as the source workflow and generated plugin payloads
+  as the distribution layer. Use a separate plugin when a workflow needs an
+  independent install or release lifecycle.
 - Use platform-specific IDs when runtime namespaces differ; the shared product
   concept can still be called Maestro in user-facing documentation.
