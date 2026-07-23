@@ -15,44 +15,30 @@ load the format it understands.
 
 ```text
 plugins/
-├── claude/maestro/                 # Claude Code distribution package
-└── codex/codex-maestro/           # Codex distribution package
-platforms/
-├── claude/
+├── claude/maestro/
+│   ├── .claude-plugin/plugin.json
 │   ├── agents/
-│   │   ├── maestro-economical-explorer.md
-│   │   ├── maestro-opus-implementation.md
-│   │   └── maestro-sonnet-mechanical.md
 │   └── skills/maestro/
 └── codex/
-    └── skills/
-        ├── codex-maestro/
-        │   ├── SKILL.md
-        │   ├── agents/openai.yaml
-        │   ├── references/implementation-worker.toml
-        │   ├── references/exploration-worker.toml
-        │   └── scripts/
-        └── setup-agent-toolkit/
-            ├── SKILL.md
-            ├── agents/openai.yaml
-            └── scripts/configure_policy.py
+    └── codex-maestro/
+        ├── .codex-plugin/plugin.json
+        └── skills/codex-maestro/
+tools/setup-agent-toolkit/             # Safe standalone setup workflow
 .claude-plugin/marketplace.json       # Claude Code catalog
 .agents/plugins/marketplace.json      # Codex catalog
 ```
 
-The directories under `platforms/` are the canonical authoring sources. The
-corresponding directories under `plugins/` are self-contained generated
-payloads for installation. Do not force Claude and Codex into one plugin: their
-manifests, agent definitions, installation scopes, and runtime capabilities
-differ.
+The plugin directories are both the canonical source and the installable
+packages. Claude and Codex remain separate because their manifests, agent
+definitions, installation scopes, and runtime capabilities differ.
 
 ## Skills
 
 | Platform | Skill | What it does |
 | --- | --- | --- |
-| Claude | [maestro](platforms/claude/skills/maestro/SKILL.md) | Capability-based orchestration across named subagents, experimental agent teams, and dynamic workflows. |
-| Codex | [codex-maestro](platforms/codex/skills/codex-maestro/SKILL.md) | Native-first GPT-5.6 orchestration with demanding implementation workers and economical read-only exploration. |
-| Codex | [setup-agent-toolkit](platforms/codex/skills/setup-agent-toolkit/SKILL.md) | Safely inspects, previews, installs, and configures Agent Toolkit without overwriting developer configuration. |
+| Claude | [maestro](plugins/claude/maestro/skills/maestro/SKILL.md) | Capability-based orchestration across named subagents, experimental agent teams, and dynamic workflows. |
+| Codex | [codex-maestro](plugins/codex/codex-maestro/skills/codex-maestro/SKILL.md) | Native-first GPT-5.6 orchestration with demanding implementation workers and economical read-only exploration. |
+| Codex | [setup-agent-toolkit](tools/setup-agent-toolkit/SKILL.md) | Safely inspects, previews, installs, and configures Agent Toolkit without overwriting developer configuration. |
 
 ## Install from the plugin marketplaces
 
@@ -85,35 +71,15 @@ policy should also be installed.
 To distribute directly from GitHub, replace `.` in the marketplace-add command
 with `akoita/agent-toolkit`.
 
-## Maintain plugin payloads
-
-Edit skills and agents only under `platforms/`, then regenerate the packaged
-copies:
-
-```bash
-python scripts/sync_plugin_packages.py
-python scripts/sync_plugin_packages.py --check
-```
-
-Tests fail when a packaged payload differs from its canonical source. Manifests
-and marketplace catalogs are maintained separately because they are
-platform-specific release metadata.
-
-Add future workflows to this repository while they share ownership and release
-practices. Give an independently installable workflow its own plugin directory
-and add it to both platform catalogs when both platforms support it; bundle
-multiple skills only when users should normally install and version them
-together.
-
 ## Safe agent-led setup
 
 An agent can perform the setup, but configuration changes use a mandatory
 preview checkpoint. From this checkout, ask Codex:
 
 ```text
-Read platforms/codex/skills/setup-agent-toolkit/SKILL.md completely and follow
-it to set up Codex Maestro globally. Inspect and preview first. Do not modify
-developer configuration until I approve the exact diff.
+Read tools/setup-agent-toolkit/SKILL.md completely and follow it to set up
+Codex Maestro globally. Inspect and preview first. Do not modify developer
+configuration until I approve the exact diff.
 ```
 
 The workflow can optionally install itself under
@@ -133,7 +99,7 @@ Its policy editor is dry-run by default. `--apply` is accepted only after the
 preview has been approved:
 
 ```bash
-python platforms/codex/skills/setup-agent-toolkit/scripts/configure_policy.py \
+python tools/setup-agent-toolkit/scripts/configure_policy.py \
   --platform codex \
   --scope global
 ```
@@ -143,7 +109,7 @@ agent may rerun it with `--apply` only after approval. Existing malformed or
 duplicate managed markers, symlink targets, non-UTF-8 files, and unexpected
 file types cause a hard stop for manual review.
 
-## Install Claude Maestro
+## Manual Claude installation
 
 Globally for all projects on a machine, copy or symlink the skill and copy its
 three named agents into the personal Claude directories:
@@ -151,8 +117,8 @@ three named agents into the personal Claude directories:
 ```bash
 git clone git@github.com:akoita/agent-toolkit.git
 mkdir -p ~/.claude/skills ~/.claude/agents
-ln -s "$(pwd)/agent-toolkit/platforms/claude/skills/maestro" ~/.claude/skills/maestro
-cp agent-toolkit/platforms/claude/agents/*.md ~/.claude/agents/
+ln -s "$(pwd)/agent-toolkit/plugins/claude/maestro/skills/maestro" ~/.claude/skills/maestro
+cp agent-toolkit/plugins/claude/maestro/agents/*.md ~/.claude/agents/
 ```
 
 Use a normal copy instead of the skill symlink when the checkout should not
@@ -169,12 +135,12 @@ only when reproducibility requires it. Dynamic workflows and Ultracode are for
 large repeatable fan-out; experimental agent teams are reserved for workers
 that must communicate directly.
 
-## Install Codex Maestro
+## Manual Codex installation
 
 Run the installer with the Python environment used to launch Codex:
 
 ```bash
-python platforms/codex/skills/codex-maestro/scripts/install.py
+python plugins/codex/codex-maestro/skills/codex-maestro/scripts/install.py
 ```
 
 It installs:
@@ -207,11 +173,11 @@ Copy a skill into the platform's repository-scoped skills directory when it
 should be checked in and shared with only that project:
 
 ```bash
-cp -r platforms/codex/skills/codex-maestro /path/to/repo/.agents/skills/
-cp -r platforms/claude/skills/maestro /path/to/repo/.claude/skills/
+cp -r plugins/codex/codex-maestro/skills/codex-maestro /path/to/repo/.agents/skills/
+cp -r plugins/claude/maestro/skills/maestro /path/to/repo/.claude/skills/
 mkdir -p /path/to/repo/.codex/agents /path/to/repo/.claude/agents
-cp platforms/codex/skills/codex-maestro/references/*-worker.toml /path/to/repo/.codex/agents/
-cp platforms/claude/agents/*.md /path/to/repo/.claude/agents/
+cp plugins/codex/codex-maestro/skills/codex-maestro/references/*-worker.toml /path/to/repo/.codex/agents/
+cp plugins/claude/maestro/agents/*.md /path/to/repo/.claude/agents/
 ```
 
 Copy only the platform and scope requested. Existing agent files are user-owned
@@ -279,10 +245,9 @@ as thin platform adapters rather than duplicating the full skill in each one.
 
 - Keep every skill project-agnostic: no repository-specific paths, secrets, or
   company context.
-- Put Claude material under `platforms/claude/` and Codex material under
-  `platforms/codex/`.
-- Keep standalone skills as the source workflow and generated plugin payloads
-  as the distribution layer. Use a separate plugin when a workflow needs an
-  independent install or release lifecycle.
+- Keep canonical skills inside their installable plugin packages.
+- Give a workflow its own plugin when it needs an independent install or
+  release lifecycle; bundle skills only when users should normally install and
+  version them together.
 - Use platform-specific IDs when runtime namespaces differ; the shared product
   concept can still be called Maestro in user-facing documentation.

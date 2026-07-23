@@ -11,9 +11,7 @@ from pathlib import Path
 
 SCRIPT = (
     Path(__file__).resolve().parents[1]
-    / "platforms"
-    / "codex"
-    / "skills"
+    / "tools"
     / "setup-agent-toolkit"
     / "scripts"
     / "configure_policy.py"

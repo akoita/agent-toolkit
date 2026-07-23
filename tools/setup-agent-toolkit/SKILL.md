@@ -36,13 +36,13 @@ change, and mutate only the requested platform and scope.
 
 Locate this repository and confirm the requested source exists:
 
-- Codex skill: `platforms/codex/skills/codex-maestro/`
+- Codex skill: `plugins/codex/codex-maestro/skills/codex-maestro/`
 - Codex implementation worker:
-  `platforms/codex/skills/codex-maestro/references/implementation-worker.toml`
+  `plugins/codex/codex-maestro/skills/codex-maestro/references/implementation-worker.toml`
 - Codex exploration worker:
-  `platforms/codex/skills/codex-maestro/references/exploration-worker.toml`
-- Claude skill: `platforms/claude/skills/maestro/`
-- Claude agents: `platforms/claude/agents/`
+  `plugins/codex/codex-maestro/skills/codex-maestro/references/exploration-worker.toml`
+- Claude skill: `plugins/claude/maestro/skills/maestro/`
+- Claude agents: `plugins/claude/maestro/agents/`
 
 Resolve destinations without changing them:
 
@@ -94,7 +94,7 @@ For a new global Codex installation, run the existing installer without
 `--force`:
 
 ```text
-python platforms/codex/skills/codex-maestro/scripts/install.py
+python plugins/codex/codex-maestro/skills/codex-maestro/scripts/install.py
 ```
 
 Use `--link` only when the user wants a development checkout to remain the
@@ -104,9 +104,9 @@ directory and, when agents are requested, those two templates to
 `.codex/agents/`. The deprecated `run_luna_worker.py` script is only a CLI
 compatibility entry point; do not install a new `luna_worker` custom agent.
 
-For Claude, copy or link `platforms/claude/skills/maestro/` to the selected
+For Claude, copy or link `plugins/claude/maestro/skills/maestro/` to the selected
 skills directory and copy the three Markdown definitions from
-`platforms/claude/agents/` to the selected agents directory. Refuse replacement
+`plugins/claude/maestro/agents/` to the selected agents directory. Refuse replacement
 when any destination exists. If the user approves replacement after reviewing
 a diff, create a timestamped sibling backup first and verify it before changing
 the destination. Recommend Claude Code 2.1.212 or later for the complete

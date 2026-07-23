@@ -5,7 +5,11 @@ from pathlib import Path
 
 
 AGENTS_ROOT = (
-    Path(__file__).resolve().parents[1] / "platforms" / "claude" / "agents"
+    Path(__file__).resolve().parents[1]
+    / "plugins"
+    / "claude"
+    / "maestro"
+    / "agents"
 )
 
 
