@@ -1,0 +1,17 @@
+{
+  "name": "agent-toolkit",
+  "owner": {
+    "name": "Aboubakar Koïta"
+  },
+  "metadata": {
+    "description": "Experimental Agent Toolkit plugins for Claude Code."
+  },
+  "plugins": [
+    {
+      "name": "maestro",
+      "source": "./plugins/claude/maestro",
+      "version": "0.1.0",
+      "description": "Experimental Claude Code workflow for orchestrating non-trivial development work."
+    }
+  ]
+}
