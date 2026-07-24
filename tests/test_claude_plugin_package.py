@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -9,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = ROOT / "plugins" / "claude" / "maestro"
 PLUGIN_MANIFEST = PACKAGE_ROOT / ".claude-plugin" / "plugin.json"
 MARKETPLACE_MANIFEST = ROOT / ".claude-plugin" / "marketplace.json"
+SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 
 
 class ClaudePluginPackageTests(unittest.TestCase):
@@ -16,7 +18,7 @@ class ClaudePluginPackageTests(unittest.TestCase):
         manifest = json.loads(PLUGIN_MANIFEST.read_text(encoding="utf-8"))
 
         self.assertEqual(manifest["name"], "maestro")
-        self.assertEqual(manifest["version"], "0.1.0")
+        self.assertRegex(manifest["version"], SEMVER)
         self.assertTrue(manifest["description"])
         self.assertEqual(manifest["author"], {"name": "Aboubakar Koïta"})
         self.assertEqual(
@@ -40,8 +42,13 @@ class ClaudePluginPackageTests(unittest.TestCase):
             (ROOT / plugin["source"]).resolve(),
             PACKAGE_ROOT.resolve(),
         )
-        self.assertEqual(plugin["version"], "0.1.0")
         self.assertTrue(plugin["description"])
+
+    def test_marketplace_version_matches_plugin_manifest(self) -> None:
+        manifest = json.loads(PLUGIN_MANIFEST.read_text(encoding="utf-8"))
+        marketplace = json.loads(MARKETPLACE_MANIFEST.read_text(encoding="utf-8"))
+
+        self.assertEqual(marketplace["plugins"][0]["version"], manifest["version"])
 
     def test_package_has_no_cache_artifacts(self) -> None:
         cache_artifacts = [
