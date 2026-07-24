@@ -30,11 +30,41 @@ names:
   Opus. Use it for the main session when the task is unusually difficult and
   the automatic fallback is acceptable.
 - `fable` explicitly selects the longest-running, highest-capability tier. Use
-  it for highly ambiguous investigations, architecture, or critical review.
-- `opus` selects the current Opus family. Use an Opus worker at `high` effort
-  for correctness-sensitive features, fixes, refactors, and tests.
+  it deliberately, not by default: see the escalation triggers below.
+- `opus` selects the current Opus family. Since Opus 5 this is the routine
+  default for the maestro session and for correctness-sensitive workers at
+  `high` effort (features, fixes, refactors, tests).
 - `sonnet` selects the current Sonnet family. Use a Sonnet worker at `medium`
   or `high` effort for well-specified, low-risk, mechanical work.
+
+### Opus vs Fable since Opus 5
+
+Opus 5 delivers near-Fable results on most measured software tasks — within
+about half a percent of Fable 5 on agentic coding benchmarks, ahead of it on
+some computer-use and problem-solving evaluations — at half the token price
+($5/$25 versus $10/$50 per million input/output tokens). On benchmark and cost
+evidence alone, Opus wins the default slot, and this skill treats it that way.
+
+What benchmarks do not capture is Fable's remaining edge as a generalist: it is
+the stronger model for delicate, ambiguous, high-stakes judgment where the cost
+of a subtly wrong framing exceeds the cost of the tokens. Escalate the main
+session (or a single review pass) to `fable` when any of these hold:
+
+- the decision is strategic or hard to reverse: architecture with lasting
+  consequences, security boundaries, data migrations, public contracts;
+- requirements are genuinely ambiguous and a wrong interpretation would be
+  expensive to discover late;
+- the item is a critical review gate where a missed subtle defect has major
+  project impact;
+- Opus at `high` effort has already failed or produced conflicting analyses on
+  a reasoning-heavy item.
+
+Everything else — routine orchestration, planning over clear requirements, and
+all implementation work — stays on `opus` or below. Do not run Fable as the
+standing session model merely because it is available; record why any Fable
+escalation happened in the final report. As always, treat these price and
+capability claims as hypotheses to re-measure on your own repositories as the
+aliases move.
 
 Aliases are intentionally moving targets. Their concrete model IDs and feature
 availability can differ across the Anthropic API, Bedrock, Google Cloud's Agent
@@ -196,7 +226,10 @@ verification.
 Allow one targeted fix round by default. For a small residual issue, fix it in
 the main session. If the plan was wrong, revise it before delegating again. If a
 Sonnet mechanical item exposes real judgment or repeated failure, escalate it
-to Opus/high; use max only with a documented risk or failure reason.
+to Opus/high; use max only with a documented risk or failure reason. If Opus at
+high effort repeatedly fails on a reasoning-heavy item, move that item's
+analysis (not the bulk implementation) to a `fable` session per the escalation
+triggers above.
 
 ## Phase 5: present and publish
 
