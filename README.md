@@ -9,17 +9,19 @@ isolated so each tool loads only the format it understands.
 
 ## Skills
 
-| Platform | Skill | What it does |
-| --- | --- | --- |
-| Claude | [maestro](plugins/claude/maestro/skills/maestro/SKILL.md) | Capability-based orchestration across named subagents, experimental agent teams, and dynamic workflows. |
-| Codex | [codex-maestro](plugins/codex/codex-maestro/skills/codex-maestro/SKILL.md) | Native-first GPT-5.6 orchestration with demanding implementation workers and economical read-only exploration. |
-| Codex | [setup-agent-toolkit](tools/setup-agent-toolkit/SKILL.md) | Safely inspects, previews, installs, and configures Agent Toolkit without overwriting developer configuration. |
+| Skill | Platform | Install as | What it does |
+| --- | --- | --- | --- |
+| [maestro](plugins/claude/maestro/) | Claude Code | `maestro@agent-toolkit` | Capability-based orchestration across named subagents, agent teams, and dynamic workflows. |
+| [codex-maestro](plugins/codex/codex-maestro/) | Codex | `codex-maestro@agent-toolkit` | Native-first GPT-5.6 orchestration with demanding implementation workers and economical read-only exploration. |
+| [setup-agent-toolkit](tools/setup-agent-toolkit/) | Codex | standalone | Safely inspects, previews, installs, and configures Agent Toolkit without overwriting developer configuration. |
+
+Each skill's own README covers its configuration, models, and manual install.
+The guides below cover mechanics shared by every skill.
 
 ## Install
 
-From a local checkout, add the repository root as a marketplace and install the
-package for your platform. Replace `.` with `akoita/agent-toolkit` to install
-straight from GitHub.
+Add the repository root as a marketplace, then install any skill from the table
+above. Replace `.` with `akoita/agent-toolkit` to install straight from GitHub.
 
 Claude Code:
 
@@ -35,11 +37,8 @@ codex plugin marketplace add .
 codex plugin add codex-maestro@agent-toolkit
 ```
 
-Restart the tool afterwards. Then invoke `/maestro` or `$codex-maestro`, or let
-the skill description trigger on non-trivial implementation work.
-
-Prefer a manual install, a per-project install, or an agent-led setup with a
-preview checkpoint? See [Installation](docs/installation.md).
+Restart the tool afterwards, then invoke the skill by name or let its
+description trigger it.
 
 ## Update
 
@@ -58,14 +57,10 @@ codex plugin marketplace upgrade agent-toolkit
 codex plugin add codex-maestro@agent-toolkit
 ```
 
-For manual installs, checking what you have, and what an upgrade leaves behind,
-see [Updating](docs/updating.md).
-
 ## Documentation
 
 | Guide | Contents |
 | --- | --- |
-| [Installation](docs/installation.md) | Agent-led setup, manual install, per-project install |
-| [Updating](docs/updating.md) | Refreshing each install path, release requirements |
-| [Orchestration policy](docs/orchestration-policy.md) | Making Maestro the default via `AGENTS.md` / `CLAUDE.md` |
-| [Conventions](docs/conventions.md) | Repository layout and contribution rules |
+| [Installation](docs/installation.md) | Marketplace, per-project, and agent-led install; scopes |
+| [Updating](docs/updating.md) | Refreshing an installed skill; checking what you have |
+| [Contributing](docs/contributing.md) | Layout, conventions, adding a skill, releasing |
