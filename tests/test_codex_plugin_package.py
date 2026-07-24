@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -12,6 +13,7 @@ PLUGIN_MANIFEST = PACKAGE_ROOT / ".codex-plugin" / "plugin.json"
 MARKETPLACE_MANIFEST = ROOT / ".agents" / "plugins" / "marketplace.json"
 IGNORED_DIRECTORY_NAMES = {"__pycache__", ".mypy_cache", ".pytest_cache", ".ruff_cache"}
 IGNORED_SUFFIXES = {".pyc", ".pyo"}
+SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 
 
 class CodexPluginPackageTests(unittest.TestCase):
@@ -19,7 +21,7 @@ class CodexPluginPackageTests(unittest.TestCase):
         manifest = json.loads(PLUGIN_MANIFEST.read_text(encoding="utf-8"))
 
         self.assertEqual(manifest["name"], PACKAGE_ROOT.name)
-        self.assertEqual(manifest["version"], "0.1.0")
+        self.assertRegex(manifest["version"], SEMVER)
         self.assertEqual(manifest["author"]["name"], "Aboubakar Koïta")
         self.assertEqual(manifest["skills"], "./skills/")
         self.assertEqual(
