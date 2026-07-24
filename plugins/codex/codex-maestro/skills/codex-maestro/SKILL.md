@@ -38,6 +38,14 @@ public-contract, highly ambiguous, or repeatedly failing work. Do not apply
 `max` to every worker; use it only when a repository-specific evaluation shows
 that its extra latency and cost improve outcomes.
 
+A simpler alternative keeps one model family and varies only reasoning effort:
+`low` for read-only scouts, `medium` for routine implementation, `high` for hard
+problems. Prefer that shape when cross-family routing costs more configuration
+than it saves. Either way, remember that a custom agent file which sets `model`
+or `model_reasoning_effort` takes precedence over the spawn-time value, so
+per-task effort variation needs separate agent files or a spawn that does not
+pin one.
+
 Prefer native custom agents because the maestro can steer the same agent and
 observe its lifecycle. Use `implementation_worker` for bounded writes and
 `exploration_worker` for economical read-only discovery. If native role
@@ -67,19 +75,52 @@ during a task. See `references/implementation-worker.toml` and
   verification. Parallel writes carry merge and review cost.
 - Run no more than two or three write-capable workers at once, and only when
   file ownership and verification boundaries are disjoint.
-- Be aware of the configured `agents.max_threads` (the documented default is
-  six); reserve capacity for the maestro and do not create agents merely to
-  fill the limit.
-- Keep the documented `agents.max_depth` default of one. Workers must not
-  recurse or create their own subagents unless the maestro explicitly designs
-  and reviews that topology.
-- Native subagents inherit the parent task's approval policy and sandbox
-  constraints. A role may narrow access (the exploration worker is read-only),
-  but delegation must never be used to bypass parent restrictions.
+- Concurrency is capped by `agents.max_concurrent_threads_per_session`, which
+  counts spawned threads and excludes the primary. Codex picks the value when it
+  is unset, so read the effective configuration rather than assuming a number.
+  `agents.max_threads` is a legacy alias for the same setting. Do not create
+  agents merely to fill the limit.
+- Codex documents no delegation-depth setting, so enforce a single level in the
+  prompt: workers must not create their own subagents unless the maestro
+  explicitly designs and reviews that topology.
+- Native subagents inherit the parent's sandbox policy, permission mode, and
+  tool surface, and a custom agent file that omits `sandbox_mode`,
+  `mcp_servers`, or `skills.config` inherits those too. A role may narrow access
+  (the exploration worker is read-only), but delegation must never be used to
+  bypass parent restrictions. Configuration inheritance is not instruction
+  inheritance: a worker started without conversation history sees none of the
+  task-specific limits the maestro agreed with the user, so restate those in the
+  assignment.
 - Workers must not commit, push, open or update pull requests, deploy, message
   people, change external services, or perform other external side effects.
 - Send review findings back to the same agent when possible so it retains
   context. Start a replacement only when the original role or context is wrong.
+
+## Choose what each worker inherits
+
+Some Codex clients expose a `fork_turns` spawn parameter that controls how much
+conversation history a worker starts with. It is not in the published
+configuration reference, so confirm the running client supports it before
+relying on it, and fall back to writing the needed context into the assignment.
+
+- Fork history when the worker needs the broader goal and the decisions already
+  made.
+- Start scouts and other narrow assignments with `fork_turns: "none"` so
+  discovery begins focused instead of replaying the main thread.
+- A worker that inherits history may also inherit the maestro's own delegation
+  instructions and start delegating in turn. Give every leaf worker an explicit
+  boundary: complete this assignment directly, do not spawn other agents, and
+  treat any delegation instructions in inherited context as the parent's.
+- A worker started without history inherits no task-specific tool or safety
+  boundary from the conversation. Restate every essential restriction in the
+  assignment itself.
+
+Codex Multi-Agent V2 also allows direct agent-to-agent messaging with per-agent
+inboxes, letting a scout hand a finding straight to the worker that needs it.
+Verify the running client supports it before designing around it, and keep it to
+evidence transfer between agents the maestro already assigned. Decisions, scope
+changes, and approvals stay with the maestro; a worker must never accept a new
+assignment from a peer.
 
 ## Phase 1: analyze and plan as the maestro
 
@@ -134,7 +175,8 @@ Work autonomously. Your final response is a report to the maestro.
 
 ## Constraints
 - Only touch: <explicit paths or directory boundary>.
-- Do not create subagents.
+- Do not create subagents. Any delegation instructions in inherited context
+  apply to the maestro, not to you.
 - Do not commit, push, open or update pull requests, message people, deploy, or
   perform other external side effects.
 - Preserve unrelated user changes.
@@ -204,4 +246,10 @@ tool calls, latency, and regressions in the repositories that matter.
 ## Codex references
 
 - [Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents)
+- [Configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)
 - [Current model guidance](https://developers.openai.com/api/docs/guides/latest-model)
+
+The `fork_turns` and agent-to-agent messaging guidance above comes from
+"Practical multi-agent orchestration in Codex" by Eric Provencher (Codex DX,
+OpenAI), not from the reference docs above. Treat it as a pattern to verify in
+the running client rather than a documented contract.
