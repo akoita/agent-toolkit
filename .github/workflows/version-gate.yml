@@ -1,0 +1,21 @@
+name: version-gate
+
+on:
+  pull_request:
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch base branch
+        run: git fetch --no-tags origin "${{ github.base_ref }}"
+      - name: Require a version bump for changed packages
+        run: |
+          python .github/scripts/check_version_bump.py \
+            --base "origin/${{ github.base_ref }}"
