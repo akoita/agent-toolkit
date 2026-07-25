@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install Codex Maestro and its capability-based custom agents."""
+"""Install or remove Codex Maestro and its capability-based custom agents."""
 
 from __future__ import annotations
 
@@ -42,7 +42,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Replace an existing installation",
+        help="Replace an existing installation, or remove a modified custom agent",
+    )
+    parser.add_argument(
+        "--uninstall",
+        action="store_true",
+        help="Remove the installation instead of creating it",
     )
     return parser.parse_args()
 
@@ -85,18 +90,47 @@ def install_agent(template: Path, destination: Path, force: bool) -> None:
     print(f"Installed custom agent: {destination}")
 
 
+def uninstall_skill(destination: Path) -> None:
+    if not destination.exists() and not destination.is_symlink():
+        print(f"Skill not installed: {destination}")
+        return
+    if destination.is_symlink() or destination.is_file():
+        destination.unlink()
+    else:
+        shutil.rmtree(destination)
+    print(f"Removed skill: {destination}")
+
+
+def uninstall_agent(template: Path, destination: Path, force: bool) -> None:
+    if not destination.exists() and not destination.is_symlink():
+        print(f"Custom agent not installed: {destination}")
+        return
+    modified = destination.is_file() and (
+        destination.read_bytes() != template.read_bytes()
+    )
+    if modified and not force:
+        print(
+            f"Kept modified custom agent: {destination}. It no longer matches the "
+            "shipped template; inspect it and rerun with --force to remove it."
+        )
+        return
+    destination.unlink()
+    print(f"Removed custom agent: {destination}")
+
+
 def main() -> int:
     args = parse_args()
     skill_source = Path(__file__).resolve().parents[1]
+    skill_destination = args.skills_root.expanduser() / SKILL_NAME
+    agents_root = args.codex_home.expanduser() / "agents"
+
     if not args.agent_only:
-        install_skill(
-            skill_source,
-            args.skills_root.expanduser() / SKILL_NAME,
-            args.link,
-            args.force,
-        )
+        if args.uninstall:
+            uninstall_skill(skill_destination)
+        else:
+            install_skill(skill_source, skill_destination, args.link, args.force)
+
     if not args.skill_only:
-        agents_root = args.codex_home.expanduser() / "agents"
         legacy_agent = agents_root / LEGACY_AGENT_FILENAME
         if legacy_agent.exists() or legacy_agent.is_symlink():
             print(
@@ -105,12 +139,17 @@ def main() -> int:
                 "confirming no callers still depend on it."
             )
         for filename in AGENT_TEMPLATES:
-            install_agent(
-                skill_source / "references" / filename,
-                agents_root / filename,
-                args.force,
-            )
-    print("Restart Codex or start a new task so it discovers the installation.")
+            template = skill_source / "references" / filename
+            destination = agents_root / filename
+            if args.uninstall:
+                uninstall_agent(template, destination, args.force)
+            else:
+                install_agent(template, destination, args.force)
+
+    if args.uninstall:
+        print("Restart Codex or start a new task so it drops the removed files.")
+    else:
+        print("Restart Codex or start a new task so it discovers the installation.")
     return 0
 
 

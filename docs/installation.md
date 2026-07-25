@@ -6,7 +6,8 @@ agents, and manual install, see its README:
 - [maestro](../plugins/claude/maestro/README.md) (Claude Code)
 - [codex-maestro](../plugins/codex/codex-maestro/README.md) (Codex)
 
-To refresh an existing installation, see [Updating](updating.md).
+To refresh an existing installation see [Updating](updating.md); to remove one
+see [Uninstalling](uninstalling.md).
 
 ## Marketplace install
 
@@ -26,8 +27,10 @@ codex plugin add <skill>@agent-toolkit
 ```
 
 Replace `.` with `akoita/agent-toolkit` to install from GitHub instead of a
-local checkout. A marketplace added from a local path is read from that path;
-a Git-sourced one is a snapshot that needs refreshing.
+local checkout. Prefer the GitHub form unless you are developing against a
+checkout, because the two behave differently on update: a local marketplace is
+read from its path, while a Git one is a snapshot refreshed with
+`codex plugin marketplace upgrade`. See [Updating](updating.md).
 
 Run `/reload-plugins` in an existing Claude Code session or start a new
 session. Restart Codex or open a new task.

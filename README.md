@@ -42,25 +42,36 @@ description trigger it.
 
 ## Update
 
-Installed packages do not track this repository, and a stale one fails quietly
-— the skill still loads but describes agents and defaults the package no longer
-has.
-
 ```bash
 claude plugin update maestro@agent-toolkit
 ```
 
-Codex has no update subcommand; refresh the snapshot and reinstall:
+Codex has no update subcommand. For a marketplace added from GitHub, refresh
+the snapshot and reinstall:
 
 ```bash
 codex plugin marketplace upgrade agent-toolkit
 codex plugin add codex-maestro@agent-toolkit
 ```
 
+Installed another way — from a local path, or with a skill's own installer? The
+steps differ. See [Updating](docs/updating.md).
+
+## Remove
+
+```bash
+claude plugin uninstall maestro
+codex plugin remove codex-maestro@agent-toolkit
+```
+
+Codex requires the `@agent-toolkit` qualifier. See
+[Uninstalling](docs/uninstalling.md) for installer-based and manual installs.
+
 ## Documentation
 
 | Guide | Contents |
 | --- | --- |
 | [Installation](docs/installation.md) | Marketplace, per-project, and agent-led install; scopes |
-| [Updating](docs/updating.md) | Refreshing an installed skill; checking what you have |
+| [Updating](docs/updating.md) | Refreshing each install path; checking what you have |
+| [Uninstalling](docs/uninstalling.md) | Removing each install path |
 | [Contributing](docs/contributing.md) | Layout, conventions, adding a skill, releasing |
