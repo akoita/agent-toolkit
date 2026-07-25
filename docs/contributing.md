@@ -32,6 +32,11 @@ definitions, installation scopes, and runtime capabilities differ.
 | Mechanics identical across skills | `docs/` |
 | Catalog and quickstart | Root `README.md` |
 
+A skill that ships its own installer must support installing, updating, and
+removing with it. Document all three in the skill's README, and keep user-owned
+files — agent definitions, configuration — reported rather than deleted unless
+the user passes `--force`.
+
 Keep the root README short enough to read before installing. A procedure that
 applies to one skill belongs with that skill, not at the end of the README.
 

@@ -48,9 +48,14 @@ It installs:
 Run it once per environment. Windows and WSL have separate Codex homes and
 configuration directories.
 
-### Updating an installer-based install
+### Updating
 
-The installer refuses an existing destination by default:
+If you installed with `--link`, `git pull` in the checkout is the whole update
+and the installation cannot drift. Point the symlink at a stable checkout, not
+a temporary worktree.
+
+Otherwise the installer refuses an existing destination, so rerun it with
+`--force`:
 
 ```bash
 python plugins/codex/codex-maestro/skills/codex-maestro/scripts/install.py --force
@@ -61,12 +66,24 @@ back up local edits first. It also rewrites the worker TOML files in
 `$CODEX_HOME/agents/`; those are user-owned configuration, so treat customized
 copies as work to preserve rather than replace.
 
-Adding `--link` installs the skill as a symlink to the checkout, after which
-`git pull` is the whole update procedure and the installation cannot drift.
-Point it at a stable checkout, not a temporary worktree.
-
 The installer reports a legacy `luna-worker.toml` if it finds one but does not
 delete it. Retire it separately after confirming nothing still references it.
+
+### Removing
+
+```bash
+python plugins/codex/codex-maestro/skills/codex-maestro/scripts/install.py --uninstall
+```
+
+This removes the skill directory, copied or symlinked, and the two worker
+definitions the installer wrote. A worker file you edited no longer matches the
+shipped template, so it is kept and reported instead of deleted; rerun with
+`--force` to remove it anyway. `--skill-only` and `--agent-only` narrow the
+removal.
+
+For a plugin install, use `codex plugin remove codex-maestro@agent-toolkit` —
+the marketplace qualifier is required. See
+[Uninstalling](../../../docs/uninstalling.md).
 
 ## Model routing
 

@@ -20,7 +20,20 @@ claude plugin install maestro@agent-toolkit
 ```
 
 See [Installation](../../../docs/installation.md) for per-project and
-agent-led installs, and [Updating](../../../docs/updating.md) for refreshing.
+agent-led installs.
+
+## Update and remove
+
+```bash
+claude plugin update maestro@agent-toolkit
+claude plugin uninstall maestro
+```
+
+Restart Claude Code afterwards; `/reload-plugins` does not pick up a version
+change. A manual install is removed by deleting what it created — the skill at
+`~/.claude/skills/maestro` and the three agent files in `~/.claude/agents/`.
+Those agent files are user-owned configuration, so inspect them before
+deleting. See [Uninstalling](../../../docs/uninstalling.md).
 
 ## Manual install
 
