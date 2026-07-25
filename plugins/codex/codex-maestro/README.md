@@ -22,15 +22,23 @@ codex plugin add codex-maestro@agent-toolkit
 ```
 
 A plugin install does not write custom-agent TOML files into
-`$CODEX_HOME/agents/`; the skill uses its bundled CLI fallback immediately. Run
-the installer below when native custom agents should also be installed.
+`$CODEX_HOME/agents/`; the skill uses its bundled CLI fallback immediately. To
+add the native worker agents, run the bundled installer — it ships inside the
+package, so no checkout is needed. Take the base path from the `PATH` column of
+`codex plugin list`:
+
+```bash
+python <path>/skills/codex-maestro/scripts/install.py --agent-only
+```
+
+`--agent-only` skips the skill, which the plugin already provides.
 
 See [Installation](../../../docs/installation.md) for per-project and agent-led
 installs.
 
 ## Installer
 
-Run it with the Python environment used to launch Codex:
+From a checkout, run it with the Python environment used to launch Codex:
 
 ```bash
 python plugins/codex/codex-maestro/skills/codex-maestro/scripts/install.py
@@ -80,6 +88,10 @@ definitions the installer wrote. A worker file you edited no longer matches the
 shipped template, so it is kept and reported instead of deleted; rerun with
 `--force` to remove it anyway. `--skill-only` and `--agent-only` narrow the
 removal.
+
+Without a checkout, run the same script from the installed package — take the
+base path from the `PATH` column of `codex plugin list`, then
+`python <path>/skills/codex-maestro/scripts/install.py --uninstall`.
 
 For a plugin install, use `codex plugin remove codex-maestro@agent-toolkit` —
 the marketplace qualifier is required. See

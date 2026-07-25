@@ -51,6 +51,11 @@ agent definitions the installer wrote. `--skill-only` and `--agent-only` narrow
 it to one or the other, and `--codex-home` and `--skills-root` target a
 non-default location.
 
+The command above assumes a checkout. An installer also ships inside its
+package, so a marketplace install can run the same script without one: take the
+base path from the `PATH` column of `codex plugin list` and call
+`python <path>/skills/<skill>/scripts/install.py --uninstall`.
+
 Agent files you edited are treated as yours: an agent definition that no longer
 matches the shipped template is kept and reported rather than deleted. Rerun
 with `--force` to remove it anyway.
