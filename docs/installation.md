@@ -40,6 +40,28 @@ A Codex plugin install does not write custom-agent TOML files into
 fallback immediately; use the agent-led setup below, or the skill's own
 installer, when native custom agents should also be installed.
 
+### Running a skill's installer after a marketplace install
+
+A skill's installer ships inside its package, so you do not need a checkout to
+run it. `codex plugin list` reports the installed package path in its `PATH`
+column:
+
+```bash
+codex plugin list
+```
+
+Use that path as the base. For codex-maestro:
+
+```bash
+python <path>/skills/codex-maestro/scripts/install.py --agent-only
+```
+
+`--agent-only` writes the worker definitions without installing a second copy
+of the skill, which the plugin already provides. Read the path from
+`codex plugin list` rather than writing one down: the package also exists under
+`$CODEX_HOME/plugins/cache/<marketplace>/<plugin>/<version>/`, and that location
+changes with every release.
+
 ## Agent-led install
 
 The [setup-agent-toolkit](../tools/setup-agent-toolkit/SKILL.md) skill lets an
