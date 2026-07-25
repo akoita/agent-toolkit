@@ -1,0 +1,41 @@
+name: release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  draft-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Decide whether to release
+        id: target
+        run: python .github/scripts/release_target.py
+      - name: Tag and draft the release
+        if: steps.target.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.target.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${VERSION}" -m "agent-toolkit v${VERSION}"
+          git push origin "v${VERSION}"
+          gh release create "v${VERSION}" \
+            --draft \
+            --generate-notes \
+            --title "v${VERSION}"
+      - name: Report
+        if: steps.target.outputs.release == 'true'
+        run: |
+          echo "Drafted release v${{ steps.target.outputs.version }}." >> "$GITHUB_STEP_SUMMARY"
+          echo "Review the generated notes and publish it." >> "$GITHUB_STEP_SUMMARY"

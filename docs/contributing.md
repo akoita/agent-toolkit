@@ -56,6 +56,9 @@ applies to one skill belongs with that skill, not at the end of the README.
 6. Add package tests mirroring `tests/test_claude_plugin_package.py` or
    `tests/test_codex_plugin_package.py`.
 
+The version gate and release workflow discover packages from the tree, so they
+pick up a new plugin with no extra wiring.
+
 ## Conventions
 
 - Keep every skill project-agnostic: no repository-specific paths, secrets, or
@@ -68,8 +71,34 @@ applies to one skill belongs with that skill, not at the end of the README.
 
 ## Releasing
 
-Updates only reach users when the version changes. Bump the plugin manifest and
-the matching catalog entry together:
+Releasing is automated, and the version bump is enforced.
+
+**On every pull request**, `version-gate` fails if any file inside a plugin
+package changed while that package's manifest still declares the same version.
+Both checks — `tests` and `version-gate` — must pass before a merge. Changes
+outside `plugins/` need no bump.
+
+Run the suite locally with either runner:
+
+```bash
+python -m unittest discover -s tests
+python -m pytest -q
+```
+
+CI uses `unittest` because every test is written against it, which keeps the
+workflow free of installed dependencies.
+
+**On merge to `main`**, if the version changed, `release` tags the commit and
+opens a **draft** GitHub release with generated notes. Review the notes and
+publish it; nothing is published automatically.
+
+Packages are discovered from the tree, so adding a skill needs no change to the
+workflows. The release job requires all packages to declare the same version:
+this repository releases in lockstep so that one repository tag is unambiguous.
+If versions ever diverge deliberately, the job stops rather than guessing a tag
+name, and tagging becomes a manual per-plugin step.
+
+Bump the plugin manifest and the matching catalog entry together:
 
 - `plugins/<platform>/<plugin>/.{claude,codex}-plugin/plugin.json`
 - the plugin's entry in `.claude-plugin/marketplace.json`, where the Claude
