@@ -78,6 +78,16 @@ package changed while that package's manifest still declares the same version.
 Both checks — `tests` and `version-gate` — must pass before a merge. Changes
 outside `plugins/` need no bump.
 
+Run the suite locally with either runner:
+
+```bash
+python -m unittest discover -s tests
+python -m pytest -q
+```
+
+CI uses `unittest` because every test is written against it, which keeps the
+workflow free of installed dependencies.
+
 **On merge to `main`**, if the version changed, `release` tags the commit and
 opens a **draft** GitHub release with generated notes. Review the notes and
 publish it; nothing is published automatically.
