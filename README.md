@@ -20,8 +20,10 @@ The guides below cover mechanics shared by every skill.
 
 ## Install
 
-Add the repository root as a marketplace, then install any skill from the table
-above. Replace `.` with `akoita/agent-toolkit` to install straight from GitHub.
+Native marketplaces are the recommended, complete installation path for the
+platform plugins. Add the repository root as a marketplace, then install the
+plugin you want. Replace `.` with `akoita/agent-toolkit` to install straight
+from GitHub.
 
 Claude Code:
 
@@ -39,6 +41,20 @@ codex plugin add codex-maestro@agent-toolkit
 
 Restart the tool afterwards, then invoke the skill by name or let its
 description trigger it.
+
+For a portable, skill-only install through the
+[skills CLI](https://www.skills.sh/docs):
+
+```bash
+npx skills add akoita/agent-toolkit --skill codex-maestro -g -a codex
+npx skills add akoita/agent-toolkit --skill maestro -g -a claude-code
+npx skills add akoita/agent-toolkit --skill setup-agent-toolkit -g -a codex
+```
+
+This path installs skill directories, not separate Claude agents or Codex
+custom-agent TOMLs. See [Installation](docs/installation.md) for the worker
+setup and tradeoffs. Use `npx skills update -g <skill>` to update a global
+install and `npx skills remove -g <skill>` to remove one.
 
 ## Update
 

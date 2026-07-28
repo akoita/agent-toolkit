@@ -14,6 +14,7 @@ plugins/
     ├── skills/<skill>/
     └── README.md
 tools/<name>/                         # Standalone skills, not shipped as plugins
+skills/<skill>/                       # skills CLI mirrors of canonical sources
 docs/                                 # Mechanics shared by every skill
 .claude-plugin/marketplace.json       # Claude Code catalog
 .agents/plugins/marketplace.json      # Codex catalog
@@ -22,6 +23,27 @@ docs/                                 # Mechanics shared by every skill
 The plugin directories are both the canonical source and the installable
 packages. Claude and Codex remain separate because their manifests, agent
 definitions, installation scopes, and runtime capabilities differ.
+
+Top-level `skills/` is a checked-in distribution catalog for the skills CLI,
+not a second source of truth. Each directory is an exact mirror of its canonical
+plugin skill or standalone tool, including nested scripts, references, and
+`agents/openai.yaml` metadata.
+
+It has to be a real copy. The skills CLI discovers a top-level `skills/`
+directory by default and does not follow symlinks. Without the catalog the
+default `npx skills add` finds only `maestro`, with no error — and a silently
+partial catalog is a worse failure than duplication. `--full-depth` finds every
+skill without the mirror, but nothing prompts a user to pass it.
+
+Edit the canonical source first, then run:
+
+```bash
+python .github/scripts/sync_skills.py
+```
+
+`--check` reports drift without writing. `tests/test_skills_cli_catalog.py`
+rejects missing, extra, byte-different, or differently-executable files, so a
+stale mirror fails CI.
 
 ## Where documentation goes
 
@@ -52,8 +74,11 @@ applies to one skill belongs with that skill, not at the end of the README.
    and manual install.
 4. Register it in the platform catalog: `.claude-plugin/marketplace.json` or
    `.agents/plugins/marketplace.json`.
-5. Add a row to the skills table in the root README.
-6. Add package tests mirroring `tests/test_claude_plugin_package.py` or
+5. Register the skill in `.github/scripts/sync_skills.py` and
+   `tests/test_skills_cli_catalog.py`, then run the sync script to create its
+   `skills/<skill>/` mirror.
+6. Add a row to the skills table in the root README.
+7. Add package tests mirroring `tests/test_claude_plugin_package.py` or
    `tests/test_codex_plugin_package.py`.
 
 The version gate and release workflow discover packages from the tree, so they
@@ -64,6 +89,8 @@ pick up a new plugin with no extra wiring.
 - Keep every skill project-agnostic: no repository-specific paths, secrets, or
   company context.
 - Keep canonical skills inside their installable plugin packages.
+- Never edit a top-level `skills/` mirror directly. Change the canonical source
+  and run `sync_skills.py`; the mirror is generated output.
 - Use platform-specific IDs when runtime namespaces differ; the shared product
   concept can still carry one name in user-facing documentation.
 - Never merge Claude and Codex configuration. Each platform reads its own
