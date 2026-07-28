@@ -9,7 +9,7 @@ agents, and manual install, see its README:
 To refresh an existing installation see [Updating](updating.md); to remove one
 see [Uninstalling](uninstalling.md).
 
-## Marketplace install
+## Recommended: marketplace install
 
 The repository exposes one marketplace catalog per platform:
 `.claude-plugin/marketplace.json` for Claude Code and
@@ -61,6 +61,45 @@ of the skill, which the plugin already provides. Read the path from
 `codex plugin list` rather than writing one down: the package also exists under
 `$CODEX_HOME/plugins/cache/<marketplace>/<plugin>/<version>/`, and that location
 changes with every release.
+
+## Portable skill-only install
+
+The [skills CLI](https://www.skills.sh/docs) can discover all three skills from
+the repository's top-level `skills/` catalog. Use it when you want a portable
+skill-directory install without registering a native marketplace:
+
+```bash
+npx skills add akoita/agent-toolkit --skill codex-maestro -g -a codex
+npx skills add akoita/agent-toolkit --skill maestro -g -a claude-code
+npx skills add akoita/agent-toolkit --skill setup-agent-toolkit -g -a codex
+```
+
+The `-g` flag installs for the current user; omit it for the current project.
+The `-a` values are skills CLI agent identifiers. Review the discovered skill
+contents before confirming the install.
+
+This is deliberately a **skill-only** distribution. The CLI installs the
+selected skill directory, including its nested scripts, references, and
+metadata, but it does not install files from a plugin's separate `agents/`
+directory or write Codex native custom-agent TOMLs. Native marketplace installs
+remain the recommended complete path:
+
+- `maestro` installed this way does not include the Claude plugin's named
+  subagent definitions.
+- `codex-maestro` retains its bundled implementation-worker CLI fallback. To
+  enable its native Codex workers too, run the installer from the installed
+  skill:
+
+  ```bash
+  python ~/.agents/skills/codex-maestro/scripts/install.py --agent-only
+  ```
+
+  If the skills CLI reports a different destination, use that installed path
+  instead. The installer writes only the custom-agent templates in this mode.
+- `setup-agent-toolkit` is self-contained and needs no separate worker install.
+
+See [Updating](updating.md) and [Uninstalling](uninstalling.md) for the matching
+skills CLI commands and native-agent lifecycle.
 
 ## Agent-led install
 

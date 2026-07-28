@@ -9,6 +9,7 @@ describes agents, scripts, or defaults the package no longer has.
 | `claude plugin install` | `claude plugin update <skill>@agent-toolkit` |
 | `codex plugin add`, Git marketplace | `codex plugin marketplace upgrade agent-toolkit` then `codex plugin add <skill>@agent-toolkit` |
 | `codex plugin add`, local marketplace | `git pull` in the checkout, then `codex plugin add <skill>@agent-toolkit` |
+| `npx skills add` | `npx skills update -g <skill>` for a global install, or omit `-g` for a project install |
 | A skill's own installer, symlinked | `git pull` in the checkout |
 | A skill's own installer, copied | Rerun the installer with `--force` |
 
@@ -31,6 +32,25 @@ Only Git marketplaces are snapshots, so only they can be upgraded — running
 `codex plugin marketplace upgrade` against a local one reports that it is not a
 Git marketplace. A local marketplace is read from its path, so pulling the
 checkout is the update and the re-`add` reinstalls from it.
+
+## skills CLI installs
+
+Update all three global skill-only installs together:
+
+```bash
+npx skills update -g codex-maestro maestro setup-agent-toolkit
+```
+
+Or name one skill, and omit `-g` for a project-scoped installation. This updates
+the installed skill directory only. If you installed Codex Maestro's native
+custom-agent TOMLs separately, refresh them from the newly updated skill:
+
+```bash
+python ~/.agents/skills/codex-maestro/scripts/install.py --agent-only --force
+```
+
+Use the destination reported by the skills CLI if it differs. `--force`
+replaces the existing TOMLs, so inspect and back up any local edits first.
 
 ## Reinstalling over an existing install
 
