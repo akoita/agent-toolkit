@@ -89,6 +89,14 @@ Install them as project agents under `.claude/agents/`, as personal agents
 under `~/.claude/agents/`, or distribute them from a plugin's `agents/`
 directory. Definitions are loaded by `name`, not by filename.
 
+These definitions live beside this skill rather than inside it, so an
+installation that copies only the skill directory does not bring them. Confirm
+an agent exists before routing to it by name. When it does not, use the
+general-purpose subagent and state the model and effort explicitly in the
+request, or handle a small item in the root session. Never route to a named
+agent assuming it was installed, and never report that a named agent performed
+work the general-purpose agent did.
+
 ## Route the work
 
 Choose the smallest orchestration primitive that fits:
