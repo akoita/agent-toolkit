@@ -50,10 +50,21 @@ class SkillsCliCatalogTests(unittest.TestCase):
                 self.assertEqual(mirror_files, canonical_files)
 
             for relative_path in sorted(canonical_files):
+                mirror_file = mirror_root / relative_path
+                canonical_file = canonical_root / relative_path
+
                 with self.subTest(skill=skill_name, file=str(relative_path)):
                     self.assertEqual(
-                        (mirror_root / relative_path).read_bytes(),
-                        (canonical_root / relative_path).read_bytes(),
+                        mirror_file.read_bytes(), canonical_file.read_bytes()
+                    )
+
+                with self.subTest(skill=skill_name, mode=str(relative_path)):
+                    # Git records only the owner-executable bit, so comparing
+                    # the full mode would fail on a contributor's umask alone.
+                    self.assertEqual(
+                        bool(mirror_file.stat().st_mode & 0o100),
+                        bool(canonical_file.stat().st_mode & 0o100),
+                        f"executable bit differs for {relative_path}",
                     )
 
 
