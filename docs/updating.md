@@ -6,9 +6,9 @@ describes agents, scripts, or defaults the package no longer has.
 
 | Installed with | Update with |
 | --- | --- |
-| `claude plugin install` | `claude plugin update <skill>@agent-toolkit` |
-| `codex plugin add`, Git marketplace | `codex plugin marketplace upgrade agent-toolkit` then `codex plugin add <skill>@agent-toolkit` |
-| `codex plugin add`, local marketplace | `git pull` in the checkout, then `codex plugin add <skill>@agent-toolkit` |
+| `claude plugin install` | `claude plugin update <plugin>@agent-toolkit` |
+| `codex plugin add`, Git marketplace | `codex plugin marketplace upgrade agent-toolkit` then `codex plugin add <plugin>@agent-toolkit` |
+| `codex plugin add`, local marketplace | `git pull` in the checkout, then `codex plugin add <plugin>@agent-toolkit` |
 | `npx skills add` | `npx skills update -g <skill>` for a global install, or omit `-g` for a project install |
 | A skill's own installer, symlinked | `git pull` in the checkout |
 | A skill's own installer, copied | Rerun the installer with `--force` |
@@ -35,15 +35,18 @@ checkout is the update and the re-`add` reinstalls from it.
 
 ## skills CLI installs
 
-Update all three global skill-only installs together:
+Update several global skill-only installs together by naming them all:
 
 ```bash
 npx skills update -g codex-maestro maestro setup-agent-toolkit
 ```
 
-Or name one skill, and omit `-g` for a project-scoped installation. This updates
-the installed skill directory only. If you installed Codex Maestro's native
-custom-agent TOMLs separately, refresh them from the newly updated skill:
+A multi-skill plugin such as `security` or `codex-security` has one entry per
+skill (`security-audit`, `security-review`, and so on), so update each name
+you installed. Or name one skill, and omit `-g` for a project-scoped
+installation. This updates the installed skill directory only. If you
+installed Codex Maestro's native custom-agent TOMLs separately, refresh them
+from the newly updated skill:
 
 ```bash
 python ~/.agents/skills/codex-maestro/scripts/install.py --agent-only --force
@@ -51,6 +54,9 @@ python ~/.agents/skills/codex-maestro/scripts/install.py --agent-only --force
 
 Use the destination reported by the skills CLI if it differs. `--force`
 replaces the existing TOMLs, so inspect and back up any local edits first.
+This step applies to skills that ship an installer script, such as
+`codex-maestro`; the security packages ship no installer, so there is nothing
+equivalent to run for them.
 
 ## Reinstalling over an existing install
 

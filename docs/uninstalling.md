@@ -4,8 +4,8 @@ Remove a skill the same way it was installed.
 
 | Installed with | Remove with |
 | --- | --- |
-| `claude plugin install` | `claude plugin uninstall <skill>` |
-| `codex plugin add` | `codex plugin remove <skill>@agent-toolkit` |
+| `claude plugin install` | `claude plugin uninstall <plugin>` |
+| `codex plugin add` | `codex plugin remove <plugin>@agent-toolkit` |
 | `npx skills add` | `npx skills remove -g <skill>` for a global install, or omit `-g` for a project install |
 | A skill's own installer | Rerun the installer with `--uninstall` |
 | Copied by hand | Delete the copied files |
@@ -15,7 +15,7 @@ Restart the tool afterwards so it stops loading the removed skill.
 ## Claude Code
 
 ```bash
-claude plugin uninstall <skill>
+claude plugin uninstall <plugin>
 ```
 
 Add `--scope project` or `--scope local` to remove an installation made at
@@ -26,11 +26,11 @@ else needs.
 ## Codex
 
 ```bash
-codex plugin remove <skill>@agent-toolkit
+codex plugin remove <plugin>@agent-toolkit
 ```
 
-The marketplace qualifier is required. `codex plugin remove <skill>` on its own
-reports that it needs `--marketplace` or a `<plugin>@<marketplace>` name.
+The marketplace qualifier is required. `codex plugin remove <plugin>` on its
+own reports that it needs `--marketplace` or a `<plugin>@<marketplace>` name.
 
 Removing a plugin leaves the marketplace registered, which is usually what you
 want. To deregister the catalog as well:
@@ -48,11 +48,15 @@ npx skills remove -g codex-maestro setup-agent-toolkit
 npx skills remove -g maestro
 ```
 
+A multi-skill plugin such as `security` or `codex-security` needs one name per
+skill installed, for example `npx skills remove -g security-audit
+security-review`.
+
 Omit `-g` for project-scoped installs. With no `-a` filter, the skills CLI
 removes the selected skills from every agent path where it installed them,
 including its canonical shared copy. It never installed Claude's separate
 named-agent definitions, so there is nothing additional to remove for
-`maestro`.
+`maestro` or, for the same reason, for `security`.
 
 If you used Codex Maestro's `--agent-only` setup, remove those native custom
 agents **before** removing the skill, while its installer is still available:
@@ -67,7 +71,9 @@ are preserved unless you inspect them and explicitly add `--force`.
 
 ## Installer-based installs
 
-A skill that ships its own installer removes what that installer created:
+Not every skill ships its own installer — the security packages, for example,
+don't, so this section does not apply to `security` or `codex-security`. A
+skill that does removes what that installer created:
 
 ```bash
 python plugins/codex/codex-maestro/skills/codex-maestro/scripts/install.py --uninstall
@@ -101,6 +107,10 @@ both the skill and any agent definitions it shipped:
 rm -rf ~/.agents/skills/<skill> ~/.claude/skills/<skill>
 rm -f ~/.codex/agents/<agent>.toml ~/.claude/agents/<agent>.md
 ```
+
+A multi-skill plugin has several skill directories to remove this way — the
+security packages ship seven each — so repeat the `rm -rf` for each one you
+copied or symlinked in.
 
 Agent files in those directories are user-owned configuration and may have been
 edited since installation. Inspect before deleting.
