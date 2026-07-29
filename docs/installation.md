@@ -5,6 +5,8 @@ agents, and manual install, see its README:
 
 - [maestro](../plugins/claude/maestro/README.md) (Claude Code)
 - [codex-maestro](../plugins/codex/codex-maestro/README.md) (Codex)
+- [security](../plugins/claude/security/README.md) (Claude Code)
+- [codex-security](../plugins/codex/codex-security/README.md) (Codex)
 
 To refresh an existing installation see [Updating](updating.md); to remove one
 see [Uninstalling](uninstalling.md).
@@ -18,12 +20,12 @@ registers whichever catalog the tool understands.
 
 ```bash
 claude plugin marketplace add .
-claude plugin install <skill>@agent-toolkit
+claude plugin install <plugin>@agent-toolkit
 ```
 
 ```bash
 codex plugin marketplace add .
-codex plugin add <skill>@agent-toolkit
+codex plugin add <plugin>@agent-toolkit
 ```
 
 Replace `.` with `akoita/agent-toolkit` to install from GitHub instead of a
@@ -42,9 +44,10 @@ installer, when native custom agents should also be installed.
 
 ### Running a skill's installer after a marketplace install
 
-A skill's installer ships inside its package, so you do not need a checkout to
-run it. `codex plugin list` reports the installed package path in its `PATH`
-column:
+Not every skill ships an installer script — the security packages, for
+example, don't. Where one does, it ships inside the package, so you do not
+need a checkout to run it. `codex plugin list` reports the installed package
+path in its `PATH` column:
 
 ```bash
 codex plugin list
@@ -64,15 +67,22 @@ changes with every release.
 
 ## Portable skill-only install
 
-The [skills CLI](https://www.skills.sh/docs) can discover all three skills from
-the repository's top-level `skills/` catalog. Use it when you want a portable
+The [skills CLI](https://www.skills.sh/docs) can discover any skill from the
+repository's top-level `skills/` catalog. Use it when you want a portable
 skill-directory install without registering a native marketplace:
 
 ```bash
 npx skills add akoita/agent-toolkit --skill codex-maestro -g -a codex
 npx skills add akoita/agent-toolkit --skill maestro -g -a claude-code
+npx skills add akoita/agent-toolkit --skill security-audit -g -a claude-code
 npx skills add akoita/agent-toolkit --skill setup-agent-toolkit -g -a codex
 ```
+
+A single-skill plugin like `maestro` or `codex-maestro` has one skill name to
+choose. A multi-skill plugin like `security` or `codex-security` ships seven —
+`security-audit`, `security-review`, `security-scan`, `security-supply-chain`,
+`security-threat-model`, `security-smart-contracts`, and `security-ai` — and
+each is installed separately, by name.
 
 The `-g` flag installs for the current user; omit it for the current project.
 The `-a` values are skills CLI agent identifiers. Review the discovered skill
@@ -96,6 +106,12 @@ remain the recommended complete path:
 
   If the skills CLI reports a different destination, use that installed path
   instead. The installer writes only the custom-agent templates in this mode.
+- `security` installed this way does not include the Claude plugin's
+  `security-auditor` and `security-scan-runner` named agents either, for the
+  same reason as `maestro` — and the security packages ship no installer
+  script, so there is no equivalent of the `codex-maestro` step above.
+- `codex-security` ships no agent definitions at all, so a skill-only install
+  of it is already complete.
 - `setup-agent-toolkit` is self-contained and needs no separate worker install.
 
 See [Updating](updating.md) and [Uninstalling](uninstalling.md) for the matching
@@ -148,6 +164,11 @@ should be checked in and shared with only that project:
 cp -r plugins/codex/codex-maestro/skills/codex-maestro /path/to/repo/.agents/skills/
 cp -r plugins/claude/maestro/skills/maestro /path/to/repo/.claude/skills/
 ```
+
+That covers a single-skill plugin. A plugin with several skills — `security`
+and `codex-security` each ship seven, under `plugins/claude/security/skills/`
+and `plugins/codex/codex-security/skills/` — needs one such `cp -r` per skill
+directory you want, or a loop over the plugin's `skills/*` directory.
 
 Skills that ship agent definitions need those copied too, into
 `/path/to/repo/.codex/agents/` or `/path/to/repo/.claude/agents/`. See the
