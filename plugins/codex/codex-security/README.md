@@ -1,0 +1,101 @@
+# codex-security
+
+Project-agnostic security skills for Codex. Covers the whole software
+lifecycle — repository audit, diff review, the deterministic free toolchain,
+supply chain, threat modeling — plus the two domain surfaces that need their
+own vocabulary: smart contracts and AI systems.
+
+Every recommended tool is free software or a genuinely free tier, drivable from
+a command line, and optional: each skill detects what is installed, prints the
+exact install command for what is not, and continues with agent-native
+reasoning rather than aborting.
+
+## What it ships
+
+Seven skills, each self-contained so it can be installed on its own:
+
+| Skill | Use it for |
+| --- | --- |
+| `security-audit` | Repository-wide deep audit, and the shared doctrine every other skill restates: severity, evidence, triage, reporting |
+| `security-review` | Diff and pull-request scoped review, advisory only |
+| `security-scan` | The deterministic toolchain, its exit codes, suppression syntax, and cadence |
+| `security-supply-chain` | Dependencies, CI/CD, SBOM, signing, provenance |
+| `security-threat-model` | Trust boundaries, assets, abuse paths, repo-grounded |
+| `security-smart-contracts` | Solidity and web3 |
+| `security-ai` | LLM applications, agents, MCP servers, and the AI supply chain |
+
+The seven skill bodies are shared with the Claude [`security`](../../claude/security/)
+plugin: they are generated from it by `.github/scripts/sync_skills.py`, so edit
+the canonical source under `plugins/claude/security/skills/` and rerun the
+script rather than editing this package's `skills/` tree.
+
+This package ships no custom agent definitions. The Claude plugin's
+`security-auditor` and `security-scan-runner` agents are Claude agent files; on
+Codex the skills run in the root task or in whatever custom agent you have
+configured.
+
+## Install
+
+```bash
+codex plugin marketplace add .
+codex plugin add codex-security@agent-toolkit
+```
+
+See [Installation](../../../docs/installation.md) for per-project and agent-led
+installs.
+
+## Update
+
+Codex has no update subcommand. For a marketplace added from GitHub, refresh
+the snapshot and reinstall:
+
+```bash
+codex plugin marketplace upgrade agent-toolkit
+codex plugin add codex-security@agent-toolkit
+```
+
+See [Updating](../../../docs/updating.md).
+
+## Remove
+
+```bash
+codex plugin remove codex-security@agent-toolkit
+```
+
+The marketplace qualifier is required. See
+[Uninstalling](../../../docs/uninstalling.md).
+
+## Manual install
+
+Copy or symlink the skills you want into the personal Codex skills directory:
+
+```bash
+git clone git@github.com:akoita/agent-toolkit.git
+mkdir -p ~/.agents/skills
+for s in agent-toolkit/plugins/codex/codex-security/skills/*; do
+  ln -s "$(pwd)/$s" ~/.agents/skills/"$(basename "$s")"
+done
+```
+
+Use a normal copy instead of the symlink when the checkout should not remain
+the live source; a copy will not follow later changes. Inspect existing
+destinations before either operation and do not overwrite a customized skill.
+A manual install is removed by deleting what it created.
+
+## Model routing
+
+Audit and threat modeling are judgment work: run them on `gpt-5.6-sol` at high
+effort, and raise effort further when a wrong framing of a trust boundary would
+be expensive to discover late. Running the toolchain, collecting SARIF, and
+normalizing output is mechanical: `gpt-5.6-terra` at medium effort is enough,
+and the deterministic result does not improve with a larger model.
+
+Diff review sits in between. It runs often enough that cost matters, so start
+economical and escalate only the diffs that touch authorization,
+authentication, cryptography, or CI configuration.
+
+## What these skills will not do
+
+They do not run any scanner against a repository the user does not control,
+they do not vendor rule packs, and they ship no offensive tooling. Penetration
+testing is a different job from securing a lifecycle and is out of scope.

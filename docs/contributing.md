@@ -15,6 +15,8 @@ plugins/
     └── README.md
 tools/<name>/                         # Standalone skills, not shipped as plugins
 skills/<skill>/                       # skills CLI mirrors of canonical sources
+                                      # (a skill shared across platforms is also
+                                      #  mirrored into the other platform's package)
 docs/                                 # Mechanics shared by every skill
 .claude-plugin/marketplace.json       # Claude Code catalog
 .agents/plugins/marketplace.json      # Codex catalog
@@ -35,6 +37,15 @@ default `npx skills add` finds only `maestro`, with no error — and a silently
 partial catalog is a worse failure than duplication. `--full-depth` finds every
 skill without the mirror, but nothing prompts a user to pass it.
 
+The catalog is not the only generated mirror. A skill whose content is
+genuinely platform-neutral is authored once and shipped by both platforms — the
+`security` skills are authored in the Claude package and mirrored into
+`plugins/codex/codex-security/skills/`. That is a deliberate exception to the
+rule that packages are hand-maintained, and it holds only while the bodies
+carry no platform-specific instruction. A skill that has to say something
+different to each platform gets two canonical sources instead, the way
+`maestro` and `codex-maestro` do.
+
 Edit the canonical source first, then run:
 
 ```bash
@@ -42,8 +53,8 @@ python .github/scripts/sync_skills.py
 ```
 
 `--check` reports drift without writing. `tests/test_skills_cli_catalog.py`
-rejects missing, extra, byte-different, or differently-executable files, so a
-stale mirror fails CI.
+rejects missing, extra, byte-different, or differently-executable files in
+every mirror, so a stale one fails CI.
 
 ## Where documentation goes
 
@@ -76,7 +87,8 @@ applies to one skill belongs with that skill, not at the end of the README.
    `.agents/plugins/marketplace.json`.
 5. Register the skill in `.github/scripts/sync_skills.py` and
    `tests/test_skills_cli_catalog.py`, then run the sync script to create its
-   `skills/<skill>/` mirror.
+   mirrors — `skills/<skill>/` always, plus the other platform's package when
+   the skill is shared.
 6. Add a row to the skills table in the root README.
 7. Add package tests mirroring `tests/test_claude_plugin_package.py` or
    `tests/test_codex_plugin_package.py`.
@@ -89,8 +101,9 @@ pick up a new plugin with no extra wiring.
 - Keep every skill project-agnostic: no repository-specific paths, secrets, or
   company context.
 - Keep canonical skills inside their installable plugin packages.
-- Never edit a top-level `skills/` mirror directly. Change the canonical source
-  and run `sync_skills.py`; the mirror is generated output.
+- Never edit a generated mirror directly, in `skills/` or in a package that
+  ships a shared skill. Change the canonical source and run `sync_skills.py`;
+  `sync_skills.py` names every mirror it manages.
 - Use platform-specific IDs when runtime namespaces differ; the shared product
   concept can still carry one name in user-facing documentation.
 - Never merge Claude and Codex configuration. Each platform reads its own

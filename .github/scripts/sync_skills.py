@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Synchronize the top-level skills/ catalog with its canonical sources.
+"""Synchronize every generated skill mirror with its canonical source.
 
 The skills CLI discovers skills from a top-level `skills/` directory by
 default, and does not follow symlinks, so the catalog has to be a real copy.
-This script performs that copy so contributors do not have to remember which
-files moved. `tests/test_skills_cli_catalog.py` verifies the result.
+The catalog is not the only mirror: the security skills are also copied into
+the Codex package, which ships the same skill bodies as the Claude plugin they
+are authored in. This script performs those copies so contributors do not have
+to remember which files moved. `tests/test_skills_cli_catalog.py` verifies the
+result.
 """
 
 from __future__ import annotations
@@ -18,15 +21,36 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG_ROOT = ROOT / "skills"
+CLAUDE_SECURITY_SKILLS = ROOT / "plugins" / "claude" / "security" / "skills"
+CODEX_SECURITY_SKILLS = ROOT / "plugins" / "codex" / "codex-security" / "skills"
+# Authored once in the Claude plugin, shipped by the Codex package too.
+SECURITY_SKILLS = (
+    "security-audit",
+    "security-review",
+    "security-scan",
+    "security-supply-chain",
+    "security-threat-model",
+    "security-smart-contracts",
+    "security-ai",
+)
 CANONICAL_SKILLS = {
     "maestro": ROOT / "plugins" / "claude" / "maestro" / "skills" / "maestro",
     "codex-maestro": (
         ROOT / "plugins" / "codex" / "codex-maestro" / "skills" / "codex-maestro"
     ),
     "setup-agent-toolkit": ROOT / "tools" / "setup-agent-toolkit",
+    **{name: CLAUDE_SECURITY_SKILLS / name for name in SECURITY_SKILLS},
 }
 IGNORED_DIRECTORY_NAMES = {"__pycache__"}
 IGNORED_SUFFIXES = {".pyc", ".pyo"}
+
+
+def mirrors_for(name: str) -> list[Path]:
+    """Every generated copy of a canonical skill, in reporting order."""
+    mirrors = [CATALOG_ROOT / name]
+    if name in SECURITY_SKILLS:
+        mirrors.append(CODEX_SECURITY_SKILLS / name)
+    return mirrors
 
 
 def parse_args() -> argparse.Namespace:
@@ -97,23 +121,24 @@ def main() -> int:
             print(f"error: canonical source missing for {name}: {canonical}")
             return 1
 
-        mirror = CATALOG_ROOT / name
-        drift = differences(canonical, mirror)
-        if not drift:
-            print(f"{name}: in sync")
-            continue
+        for mirror in mirrors_for(name):
+            label = mirror.relative_to(ROOT)
+            drift = differences(canonical, mirror)
+            if not drift:
+                print(f"{label}: in sync")
+                continue
 
-        drifted = True
-        if args.check:
-            print(f"{name}: out of sync")
-            for entry in drift:
-                print(f"  {entry}")
-        else:
-            sync(canonical, mirror)
-            print(f"{name}: synchronized ({len(drift)} change(s))")
+            drifted = True
+            if args.check:
+                print(f"{label}: out of sync")
+                for entry in drift:
+                    print(f"  {entry}")
+            else:
+                sync(canonical, mirror)
+                print(f"{label}: synchronized ({len(drift)} change(s))")
 
     if args.check and drifted:
-        print("\nRun `python .github/scripts/sync_skills.py` to update the catalog.")
+        print("\nRun `python .github/scripts/sync_skills.py` to update the mirrors.")
         return 1
     return 0
 

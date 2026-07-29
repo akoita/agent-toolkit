@@ -13,6 +13,8 @@ isolated so each tool loads only the format it understands.
 | --- | --- | --- | --- |
 | [maestro](plugins/claude/maestro/) | Claude Code | `maestro@agent-toolkit` | Capability-based orchestration across named subagents, agent teams, and dynamic workflows. |
 | [codex-maestro](plugins/codex/codex-maestro/) | Codex | `codex-maestro@agent-toolkit` | Native-first GPT-5.6 orchestration with demanding implementation workers and economical read-only exploration. |
+| [security](plugins/claude/security/) | Claude Code | `security@agent-toolkit` | Seven security skills: repository audit, diff review, the free deterministic toolchain, supply chain, threat modeling, smart contracts, AI systems. |
+| [codex-security](plugins/codex/codex-security/) | Codex | `codex-security@agent-toolkit` | The same seven security skills, packaged for Codex without the Claude agent definitions. |
 | [setup-agent-toolkit](tools/setup-agent-toolkit/) | Codex | standalone | Safely inspects, previews, installs, and configures Agent Toolkit without overwriting developer configuration. |
 
 Each skill's own README covers its configuration, models, and manual install.

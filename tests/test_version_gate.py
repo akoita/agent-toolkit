@@ -8,13 +8,21 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / ".github" / "scripts"))
 
-from plugin_versions import discover_packages, packages_needing_bump  # noqa: E402
+from plugin_versions import (  # noqa: E402
+    current_version,
+    discover_packages,
+    packages_needing_bump,
+)
 
 
 PACKAGES = {
     "plugins/claude/maestro": "plugins/claude/maestro/.claude-plugin/plugin.json",
+    "plugins/claude/security": "plugins/claude/security/.claude-plugin/plugin.json",
     "plugins/codex/codex-maestro": (
         "plugins/codex/codex-maestro/.codex-plugin/plugin.json"
+    ),
+    "plugins/codex/codex-security": (
+        "plugins/codex/codex-security/.codex-plugin/plugin.json"
     ),
 }
 
@@ -26,6 +34,22 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(discovered, PACKAGES)
         for manifest in discovered.values():
             self.assertTrue((ROOT / manifest).is_file())
+
+
+class LockstepVersionTests(unittest.TestCase):
+    def test_every_package_declares_the_same_version(self) -> None:
+        # The release job refuses to guess a tag when versions diverge, so a
+        # single package bumped alone would break tagging on merge.
+        versions = {
+            package: current_version(manifest, ROOT)
+            for package, manifest in discover_packages(ROOT).items()
+        }
+
+        self.assertEqual(
+            len(set(versions.values())),
+            1,
+            f"plugin versions have diverged: {versions}",
+        )
 
 
 class BumpDetectionTests(unittest.TestCase):

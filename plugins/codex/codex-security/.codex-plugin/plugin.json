@@ -1,0 +1,33 @@
+{
+  "name": "codex-security",
+  "version": "0.4.0",
+  "description": "Project-agnostic security skills for Codex covering repository audits, diff review, the free deterministic toolchain, supply chain, threat modeling, smart contracts, and AI systems.",
+  "author": {
+    "name": "Aboubakar Koïta",
+    "url": "https://github.com/akoita"
+  },
+  "homepage": "https://github.com/akoita/agent-toolkit",
+  "repository": "https://github.com/akoita/agent-toolkit",
+  "keywords": [
+    "security",
+    "audit",
+    "review",
+    "supply-chain",
+    "threat-modeling"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Security",
+    "shortDescription": "Audit, review, and harden a codebase.",
+    "longDescription": "Run repository-wide audits, diff-scoped review, the free deterministic toolchain, supply-chain and threat-modeling passes, plus dedicated smart-contract and AI-system surfaces.",
+    "developerName": "Aboubakar Koïta",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use Codex Security to audit this repository."
+    ]
+  }
+}
