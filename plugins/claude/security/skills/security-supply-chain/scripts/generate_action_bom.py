@@ -359,6 +359,12 @@ def scan_actions(
 
 
 def docker_from(line: str) -> tuple[str, str | None] | None:
+    # Dockerfiles commonly end RUN/COPY/HEALTHCHECK lines with a continuation
+    # backslash. Avoid feeding non-FROM instructions to shlex: a trailing
+    # backslash is intentionally incomplete until the next physical line and
+    # would otherwise make unrelated valid Dockerfiles fail discovery.
+    if re.match(r"^\s*from(?:\s|$)", line, flags=re.IGNORECASE) is None:
+        return None
     try:
         tokens = shlex.split(line, comments=True, posix=True)
     except ValueError as error:

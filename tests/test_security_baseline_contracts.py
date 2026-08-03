@@ -177,6 +177,8 @@ class SecurityBaselineContractTests(unittest.TestCase):
             )
             (repository / "Dockerfile").write_text(
                 f"FROM --platform=linux/amd64 python@sha256:{digest} AS Builder\n"
+                "RUN echo first \\\n"
+                "    && echo second\n"
                 "FROM builder AS test\n"
                 "FROM scratch AS export\n"
                 f"FROM alpine@sha256:{digest}\n",
