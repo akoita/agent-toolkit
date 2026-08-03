@@ -9,7 +9,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 SECURITY_ROOT = ROOT / "plugins" / "claude" / "security" / "skills"
 SUPPLY_CHAIN = SECURITY_ROOT / "security-supply-chain"
@@ -165,11 +164,23 @@ class SecurityBaselineContractTests(unittest.TestCase):
             workflows.mkdir(parents=True)
             workflow = workflows / "ci.yml"
             workflow.write_text(
-                f"steps:\n  - uses: actions/checkout@{revision} # v5\n",
+                "jobs:\n"
+                "  test:\n"
+                "    container:\n"
+                f"      image: node@sha256:{digest} # node 24\n"
+                "    services:\n"
+                "      database:\n"
+                f"        image: postgres@sha256:{digest}\n"
+                "    steps:\n"
+                f"      - uses: actions/checkout@{revision} # v5\n",
                 encoding="utf-8",
             )
             (repository / "Dockerfile").write_text(
-                f"FROM python@sha256:{digest}\n", encoding="utf-8"
+                f"FROM --platform=linux/amd64 python@sha256:{digest} AS Builder\n"
+                "FROM builder AS test\n"
+                "FROM scratch AS export\n"
+                f"FROM alpine@sha256:{digest}\n",
+                encoding="utf-8",
             )
             first = Path(directory) / "first.json"
             second = Path(directory) / "second.json"
@@ -199,7 +210,30 @@ class SecurityBaselineContractTests(unittest.TestCase):
             self.assertEqual(first_result.returncode, 0, first_result.stderr)
             self.assertEqual(second_result.returncode, 0, second_result.stderr)
             self.assertEqual(first.read_bytes(), second.read_bytes())
-            self.assertEqual(len(json.loads(first.read_text())["entries"]), 2)
+            entries = json.loads(first.read_text())["entries"]
+            self.assertEqual(len(entries), 5)
+            self.assertNotIn("builder", {item["source"] for item in entries})
+            self.assertEqual(
+                {
+                    item["source"]
+                    for item in entries
+                    if item["version_annotation"] == "Dockerfile FROM"
+                },
+                {"python", "alpine"},
+            )
+            workflow_images = {
+                item["version_annotation"]: item["evidence"]
+                for item in entries
+                if item["kind"] == "container_image"
+                and item["consumer"].startswith(".github/workflows/")
+            }
+            self.assertEqual(
+                workflow_images,
+                {
+                    "GitHub Actions job container": [".github/workflows/ci.yml:4"],
+                    "GitHub Actions service container": [".github/workflows/ci.yml:7"],
+                },
+            )
 
             workflow.write_text(
                 "steps:\n  - uses: actions/checkout@main\n", encoding="utf-8"
@@ -213,6 +247,131 @@ class SecurityBaselineContractTests(unittest.TestCase):
             )
             self.assertEqual(mutable_result.returncode, 1)
             self.assertIn("immutable-input validation failed", mutable_result.stderr)
+
+            workflow.write_text(
+                "jobs:\n"
+                "  test:\n"
+                "    container: node:latest\n"
+                "    services:\n"
+                "      database:\n"
+                "        image: postgres:latest\n"
+                "    steps:\n"
+                f"      - uses: actions/checkout@{revision} # v5\n",
+                encoding="utf-8",
+            )
+            mutable_images = subprocess.run(
+                [*base_command, "--output", str(first)],
+                check=False,
+                capture_output=True,
+                env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                text=True,
+            )
+            self.assertEqual(mutable_images.returncode, 1)
+            self.assertIn(
+                "container inputs require a sha256 digest", mutable_images.stderr
+            )
+
+            workflow.write_text(
+                f"steps:\n  - uses: actions/checkout@{revision} # v5\n",
+                encoding="utf-8",
+            )
+            (repository / "Dockerfile").write_text(
+                "FROM python:3.13 AS builder\nFROM builder AS test\n",
+                encoding="utf-8",
+            )
+            mutable_base = subprocess.run(
+                [*base_command, "--output", str(first)],
+                check=False,
+                capture_output=True,
+                env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                text=True,
+            )
+            self.assertEqual(mutable_base.returncode, 1)
+            self.assertIn(
+                "container inputs require a sha256 digest", mutable_base.stderr
+            )
+            docker_entries = [
+                item
+                for item in json.loads(first.read_text())["entries"]
+                if item["version_annotation"] == "Dockerfile FROM"
+            ]
+            self.assertEqual(
+                [(item["source"], item["consumer"]) for item in docker_entries],
+                [("python:3.13", "Dockerfile:1")],
+            )
+
+    def test_action_bom_generator_reads_only_the_resolved_git_revision(self) -> None:
+        generator = SUPPLY_CHAIN / "scripts" / "generate_action_bom.py"
+        revision = "a" * 40
+        digest = "b" * 64
+        with tempfile.TemporaryDirectory() as directory:
+            repository = Path(directory) / "repository"
+            workflows = repository / ".github" / "workflows"
+            workflows.mkdir(parents=True)
+            (repository / ".gitignore").write_text("ignored/\n", encoding="utf-8")
+            workflow = workflows / "ci.yml"
+            workflow.write_text(
+                f"steps:\n  - uses: actions/checkout@{revision} # v5\n",
+                encoding="utf-8",
+            )
+            (repository / "Dockerfile").write_text(
+                f"FROM python@sha256:{digest}\n", encoding="utf-8"
+            )
+            for arguments in (
+                ("init", "-q"),
+                ("config", "user.name", "ABOM test"),
+                ("config", "user.email", "abom@example.test"),
+                ("add", "."),
+                ("commit", "-qm", "fixture"),
+            ):
+                result = subprocess.run(
+                    ["git", "-C", str(repository), *arguments],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+
+            first = Path(directory) / "first.json"
+            second = Path(directory) / "second.json"
+            base_command = [sys.executable, str(generator), str(repository)]
+            first_result = subprocess.run(
+                [*base_command, "--output", str(first)],
+                check=False,
+                capture_output=True,
+                env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                text=True,
+            )
+            self.assertEqual(first_result.returncode, 0, first_result.stderr)
+
+            workflow.write_text(
+                "steps:\n  - uses: actions/checkout@main\n", encoding="utf-8"
+            )
+            (repository / "Dockerfile.local").write_text(
+                "FROM untracked:latest\n", encoding="utf-8"
+            )
+            ignored = repository / "ignored"
+            ignored.mkdir()
+            (ignored / "Dockerfile").write_text(
+                "FROM ignored:latest\n", encoding="utf-8"
+            )
+            second_result = subprocess.run(
+                [*base_command, "--output", str(second)],
+                check=False,
+                capture_output=True,
+                env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                text=True,
+            )
+            self.assertEqual(second_result.returncode, 0, second_result.stderr)
+            self.assertEqual(first.read_bytes(), second.read_bytes())
+
+            head = subprocess.run(
+                ["git", "-C", str(repository), "rev-parse", "HEAD"],
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+            self.assertEqual(json.loads(first.read_text())["source_revision"], head)
 
     def test_restricted_analysis_validator_rejects_open_network(self) -> None:
         template = json.loads(

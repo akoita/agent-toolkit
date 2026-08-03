@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -20,11 +21,9 @@ from validate_security_profile import (
     validate_document,
 )
 
-
 USES_PATTERN = re.compile(
     r"^\s*(?:-\s*)?uses:\s*[\"']?([^\"'\s#]+)[\"']?\s*(?:#\s*(.*))?$"
 )
-FROM_PATTERN = re.compile(r"^\s*FROM(?:\s+--platform=\S+)?\s+(\S+)", re.IGNORECASE)
 
 
 def run_git(root: Path, *arguments: str) -> str:
@@ -38,6 +37,110 @@ def run_git(root: Path, *arguments: str) -> str:
         message = result.stderr.strip() or "git command failed"
         raise ValueError(message)
     return result.stdout.strip()
+
+
+def git_top_level(root: Path) -> Path | None:
+    result = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "--show-toplevel"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return None
+    return Path(result.stdout.strip()).resolve()
+
+
+def is_action_document(path: str) -> bool:
+    candidate = Path(path)
+    if candidate.name in {"action.yml", "action.yaml"} and len(candidate.parts) == 1:
+        return True
+    return (
+        candidate.suffix in {".yml", ".yaml"}
+        and len(candidate.parts) >= 3
+        and candidate.parts[:2]
+        in {
+            (".github", "workflows"),
+            (".github", "actions"),
+        }
+    )
+
+
+def is_dockerfile(path: str) -> bool:
+    name = Path(path).name
+    return name == "Dockerfile" or name.startswith("Dockerfile.")
+
+
+def is_input_document(path: str) -> bool:
+    return is_action_document(path) or is_dockerfile(path)
+
+
+def git_documents(root: Path, top_level: Path, source_revision: str) -> dict[str, str]:
+    try:
+        prefix = root.relative_to(top_level)
+    except ValueError as error:
+        raise ValueError("repository is outside its Git worktree") from error
+
+    pathspec = prefix.as_posix() if prefix.parts else "."
+    result = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(top_level),
+            "ls-tree",
+            "-r",
+            "--name-only",
+            "-z",
+            source_revision,
+            "--",
+            pathspec,
+        ],
+        check=False,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        message = result.stderr.decode(errors="replace").strip() or "git ls-tree failed"
+        raise ValueError(message)
+
+    documents: dict[str, str] = {}
+    for raw_path in result.stdout.split(b"\0"):
+        if not raw_path:
+            continue
+        repository_path = raw_path.decode("utf-8")
+        relative = Path(repository_path).relative_to(prefix).as_posix()
+        if not is_input_document(relative):
+            continue
+        blob = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(top_level),
+                "show",
+                f"{source_revision}:{repository_path}",
+            ],
+            check=False,
+            capture_output=True,
+        )
+        if blob.returncode != 0:
+            message = blob.stderr.decode(errors="replace").strip() or "git show failed"
+            raise ValueError(message)
+        documents[relative] = blob.stdout.decode("utf-8")
+    return documents
+
+
+def filesystem_documents(root: Path) -> dict[str, str]:
+    documents: dict[str, str] = {}
+    ignored = {".git", "node_modules", ".venv", "vendor"}
+    for path in sorted(root.rglob("*")):
+        if not path.is_file():
+            continue
+        relative_path = path.relative_to(root)
+        relative = relative_path.as_posix()
+        if any(part in ignored for part in relative_path.parts):
+            continue
+        if is_input_document(relative):
+            documents[relative] = path.read_text(encoding="utf-8")
+    return documents
 
 
 def stable_id(kind: str, consumer: str, source: str) -> str:
@@ -83,28 +186,122 @@ def entry(
     }
 
 
-def action_documents(root: Path) -> list[Path]:
-    documents: set[Path] = set()
-    for directory in (root / ".github" / "workflows", root / ".github" / "actions"):
-        if directory.is_dir():
-            documents.update(directory.rglob("*.yml"))
-            documents.update(directory.rglob("*.yaml"))
-    for name in ("action.yml", "action.yaml"):
-        candidate = root / name
-        if candidate.is_file():
-            documents.add(candidate)
-    return sorted(documents)
+def yaml_mapping(line: str) -> tuple[int, str, str] | None:
+    indentation = len(line) - len(line.lstrip(" "))
+    content = line[indentation:]
+    if not content or content.startswith(("#", "-")):
+        return None
+
+    quote: str | None = None
+    escaped = False
+    separator = -1
+    for index, character in enumerate(content):
+        if escaped:
+            escaped = False
+            continue
+        if quote == '"' and character == "\\":
+            escaped = True
+            continue
+        if character in {"'", '"'}:
+            quote = (
+                None if quote == character else character if quote is None else quote
+            )
+            continue
+        if character == ":" and quote is None:
+            separator = index
+            break
+    if separator < 0:
+        return None
+
+    key = content[:separator].strip().strip("'\"")
+    if not key:
+        return None
+    return indentation, key, yaml_scalar(content[separator + 1 :])
+
+
+def yaml_scalar(value: str) -> str:
+    value = value.strip()
+    quote: str | None = None
+    escaped = False
+    for index, character in enumerate(value):
+        if escaped:
+            escaped = False
+            continue
+        if quote == '"' and character == "\\":
+            escaped = True
+            continue
+        if character in {"'", '"'}:
+            quote = (
+                None if quote == character else character if quote is None else quote
+            )
+            continue
+        if (
+            character == "#"
+            and quote is None
+            and (index == 0 or value[index - 1].isspace())
+        ):
+            value = value[:index].rstrip()
+            break
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        value = value[1:-1]
+    return value
+
+
+def workflow_images(lines: list[str]) -> list[tuple[int, str, str]]:
+    images: list[tuple[int, str, str]] = []
+    stack: list[tuple[int, str]] = []
+    for line_number, line in enumerate(lines, start=1):
+        mapping = yaml_mapping(line)
+        if mapping is None:
+            continue
+        indentation, key, value = mapping
+        while stack and stack[-1][0] >= indentation:
+            stack.pop()
+        ancestors = [item[1] for item in stack]
+
+        annotation = ""
+        image = ""
+        if len(ancestors) == 2 and ancestors[0] == "jobs" and key == "container":
+            annotation = "GitHub Actions job container"
+            image = value
+        elif (
+            len(ancestors) == 3
+            and ancestors[0] == "jobs"
+            and ancestors[2] == "container"
+            and key == "image"
+        ):
+            annotation = "GitHub Actions job container"
+            image = value
+        elif (
+            len(ancestors) == 4
+            and ancestors[0] == "jobs"
+            and ancestors[2] == "services"
+            and key == "image"
+        ):
+            annotation = "GitHub Actions service container"
+            image = value
+        if image:
+            images.append((line_number, image, annotation))
+        stack.append((indentation, key))
+    return images
+
+
+def image_parts(image: str) -> tuple[str, str]:
+    if "@" in image:
+        source, reference = image.rsplit("@", 1)
+        return source, reference
+    return image, image.rsplit(":", 1)[-1]
 
 
 def scan_actions(
-    root: Path, source_revision: str, minimum_age_days: int
+    documents: dict[str, str], source_revision: str, minimum_age_days: int
 ) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
-    for path in action_documents(root):
-        relative = path.relative_to(root).as_posix()
-        for line_number, line in enumerate(
-            path.read_text(encoding="utf-8").splitlines(), start=1
-        ):
+    for relative, content in sorted(documents.items()):
+        if not is_action_document(relative):
+            continue
+        lines = content.splitlines()
+        for line_number, line in enumerate(lines, start=1):
             match = USES_PATTERN.match(line)
             if not match:
                 continue
@@ -112,10 +309,7 @@ def scan_actions(
             consumer = f"{relative}:{line_number}"
             if specification.startswith("docker://"):
                 image = specification.removeprefix("docker://")
-                if "@" in image:
-                    source, reference = image.rsplit("@", 1)
-                else:
-                    source, reference = image, image.rsplit(":", 1)[-1]
+                source, reference = image_parts(image)
                 kind = "container_image"
             elif specification.startswith("./"):
                 source = specification
@@ -145,33 +339,64 @@ def scan_actions(
                     evidence=consumer,
                 )
             )
+        if not relative.startswith(".github/workflows/"):
+            continue
+        for line_number, image, annotation in workflow_images(lines):
+            source, reference = image_parts(image)
+            consumer = f"{relative}:{line_number}"
+            entries.append(
+                entry(
+                    kind="container_image",
+                    consumer=consumer,
+                    source=source,
+                    reference=reference,
+                    annotation=annotation,
+                    minimum_age_days=minimum_age_days,
+                    evidence=consumer,
+                )
+            )
     return entries
 
 
-def scan_dockerfiles(root: Path, minimum_age_days: int) -> list[dict[str, Any]]:
+def docker_from(line: str) -> tuple[str, str | None] | None:
+    try:
+        tokens = shlex.split(line, comments=True, posix=True)
+    except ValueError as error:
+        raise ValueError(f"invalid Dockerfile FROM instruction: {error}") from error
+    if not tokens or tokens[0].lower() != "from":
+        return None
+
+    index = 1
+    while index < len(tokens) and tokens[index].startswith("--"):
+        index += 1
+    if index >= len(tokens):
+        return None
+    image = tokens[index]
+    alias = None
+    if index + 2 < len(tokens) and tokens[index + 1].lower() == "as":
+        alias = tokens[index + 2]
+    return image, alias
+
+
+def scan_dockerfiles(
+    documents: dict[str, str], minimum_age_days: int
+) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
-    ignored = {".git", "node_modules", ".venv", "vendor"}
-    for path in sorted(root.rglob("*")):
-        if not path.is_file() or not (
-            path.name == "Dockerfile" or path.name.startswith("Dockerfile.")
-        ):
+    for relative, content in sorted(documents.items()):
+        if not is_dockerfile(relative):
             continue
-        if any(part in ignored for part in path.relative_to(root).parts):
-            continue
-        relative = path.relative_to(root).as_posix()
-        for line_number, line in enumerate(
-            path.read_text(encoding="utf-8").splitlines(), start=1
-        ):
-            match = FROM_PATTERN.match(line)
-            if not match:
+        stage_aliases: set[str] = set()
+        for line_number, line in enumerate(content.splitlines(), start=1):
+            instruction = docker_from(line)
+            if instruction is None:
                 continue
-            image = match.group(1)
-            if image.lower() == "scratch":
+            image, alias = instruction
+            internal_stage = image.casefold() in stage_aliases
+            if alias:
+                stage_aliases.add(alias.casefold())
+            if image.lower() == "scratch" or internal_stage:
                 continue
-            if "@" in image:
-                source, reference = image.rsplit("@", 1)
-            else:
-                source, reference = image, image.rsplit(":", 1)[-1]
+            source, reference = image_parts(image)
             consumer = f"{relative}:{line_number}"
             entries.append(
                 entry(
@@ -233,12 +458,26 @@ def main() -> int:
         return 2
 
     try:
-        source_revision = args.source_revision or run_git(root, "rev-parse", "HEAD")
-        generated_at = args.generated_at or run_git(
-            root, "show", "-s", "--format=%cI", source_revision
-        )
-        entries = scan_actions(root, source_revision, args.minimum_age_days)
-        entries.extend(scan_dockerfiles(root, args.minimum_age_days))
+        top_level = git_top_level(root)
+        if top_level is None:
+            if not args.source_revision or not args.generated_at:
+                raise ValueError(
+                    "non-Git repositories require --source-revision and --generated-at"
+                )
+            source_revision = args.source_revision
+            generated_at = args.generated_at
+            documents = filesystem_documents(root)
+        else:
+            requested_revision = args.source_revision or "HEAD"
+            source_revision = run_git(
+                root, "rev-parse", "--verify", f"{requested_revision}^{{commit}}"
+            )
+            generated_at = args.generated_at or run_git(
+                root, "show", "-s", "--format=%cI", source_revision
+            )
+            documents = git_documents(root, top_level, source_revision)
+        entries = scan_actions(documents, source_revision, args.minimum_age_days)
+        entries.extend(scan_dockerfiles(documents, args.minimum_age_days))
         entries.extend(
             declared_utility(item, args.minimum_age_days) for item in args.build_utility
         )
