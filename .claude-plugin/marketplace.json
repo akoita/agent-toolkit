@@ -10,7 +10,7 @@
     {
       "name": "maestro",
       "source": "./plugins/claude/maestro",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "description": "Experimental Claude Code workflow for orchestrating non-trivial development work."
     },
     {
