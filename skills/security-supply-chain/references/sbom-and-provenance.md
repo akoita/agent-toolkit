@@ -32,10 +32,16 @@ python ../scripts/validate_security_profile.py \
   /private/artifacts/action-bom.json
 ```
 
-The source revision and generation timestamp default to the checked-out commit
-and its commit time, making repeated generation stable for the same revision.
-Pin the generator version in CI and declare build utilities with a commit,
-digest, or package URL plus digest. Start from
+For a Git repository, the generator resolves the source revision to a commit
+and reads tracked workflow and Dockerfile blobs from that commit rather than
+the live worktree. Ignored files, untracked files, and uncommitted edits
+therefore cannot change a revision-bound ABOM. The source revision and
+generation timestamp default to the checked-out commit and its commit time,
+making repeated generation stable for the same revision. A non-Git fixture
+directory uses a deterministic filesystem scan and requires both
+`--source-revision` and `--generated-at`; do not use that fallback as release
+evidence. Pin the generator version in CI and declare build utilities with a
+commit, digest, or package URL plus digest. Start from
 `../assets/action-bom.template.json` when integrating a new consumer; each entry
 records a stable id,
 kind, consumer location, source, immutable commit/digest/package-hash evidence, version
