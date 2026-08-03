@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "profile_name": "restricted-vulnerability-analysis",
+  "source": {
+    "repository": "owner/repository",
+    "commit": "full commit SHA",
+    "analysis_mode": "source_at_rest",
+    "root_absolute_path": "/absolute/path/to/repository",
+    "mount_mode": "read_only",
+    "allowed_paths": [
+      "/absolute/path/to/repository/path/in/scope"
+    ],
+    "excluded_paths": [
+      "/absolute/path/to/repository/.git"
+    ],
+    "reject_symlink_escape": true,
+    "treat_contents_as_untrusted": true
+  },
+  "artifacts": {
+    "directory_absolute_path": "/private/path/outside/all/worktrees/run-id",
+    "must_be_outside_repository": true,
+    "posix_mode": "0700",
+    "public_upload_allowed": false,
+    "retention_days": 30
+  },
+  "credentials": {
+    "repository_credentials_present": false,
+    "cloud_credentials_present": false,
+    "package_publish_credentials_present": false,
+    "deployment_credentials_present": false,
+    "signing_or_wallet_credentials_present": false,
+    "host_environment_passthrough": false,
+    "allowed_environment_variables": [
+      "LANG",
+      "LC_ALL",
+      "TZ"
+    ],
+    "model_auth_location": "trusted_proxy_or_launcher",
+    "model_auth_visible_to_model_tools": false
+  },
+  "network": {
+    "mode": "disabled",
+    "allowed_destinations": [],
+    "general_dns_allowed": false,
+    "private_networks_allowed": false,
+    "cloud_metadata_allowed": false,
+    "listeners_allowed": false,
+    "log_policy_violations": true
+  },
+  "tools": {
+    "allowed": [
+      "scoped_file_read",
+      "scoped_repository_search"
+    ],
+    "denied": [
+      "file_write",
+      "file_edit",
+      "arbitrary_shell",
+      "package_install",
+      "git_mutation",
+      "repository_write_api",
+      "messaging",
+      "secret_access",
+      "deployment",
+      "cloud_control",
+      "browser_automation",
+      "unrestricted_mcp"
+    ],
+    "model_may_expand_allowlist": false
+  },
+  "limits": {
+    "timeout_seconds": 1800,
+    "max_cost_usd": 10.0,
+    "max_subagents": 0,
+    "cpu_limit": "launcher_defined",
+    "memory_limit": "launcher_defined"
+  },
+  "capture": {
+    "started_at": "YYYY-MM-DDTHH:MM:SSZ",
+    "completed_at": null,
+    "host_os": "name and version",
+    "architecture": "architecture",
+    "sandbox_runtime": "runtime and version",
+    "sandbox_image_digest": "sha256:digest",
+    "model_provider": "provider",
+    "model_identifier": "exact model identifier or version",
+    "inference_parameters": {},
+    "harness_version": "version or commit",
+    "tool_versions": {},
+    "configuration_sha256": "sha256:digest",
+    "security_context_sha256": "sha256:digest",
+    "exit_status": null,
+    "coverage": "planned"
+  },
+  "approval": {
+    "findings_are_advisory": true,
+    "model_may_block_merge_or_release": false,
+    "model_may_mutate_source": false,
+    "model_may_change_severity_or_disclosure": false,
+    "human_approver": "name or role",
+    "approval_required_before_reproduction": true,
+    "approval_required_before_code_or_state_change": true
+  }
+}

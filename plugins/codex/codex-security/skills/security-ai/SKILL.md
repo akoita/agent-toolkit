@@ -5,10 +5,10 @@ description: >-
   AI and ML supply chain, and repositories that ship agent skills or plugins.
   Covers prompt injection and indirect injection, exfiltration paths, agent
   permission and sandbox hardening, MCP authorization requirements, model,
-  dataset and pickle provenance, and AI red-teaming tool selection. Skip it
-  when no model or agent sits in the trust path and a conventional
-  application, infrastructure, or dependency review applies, and skip it for
-  legal or compliance sign-off.
+  dataset and pickle provenance, AI red-teaming tool selection, and restricted
+  model-assisted vulnerability analysis. Skip it when no model or agent sits
+  in the trust path and a conventional application, infrastructure, or
+  dependency review applies, and skip it for legal or compliance sign-off.
 ---
 
 # Security review for AI systems
@@ -35,6 +35,7 @@ A target usually has more than one. Work every surface it has.
 | An MCP server or client, a server configuration file, a tool catalog, or a one-click server install flow | MCP | `references/mcp-server-review.md` |
 | Model weights, datasets, `from_pretrained`, `torch.load`, pickles, a fine-tuning or inference pipeline, a model registry | AI/ML supply chain | `references/ai-supply-chain.md` |
 | `SKILL.md`, `CLAUDE.md`, `AGENTS.md`, agent settings files, hooks, or a published skill or plugin package | Skill-shipping repository | "Repositories that ship agent skills and plugins" in `references/agent-runtime-hardening.md` |
+| A model or agent reads repository source to discover, triage, reproduce, or propose fixes for vulnerabilities | Model-assisted vulnerability analysis | `references/restricted-vulnerability-analysis.md` |
 
 `references/red-teaming-tools.md` is cross-cutting. Consult it once the
 surfaces are known, to choose the scanners and probes that produce evidence
@@ -52,6 +53,17 @@ apply to every surface:
 2. Name the structural property that fails, not the payload that exposed it.
    A single jailbreak string is a symptom; "this component holds private data,
    reads untrusted content, and can reach the network" is the finding.
+
+For model-assisted vulnerability analysis, complete
+`assets/restricted-analysis-profile.template.json` before exposing source to
+the analysis process. The profile fixes designated read-only paths, an external
+private artifact directory, credential and network restrictions, tool
+capabilities, environment/model/tool versions, and the human approval boundary.
+Never infer these controls from a prompt. Validate the completed profile with:
+
+```bash
+python scripts/validate_restricted_analysis_profile.py path/to/profile.json
+```
 
 ## Step 3: report per the shared contract
 
@@ -154,3 +166,10 @@ useful. A report that states a wrong version floor gets a real fix skipped.
   model hubs as non-anchors.
 - `references/red-teaming-tools.md` — install commands, exact invocations,
   what each tool actually tests, and CI gating.
+- `references/restricted-vulnerability-analysis.md` — source-at-rest model
+  analysis, isolation requirements, evidence capture, proportional small-project
+  operation, and practices rejected as universal mandates.
+- `assets/restricted-analysis-profile.template.json` — a machine-readable,
+  fail-closed profile to complete before model-assisted vulnerability analysis.
+- `scripts/validate_restricted_analysis_profile.py` — a standard-library
+  validator for the profile's fail-closed structural invariants.

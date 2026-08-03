@@ -1,0 +1,25 @@
+{
+  "document_type": "agent-toolkit.action-bom",
+  "schema_version": "1.0",
+  "generated_at": "2000-01-01T00:00:00Z",
+  "source_revision": "replace-with-immutable-source-revision",
+  "entries": [
+    {
+      "entry_id": "build-input-001",
+      "kind": "github_action",
+      "consumer": "replace-with-workflow-or-build-location",
+      "source": "replace-with-upstream-source",
+      "immutable_ref": "replace-with-commit-sha-digest-or-version-plus-hash",
+      "version_annotation": "replace-with-human-readable-version-or-not-applicable",
+      "minimum_age_days": 0,
+      "permissions": [
+        "replace-with-effective-permission-or-not-applicable"
+      ],
+      "provenance": "unverified",
+      "review_status": "review_required",
+      "evidence": [
+        "replace-with-file-line-setting-or-command-evidence"
+      ]
+    }
+  ]
+}
