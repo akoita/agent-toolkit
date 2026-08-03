@@ -123,6 +123,78 @@ not freeze you on old versions.
   whatever the previous job left behind.
 - Pin container images by digest, not by tag, for the same reason as actions.
 
+## Short-lived CI identity with OIDC and workload identity federation
+
+Prefer a workload identity issued for one job over a stored PAT, registry token,
+or cloud key. OIDC-based workload identity federation (WIF) is not safe merely
+because it is short-lived: the trust policy must bind the token to the intended
+issuer, audience, repository, workflow, ref or protected environment, and
+operation. A subject pattern broad enough to match a fork, another workflow, or
+every branch preserves the same attack path as a shared secret.
+
+Verify all of these:
+
+1. `id-token: write` exists only on the job that exchanges the token, not as a
+   workflow-wide default.
+2. The identity provider checks issuer and audience and constrains repository,
+   workflow, ref/tag, and environment claims as tightly as the release process
+   permits.
+3. The resulting cloud or registry principal has only the publish/deploy action
+   and target scope the job needs. Federation removes a stored key; it does not
+   make an over-privileged role safe.
+4. A run from the wrong branch, workflow, repository, or environment fails the
+   exchange. Record this negative test; reading the happy path is insufficient.
+5. Token issuance and use are present in retained provider audit logs with the
+   workload subject and target resource.
+6. Superseded PATs, cloud keys, and registry tokens are removed and rotated.
+   Leaving a fallback secret in repository settings leaves the old path open.
+
+When federation is unavailable, use a per-environment credential with the
+shortest practical lifetime and scope, expose it only to the privileged job,
+rotate it automatically, and record federation as a prerequisite rather than
+claiming equivalence.
+
+## Runner, source, and workspace isolation
+
+Provider-hosted jobs are normally single-use and are the default for small
+projects. A privileged self-hosted job needs equivalent evidence: a fresh
+instance per job, no previous workspace or process state, no organization-wide
+credential, and destruction after evidence export. Cleanup scripts on a
+persistent runner are not equivalent because the compromised job controls the
+cleanup environment.
+
+Separate untrusted evaluation from privileged publish/deploy:
+
+- An untrusted pull request may build and test without secrets, but it must not
+  hand a writable workspace, cache, executable artifact, environment file, or
+  generated workflow directly to a privileged job.
+- The privileged job starts from a fresh checkout of the reviewed immutable
+  commit. When it consumes an artifact from an earlier job, bind that artifact
+  to a digest and the reviewed source revision, and verify both before use.
+- Keep release credentials and `id-token: write` out of dependency installation
+  and arbitrary project-script steps. Split fetch/build, verify, and publish
+  when the platform permits it.
+- Scope caches by trust level and immutable inputs. Never let an untrusted
+  context write a cache that a privileged release consumes as executable code.
+- Do not mount the host container socket, developer home directory, SSH/cloud
+  configuration, or package-manager credentials into an untrusted or build
+  workspace.
+
+## Egress from privileged jobs
+
+A privileged build usually needs fewer destinations than a test job: source
+hosting, the selected package registry or mirror, the attestation service, and
+the publish/deploy endpoint. Deny other egress when the runner platform supports
+it, or move publishing into a small job whose network surface can be bounded.
+
+An allowlisted hostname is not enough evidence. Verify the TLS identity and
+whether the destination accepts attacker-controlled writes or uploads. A
+telemetry endpoint, gist service, public object store, or compromised package
+registry can be an exfiltration path even when its domain is expected. Record
+the allowed destination, method, purpose, write capability, owner, and review
+date. Alert on denied destinations and unusual upload volume, and fail closed
+when the policy or proxy is unavailable.
+
 ## Package-manager and install-script risk
 
 ### The threat as of 2026

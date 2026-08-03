@@ -21,7 +21,10 @@ covered as about what was.
 
 The doctrine in `references/severity-and-reporting.md` and
 `references/triage-and-false-positives.md` is the contract for this skill and
-for its siblings. Read both before writing a single finding.
+for its siblings. Read both before writing a single finding. Before discovery,
+also load the repository's focused security context as
+`references/security-context-and-knowledge-base.md` describes; after triage,
+carry every survivor through `references/vulnerability-lifecycle.md`.
 
 ## 1. Scope and budget
 
@@ -45,7 +48,28 @@ explicitly rather than trusting its default.
 
 State all three in the opening of the report.
 
-## 2. Tool preflight
+## 2. Load security context
+
+Discovery starts from explicit trust boundaries, not from an undocumented
+model guess. Read the root disclosure-policy `SECURITY.md`, then locate focused
+engineering `SECURITY.md` files inside the in-scope paths. The two have
+different jobs: the root file tells reporters how to disclose vulnerabilities;
+a nested file tells reviewers what the component trusts, what it must protect,
+and which paths are privileged. Never replace one with the other.
+
+Build a small, source-backed knowledge base from the threat model, prior
+findings and incidents, relevant CVEs, ownership, and the history of sensitive
+paths. Record the source and freshness of every entry. Do not copy credentials,
+private report contents, or unrelated repository history into prompts or scan
+artifacts. Use `assets/trust-boundary-SECURITY.template.md` when a component
+needs focused context, and follow
+`references/security-context-and-knowledge-base.md` for the minimum useful set
+and staleness rules.
+
+This context guides attention and tests hypotheses; it does not prove that a
+control exists. Verify every claimed mitigation in code or configuration.
+
+## 3. Tool preflight
 
 Detect, never assume. Run the version command for each tool the audit intends
 to use, record what answered, and print the exact install command for what did
@@ -64,7 +88,7 @@ table so the reader knows which classes went unscanned. The `security-scan`
 skill holds the install commands and the exact invocations; this skill only
 needs to know what is present.
 
-## 3. The two-pass shape
+## 4. The two-pass shape
 
 Adapted from the CodeCrucible blueprint (https://github.com/block/codecrucible).
 The value is in the second pass being adversarial towards the first.
@@ -111,7 +135,7 @@ dropped set is evidence that triage happened.
 The reasoning behind this split, and the measurements that support it, are in
 `references/llm-assisted-review.md`.
 
-## 4. Deduplicate
+## 5. Deduplicate
 
 Collapse survivors by `(location, CWE)`, keeping the highest severity instance
 and merging the evidence from every tool and pass that reported it. Record
@@ -120,7 +144,7 @@ which sources agreed: independent agreement is a real confidence signal.
 A repeated idiom that fails at fifty call sites is one finding with fifty
 locations, not fifty findings.
 
-## 5. Triage
+## 6. Triage
 
 Apply `references/triage-and-false-positives.md` in full: promotion rules,
 KEV → EPSS → CVSS prioritization for anything with a CVE, the suppression
@@ -129,7 +153,30 @@ absent TLS in a local development context, a casual HSTS recommendation, and a
 sequential identifier reported without the missing authorization check are the
 three findings most likely to get an entire report dismissed.
 
-## 6. Ownership as a risk signal
+## 7. Controlled vulnerability lifecycle
+
+Triage is not the end of the audit. Put each surviving finding through the
+controlled intake and remediation states in
+`references/vulnerability-lifecycle.md`: deduplicate, reproduce, enrich,
+identify a human owner, fix, independently review, test, release, and confirm
+deployment or downstream adoption where that distinction exists.
+
+Use `assets/finding-intake.template.json` for a portable record. Generate
+multiple candidate fixes only when the change is consequential or genuinely
+ambiguous; ordinary defects need one minimal fix, not an agent tournament.
+Every accepted fix needs a regression test or a written reason one is
+impractical. Prefer a structural, class-wide mitigation when repeated instances
+share a root cause, but do not delay an urgent containment fix while designing
+the broader repair. Privileged and high-impact changes retain human approval.
+
+Track the timestamps from discovery through triage or reproduction, fix,
+release, and deployed/adopted protection. Report p50 and p90 durations with the
+sample size and population definition using
+`assets/patch-gap-scorecard.template.md`. A solo maintainer may implement the
+same state machine with issue labels and a checklist; no assignment service is
+required.
+
+## 8. Ownership as a risk signal
 
 Who maintains a file predicts how quickly a defect in it is noticed, so use
 history to rank attention. This is an input to prioritization and never a
@@ -151,7 +198,7 @@ Use these to decide where the deep pass goes when the budget will not cover
 everything, and report them in the assumptions section as context. Never write
 "this file has one owner" as a finding.
 
-## 7. Report
+## 9. Report
 
 Write the report exactly as `references/severity-and-reporting.md` specifies:
 executive summary, scope and what was not covered, findings by severity, the
@@ -161,7 +208,7 @@ Write artifacts outside the working tree, keep the directory private, and do
 not attach them to a pull request. They contain source excerpts and exploit
 steps.
 
-## 8. Routing
+## 10. Routing
 
 This skill is the deep pass and the doctrine. Hand off when the question has a
 better-shaped home:
@@ -178,6 +225,20 @@ better-shaped home:
 A repository audit routinely calls two or three of these. Run them, fold their
 results into the same deduplication and triage, and attribute each finding to
 the pass that produced it.
+
+## Local references and assets
+
+- `references/security-context-and-knowledge-base.md` — focused trust-boundary
+  context, root versus nested `SECURITY.md`, and a source-backed review
+  knowledge base.
+- `references/vulnerability-lifecycle.md` — intake, reproduction, ownership,
+  remediation controls, and patch-gap measurement.
+- `references/llm-assisted-review.md` — evidence, tier-scoped repeated
+  discovery, and separate-context critic rules.
+- `assets/trust-boundary-SECURITY.template.md` — nested engineering context;
+  it is not a repository disclosure policy.
+- `assets/finding-intake.template.json` — machine-readable lifecycle intake.
+- `assets/patch-gap-scorecard.template.md` — p50/p90 lifecycle reporting.
 
 ## Optional external LLM scanners
 

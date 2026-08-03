@@ -4,6 +4,54 @@ Pass 3 answers one question: can somebody who did not build this artifact prove
 what it contains and where it came from? Pass 4's checklists mostly test
 whether you answered it.
 
+## Action Bill of Materials
+
+An SBOM inventories what enters the product. An **Action Bill of Materials
+(ABOM)** inventories third-party code that can influence the build even when it
+does not ship in the product:
+
+- GitHub Actions and reusable workflows;
+- local or third-party composite actions;
+- job and service container images;
+- compilers, generators, package managers, bundlers, signing clients, deployment
+  utilities, and downloaded build tools.
+
+Generate the ABOM from workflow files, composite-action definitions, Dockerfile
+base images, and explicitly declared build utilities for every reviewed source
+revision. Do not maintain a hand-written list that drifts from the executable
+configuration. The generator deliberately exits nonzero after writing the
+inventory when it finds a mutable tag or branch, so the ABOM cannot be treated
+as passing evidence until those inputs are pinned:
+
+```bash
+python ../scripts/generate_action_bom.py /path/to/repository \
+  --output /private/artifacts/action-bom.json \
+  --minimum-age-days 7 \
+  --build-utility 'pinact=sha256:<64-hex-digest>'
+python ../scripts/validate_security_profile.py \
+  /private/artifacts/action-bom.json
+```
+
+The source revision and generation timestamp default to the checked-out commit
+and its commit time, making repeated generation stable for the same revision.
+Pin the generator version in CI and declare build utilities with a commit,
+digest, or package URL plus digest. Start from
+`../assets/action-bom.template.json` when integrating a new consumer; each entry
+records a stable id,
+kind, consumer location, source, immutable commit/digest/package-hash evidence, version
+annotation, effective permissions, provenance status, review status, and
+`file:line` or setting evidence. Validate it with:
+
+```bash
+python ../scripts/validate_security_profile.py path/to/action-bom.json
+```
+
+Tie the ABOM to the source revision. Diff it on workflow/build changes and on a
+release. A new source, widened permission, mutable reference, publisher change,
+or provenance regression requires review under the dependency-intake policy.
+An ABOM does not replace SHA/digest pinning or workflow review; it makes those
+inputs enumerable and comparable.
+
 ## SBOM
 
 Emit **CycloneDX 1.7** as the primary format. It was published in October 2025
@@ -117,6 +165,35 @@ cosign regexp.
 Reach for `slsa-framework/slsa-github-generator` only when a consumer requires
 certified Build L3. It is materially more machinery, and L2 with anchored
 verification already removes the whole class of post-build tampering.
+
+## Deploy by digest and reconcile live state
+
+Verification is incomplete when CI verifies one digest and deployment later
+resolves a mutable tag. Carry one immutable artifact identity across the whole
+chain:
+
+1. Build the artifact and record its digest.
+2. Generate the SBOM from the built artifact or locked graph and associate its
+   digest with that artifact.
+3. Sign and attest the artifact digest using the intended release identity.
+4. Verify the signature, provenance identity, subject digest, and SBOM before
+   promotion.
+5. Put the digest, not a tag, in the deployment input or rendered deployment
+   manifest.
+6. Read the registry digest and the live runtime revision/image digest after
+   deployment and compare them to the release record and declared IaC.
+
+A release verification record should contain the reviewed source revision,
+builder/workflow identity, artifact and SBOM digests, signature/provenance
+verification output, declared deployment digest, registry digest, live digest,
+environment, deploy actor, and timestamp. Any mismatch fails promotion or
+opens an incident; it is not normalized away by rewriting the record.
+
+Reconcile on every deployment and periodically for long-lived T2–T4 services.
+Also reconcile after a rollback, manual deployment, registry migration, or IaC
+import. A scheduled check must read the live platform rather than compare two
+copies of the same desired-state file. Tags may remain as human-friendly
+labels, but they are never the deployment or verification identity.
 
 ## OpenSSF Scorecard
 

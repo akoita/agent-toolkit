@@ -47,14 +47,56 @@ dropped. Never claim a control exists, or does not exist, without a code
 reference. Detect each tool before using it, print its install command when it
 is missing, and continue with manual reading rather than aborting.
 
+## Pass 0: tier and applicability
+
+Start by assigning the repository the highest applicable tier from T0 through
+T4. Tiers are additive: a deployed agent is T3 and inherits the T0, T1, and T2
+minimums. Record conditional controls as not applicable only with evidence that
+the triggering surface is absent; do not silently skip them.
+
+Use `references/tiered-baseline.md` for the tier definitions, stable control
+ids, minimum-control matrix, roadmap priorities, review cadence, and
+scale-based rejects. Start from `assets/repository-baseline.template.json` and
+validate the completed profile with:
+
+```bash
+python scripts/validate_security_profile.py path/to/security-profile.json
+```
+
+The validator requires one record for every catalog control and checks the
+required, conditional, and out-of-tier status against the selected tier. Use
+`--allow-placeholders` only to lint the shipped template while authoring; it is
+not valid completion evidence.
+
+For every candidate control, write an adoption record before recommending a
+change:
+
+- applicability and trigger evidence;
+- decision: `adopt`, `adapt`, `reject`, `already-covered`, or the narrowly
+  constrained `not-applicable` state;
+- decision rationale and compensating controls where required;
+- evidence: exact `file:line`, repository setting, artifact digest, or command
+  output that supports the decision;
+- expected risk reduction;
+- operating cost;
+- prerequisites;
+- failure mode: how the control can look present while leaving the attack path
+  open.
+
+An adoption record is planning evidence, not a finding. A missing baseline
+control becomes a finding only when it also satisfies the finding contract
+above.
+
 ## Order of work
 
 | Pass | Question | Reference |
 | --- | --- | --- |
+| 0. Applicability | Which additive tier and conditional controls apply? | `references/tiered-baseline.md` |
 | 1. CI/CD | What can a pull request make the build do? | `references/ci-hardening.md` |
-| 2. Intake | What runs when a dependency is installed? | `references/ci-hardening.md` |
+| 2. Intake | What runs when a dependency is installed, and what evidence permits adoption? | `references/dependency-intake-policy.md` |
 | 3. Output | Can a consumer prove what we shipped? | `references/sbom-and-provenance.md` |
 | 4. Obligations | What will an auditor or regulator ask for? | `references/standards-and-compliance.md` |
+| 5. Operations | Will misuse be detected and can the team respond? | `references/monitoring-and-response.md` |
 
 Do not start at pass 4. A repository that fails pass 1 will fail every
 checklist in pass 4 for reasons the checklist describes badly.
@@ -144,6 +186,12 @@ PEP 740 attestations are Final and PyPI supports them, but neither pip nor uv
 rejects an unsigned package today. Treat attestations as audit evidence, not as
 an enforcement point.
 
+Use `references/dependency-intake-policy.md` to decide what to do with a
+vulnerable, confirmed-malicious, abandoned, newly published,
+provenance-missing, or maintainer-transferred package. Deterministic evidence
+may block; reputation and age are soft signals that require review rather than
+an automatic verdict.
+
 ## Pass 3: what you publish
 
 Emit CycloneDX 1.7 as the primary SBOM format and add SPDX only on request.
@@ -165,6 +213,15 @@ build track, and how to gate on OpenSSF Scorecard output.
 drop-in repository checklist, and states the EU Cyber Resilience Act, NIST
 SSDF, OWASP ASVS and SAMM, CIS benchmarks, PCI DSS, and SOC 2 as engineering
 obligations. It is engineering guidance, not legal advice.
+
+## Pass 5: monitoring and response
+
+Review audit evidence for workflow changes, unexpected triggers, credential
+use, and privileged-job egress. Then select the scenario playbooks that match
+the tier: package takeover, dependency confusion, pipeline credential
+harvesting, malicious skills or plugins, and developer workstation or IDE
+compromise. `references/monitoring-and-response.md` defines the evidence,
+response shape, retention questions, and tabletop cadence.
 
 ## When a tool is missing
 
@@ -189,13 +246,25 @@ pass 1 with no tools at all.
 Group findings by pass, not by tool. For each, give the record described in the
 finding contract above. Separate what is already mitigated in the repository,
 with the `file:line` that proves it, from what you are recommending. State
-which tools were unavailable and what that leaves unverified.
+which tools were unavailable and what that leaves unverified. Include the tier,
+the adoption records, deferred and rejected controls, owners, and review dates.
 
 ## References
 
 - `references/ci-hardening.md` — workflow audits, pinning, install scripts,
-  lockfiles, and cooldowns in detail.
+  lockfiles, cooldowns, workload identity, runner isolation, and egress.
+- `references/tiered-baseline.md` — additive tiers, stable control ids,
+  applicability, priorities, cadence, and scale-based rejects.
+- `references/dependency-intake-policy.md` — deterministic and soft-signal
+  package dispositions.
 - `references/sbom-and-provenance.md` — SBOM formats, `cosign`, SLSA v1.2,
-  Scorecard, and OSPS Baseline.
+  generated ABOMs, deployment reconciliation, Scorecard, and OSPS Baseline.
+- `references/monitoring-and-response.md` — operational detection, evidence,
+  incident scenarios, and tabletop cadence.
 - `references/standards-and-compliance.md` — CRA, SSDF, ASVS, SAMM, CIS,
   PCI DSS, SOC 2.
+- `assets/repository-baseline.template.json` — machine-checkable repository
+  tier and adoption records.
+- `assets/action-bom.template.json` — machine-checkable generated ABOM shape.
+- `scripts/validate_security_profile.py` — standard-library validator for both
+  document types.

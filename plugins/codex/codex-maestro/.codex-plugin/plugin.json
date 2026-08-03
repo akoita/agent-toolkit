@@ -1,6 +1,6 @@
 {
   "name": "codex-maestro",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Experimental Codex workflow for planning, bounded delegation, review, and verification.",
   "author": {
     "name": "Aboubakar Koïta",

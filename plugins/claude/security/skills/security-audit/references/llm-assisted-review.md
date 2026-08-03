@@ -53,6 +53,54 @@ actionable of the five: asking "is this a SQL injection, given this trace" beats
 asking "is this a vulnerability" by a wide margin, and it costs nothing to do.
 Give the model the flow, not just the line.
 
+## Tier-scoped repeated discovery
+
+The Chrome Security Team reports running vulnerability-finding models over its
+codebase multiple times to account for nondeterminism and model improvements,
+and using a critic with separate context. That is a **direct source claim** from
+its 30 July 2026 article, not evidence that repetition is economical or
+sufficient for every repository:
+https://blog.google/security/chrome-stronger-with-every-update/
+
+The following is this skill's **scaled adaptation**. Repetition is an advisory
+discovery technique, scoped by impact and budget:
+
+| Review tier | Repeated model discovery |
+| --- | --- |
+| Static/docs-only or routine low-impact change | Do not repeat. Use deterministic checks and ordinary review. |
+| Library or deployed-service boundary | One advisory discovery pass on changed/high-risk paths; repeat only when the first pass identifies an unresolved attack path or the scheduled deep review calls for it. |
+| Authentication, agent permissions, payment/custody, signing, deployment, or smart-contract boundary | Two independent discovery passes on the focused boundary are reasonable when budget permits. A scheduled release or deep audit may use a third pass if it has a distinct hypothesis or model capability. |
+
+Do not run repeated whole-repository analysis on every change. Fix the scope,
+commit, context pack, model/tool versions, and cost ceiling. Record each run's
+coverage and candidates separately. The union of candidates proceeds to
+deduplication and CWE-specific proof; a candidate does not become a finding
+because it appeared twice.
+
+## Separate-context critic
+
+Use a critic for consequential or ambiguous candidates and fixes, not as
+ceremony on every alert. Independence means:
+
+1. start with fresh context rather than the discovery or fixing transcript;
+2. provide the same scoped code, trust-boundary context, and finding contract;
+3. withhold discovery conclusions and candidate patches until the critic has
+   written its own attack-path, expected-mitigation, and test analysis where
+   feasible;
+4. then disclose each candidate and require the critic to falsify it against
+   code, configuration, and regression evidence.
+
+If operational limits make candidate withholding impossible, state that the
+review is not fully independent. A different model with the same inherited
+reasoning is not automatically independent, while the same model in a fresh,
+properly isolated context can provide a useful second analysis.
+
+Never treat majority vote, model agreement, or repeated wording as proof. Each
+candidate still has to meet the finding contract: a reachable path from
+attacker-controlled input, a missing mitigation, concrete impact, precise
+locations, and an exact remediation. Deterministic tests and human approval
+remain authoritative for consequential changes.
+
 ## What not to do
 
 Never make an LLM verdict a blocking gate. Run-to-run instability means the
