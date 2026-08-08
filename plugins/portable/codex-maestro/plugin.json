@@ -1,0 +1,52 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "codex-maestro",
+  "version": "0.5.3",
+  "description": "Experimental Codex workflow for planning, bounded delegation, review, and verification.",
+  "author": {
+    "name": "Aboubakar Koïta",
+    "url": "https://github.com/akoita"
+  },
+  "homepage": "https://github.com/akoita/agent-toolkit",
+  "repository": "https://github.com/akoita/agent-toolkit",
+  "keywords": [
+    "agents",
+    "development",
+    "orchestration"
+  ],
+  "extensions": {
+    "io.github.akoita.agent-toolkit": {
+      "adapters": {
+        "codex": {
+          "name": "codex-maestro",
+          "description": "Experimental Codex workflow for planning, bounded delegation, review, and verification.",
+          "interface": {
+            "displayName": "Codex Maestro",
+            "shortDescription": "Orchestrate non-trivial development work.",
+            "longDescription": "Plan complex changes, delegate bounded implementation, inspect the resulting diff, and verify the outcome.",
+            "developerName": "Aboubakar Koïta",
+            "category": "Developer Tools",
+            "capabilities": [
+              "Read",
+              "Write"
+            ],
+            "defaultPrompt": [
+              "Use Codex Maestro to implement this change."
+            ]
+          },
+          "marketplace": {
+            "source": {
+              "source": "local",
+              "path": "./plugins/codex/codex-maestro"
+            },
+            "policy": {
+              "installation": "AVAILABLE",
+              "authentication": "ON_INSTALL"
+            },
+            "category": "Developer Tools"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Generate native security plugin adapters from the portable package.
+"""Generate native plugin adapters from portable packages.
 
-The Agent Plugins manifest owns portable metadata and repository-specific
-adapter data. This script renders the Claude and Codex native manifests and
-replaces only their matching marketplace entries, leaving unrelated entries
-untouched.
+Each Agent Plugins manifest owns portable metadata and repository-specific
+adapter data. This script renders only the native adapters declared by each
+package and replaces only their matching marketplace entries, leaving
+unrelated entries untouched.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -18,11 +19,17 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 EXTENSION_NAMESPACE = "io.github.akoita.agent-toolkit"
-PORTABLE_MANIFEST = Path("plugins/portable/security/plugin.json")
-CLAUDE_MANIFEST = Path("plugins/claude/security/.claude-plugin/plugin.json")
-CODEX_MANIFEST = Path("plugins/codex/codex-security/.codex-plugin/plugin.json")
+PORTABLE_MANIFESTS = (
+    Path("plugins/portable/codex-maestro/plugin.json"),
+    Path("plugins/portable/security/plugin.json"),
+)
 CLAUDE_MARKETPLACE = Path(".claude-plugin/marketplace.json")
 CODEX_MARKETPLACE = Path(".agents/plugins/marketplace.json")
+MARKETPLACES = {
+    "claude": CLAUDE_MARKETPLACE,
+    "codex": CODEX_MARKETPLACE,
+}
+PACKAGE_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 def parse_args() -> argparse.Namespace:
@@ -72,64 +79,118 @@ def replace_marketplace_entry(
     return catalog
 
 
+def adapter_package_path(kind: str, adapter: dict[str, Any]) -> Path:
+    source = adapter["marketplace"]["source"]
+    if kind == "claude" and isinstance(source, str):
+        source_path = source
+    elif (
+        kind == "codex"
+        and isinstance(source, dict)
+        and source.get("source") == "local"
+        and isinstance(source.get("path"), str)
+    ):
+        source_path = source["path"]
+    else:
+        raise ValueError(f"unsupported {kind} marketplace source")
+    components = source_path.split("/")
+    package_name = components[3] if len(components) == 4 else ""
+    if (
+        len(components) != 4
+        or components[:3] != [".", "plugins", kind]
+        or PACKAGE_NAME.fullmatch(package_name) is None
+        or adapter.get("name") != package_name
+    ):
+        raise ValueError(
+            f"{kind} adapter must target its matching "
+            f"plugins/{kind}/<package-name>: {source_path}"
+        )
+    return Path(*components[1:])
+
+
+def native_manifest(
+    kind: str, portable: dict[str, Any], adapter: dict[str, Any]
+) -> dict[str, Any]:
+    common = {
+        "name": adapter["name"],
+        "version": portable["version"],
+        "description": adapter["description"],
+    }
+    if kind == "claude":
+        return {
+            **common,
+            "author": {"name": portable["author"]["name"]},
+            "repository": portable["repository"],
+        }
+    if kind == "codex":
+        return {
+            **common,
+            "author": portable["author"],
+            "homepage": portable["homepage"],
+            "repository": portable["repository"],
+            "keywords": portable["keywords"],
+            "skills": "./skills/",
+            "interface": adapter["interface"],
+        }
+    raise ValueError(f"unsupported adapter kind: {kind}")
+
+
+def marketplace_entry(
+    kind: str, portable: dict[str, Any], adapter: dict[str, Any]
+) -> dict[str, Any]:
+    if kind == "claude":
+        marketplace = adapter["marketplace"]
+        # Keep the established Claude catalog field order stable.
+        return {
+            "name": adapter["name"],
+            "source": marketplace["source"],
+            "version": portable["version"],
+            "description": marketplace["description"],
+        }
+    if kind == "codex":
+        return {"name": adapter["name"], **adapter["marketplace"]}
+    raise ValueError(f"unsupported adapter kind: {kind}")
+
+
 def rendered_outputs(root: Path = ROOT) -> dict[Path, bytes]:
-    portable = load_json(root / PORTABLE_MANIFEST)
-    try:
-        adapters = portable["extensions"][EXTENSION_NAMESPACE]["adapters"]
-        claude = adapters["claude"]
-        codex = adapters["codex"]
-    except (KeyError, TypeError) as error:
-        raise ValueError("portable manifest is missing native adapter metadata") from error
-
-    version = portable["version"]
-    repository = portable["repository"]
-    author = portable["author"]
-
-    claude_manifest = {
-        "name": claude["name"],
-        "version": version,
-        "description": claude["description"],
-        "author": {"name": author["name"]},
-        "repository": repository,
+    catalogs = {
+        kind: load_json(root / path) for kind, path in MARKETPLACES.items()
     }
-    codex_manifest = {
-        "name": codex["name"],
-        "version": version,
-        "description": codex["description"],
-        "author": author,
-        "homepage": portable["homepage"],
-        "repository": repository,
-        "keywords": portable["keywords"],
-        "skills": "./skills/",
-        "interface": codex["interface"],
-    }
+    manifests: dict[Path, bytes] = {}
 
-    claude_entry = {
-        "name": claude["name"],
-        **claude["marketplace"],
-        "version": version,
-    }
-    # Keep the established Claude catalog field order stable.
-    claude_entry = {
-        "name": claude_entry["name"],
-        "source": claude_entry["source"],
-        "version": claude_entry["version"],
-        "description": claude_entry["description"],
-    }
-    codex_entry = {"name": codex["name"], **codex["marketplace"]}
+    for relative in PORTABLE_MANIFESTS:
+        portable = load_json(root / relative)
+        try:
+            adapters = portable["extensions"][EXTENSION_NAMESPACE]["adapters"]
+        except (KeyError, TypeError) as error:
+            raise ValueError(
+                f"portable manifest is missing native adapter metadata: {relative}"
+            ) from error
+        if not isinstance(adapters, dict) or not adapters:
+            raise ValueError(f"portable manifest declares no native adapters: {relative}")
 
-    claude_catalog = replace_marketplace_entry(
-        load_json(root / CLAUDE_MARKETPLACE), claude["name"], claude_entry
-    )
-    codex_catalog = replace_marketplace_entry(
-        load_json(root / CODEX_MARKETPLACE), codex["name"], codex_entry
-    )
+        for kind, adapter in adapters.items():
+            if kind not in MARKETPLACES or not isinstance(adapter, dict):
+                raise ValueError(f"unsupported adapter kind: {kind}")
+            package = adapter_package_path(kind, adapter)
+            manifest_dir = f".{kind}-plugin"
+            manifest_path = package / manifest_dir / "plugin.json"
+            if manifest_path in manifests:
+                raise ValueError(f"duplicate generated manifest: {manifest_path}")
+            manifests[manifest_path] = json_bytes(
+                native_manifest(kind, portable, adapter)
+            )
+            replace_marketplace_entry(
+                catalogs[kind],
+                adapter["name"],
+                marketplace_entry(kind, portable, adapter),
+            )
 
     return {
-        CLAUDE_MANIFEST: json_bytes(claude_manifest),
-        CODEX_MANIFEST: json_bytes(codex_manifest),
-        CLAUDE_MARKETPLACE: json_bytes(claude_catalog),
-        CODEX_MARKETPLACE: json_bytes(codex_catalog),
+        **manifests,
+        **{
+            MARKETPLACES[kind]: json_bytes(catalog)
+            for kind, catalog in catalogs.items()
+        },
     }
 
 

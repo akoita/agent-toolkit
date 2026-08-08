@@ -3,9 +3,9 @@
 
 The skills CLI discovers skills from a top-level `skills/` directory by
 default, and does not follow symlinks, so the catalog has to be a real copy.
-The catalog is not the only mirror: the portable security package is canonical
-and its skills are copied into both native packages. This script performs those
-copies so contributors do not have to remember which files moved.
+The catalog is not the only mirror: portable packages are canonical and their
+skills are copied into the applicable native packages. This script performs
+those copies so contributors do not have to remember which files moved.
 `tests/test_skills_cli_catalog.py` verifies the result.
 """
 
@@ -21,8 +21,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG_ROOT = ROOT / "skills"
 PORTABLE_SECURITY_SKILLS = ROOT / "plugins" / "portable" / "security" / "skills"
+PORTABLE_CODEX_MAESTRO_SKILLS = (
+    ROOT / "plugins" / "portable" / "codex-maestro" / "skills"
+)
 CLAUDE_SECURITY_SKILLS = ROOT / "plugins" / "claude" / "security" / "skills"
 CODEX_SECURITY_SKILLS = ROOT / "plugins" / "codex" / "codex-security" / "skills"
+CODEX_MAESTRO_SKILLS = ROOT / "plugins" / "codex" / "codex-maestro" / "skills"
 # Authored once in the portable package, shipped by both native packages too.
 SECURITY_SKILLS = (
     "security-audit",
@@ -35,9 +39,7 @@ SECURITY_SKILLS = (
 )
 CANONICAL_SKILLS = {
     "maestro": ROOT / "plugins" / "claude" / "maestro" / "skills" / "maestro",
-    "codex-maestro": (
-        ROOT / "plugins" / "codex" / "codex-maestro" / "skills" / "codex-maestro"
-    ),
+    "codex-maestro": PORTABLE_CODEX_MAESTRO_SKILLS / "codex-maestro",
     "setup-agent-toolkit": ROOT / "tools" / "setup-agent-toolkit",
     **{name: PORTABLE_SECURITY_SKILLS / name for name in SECURITY_SKILLS},
 }
@@ -48,6 +50,8 @@ IGNORED_SUFFIXES = {".pyc", ".pyo"}
 def mirrors_for(name: str) -> list[Path]:
     """Every generated copy of a canonical skill, in reporting order."""
     mirrors = [CATALOG_ROOT / name]
+    if name == "codex-maestro":
+        mirrors.append(CODEX_MAESTRO_SKILLS / name)
     if name in SECURITY_SKILLS:
         mirrors.extend(
             [CLAUDE_SECURITY_SKILLS / name, CODEX_SECURITY_SKILLS / name]
@@ -73,6 +77,22 @@ def source_files(root: Path) -> set[Path]:
         and not any(part in IGNORED_DIRECTORY_NAMES for part in path.parts)
         and path.suffix not in IGNORED_SUFFIXES
     }
+
+
+def validate_source_tree(root: Path) -> None:
+    """Reject links, escapes, and special files before generating mirrors."""
+    if root.is_symlink():
+        raise ValueError(f"canonical source must not be a symlink: {root}")
+    resolved_root = root.resolve()
+    for path in root.rglob("*"):
+        if path.is_symlink():
+            raise ValueError(f"canonical source contains a symlink: {path}")
+        try:
+            path.resolve().relative_to(resolved_root)
+        except ValueError as error:
+            raise ValueError(f"canonical source path escapes its root: {path}") from error
+        if not path.is_dir() and not path.is_file():
+            raise ValueError(f"canonical source contains a special file: {path}")
 
 
 def is_executable(path: Path) -> bool:
@@ -105,6 +125,10 @@ def differences(canonical: Path, mirror: Path) -> list[str]:
 
 
 def sync(canonical: Path, mirror: Path) -> None:
+    # Validate before deleting the existing mirror. Besides keeping generated
+    # trees path-contained, this prevents copytree from dereferencing a source
+    # symlink and materializing an out-of-tree file (including local secrets).
+    validate_source_tree(canonical)
     if mirror.exists():
         shutil.rmtree(mirror)
     shutil.copytree(
@@ -121,6 +145,11 @@ def main() -> int:
     for name, canonical in sorted(CANONICAL_SKILLS.items()):
         if not canonical.is_dir():
             print(f"error: canonical source missing for {name}: {canonical}")
+            return 1
+        try:
+            validate_source_tree(canonical)
+        except (OSError, ValueError) as error:
+            print(f"error: {error}")
             return 1
 
         for mirror in mirrors_for(name):
