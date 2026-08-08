@@ -25,13 +25,13 @@ docs/                                 # Mechanics shared by every skill
 .agents/plugins/marketplace.json      # Codex catalog
 ```
 
-Native plugin directories are normally both canonical sources and installable
-packages. Claude and Codex remain separate because their manifests, agent
-definitions, installation scopes, and runtime capabilities differ. Security is
-the experimental exception: `plugins/portable/security/` is its canonical
-Agent Plugins v1.0.0 source, while the native manifests, catalog entries, and
-skill trees are generated compatibility adapters. Native security READMEs and
-Claude agent definitions remain client-specific and hand-authored.
+Eligible Codex skill plugins use an Agent Plugins v1.0.0 package as their
+canonical source. `plugins/portable/codex-maestro/` generates only the native
+Codex adapter. `plugins/portable/security/` generates the native Codex adapter
+and, because its skill bodies are shared byte-for-byte, a native Claude mirror.
+That Claude adapter does not mean Claude Code consumes the Agent Plugins format.
+Claude manifests, agent definitions, installation scopes, and runtime behavior
+remain client-specific; Claude Maestro is a separate native implementation.
 
 Top-level `skills/` is a checked-in distribution catalog for the skills CLI,
 not a second source of truth. Each directory is an exact mirror of its canonical
@@ -44,13 +44,12 @@ default `npx skills add` finds only `maestro`, with no error — and a silently
 partial catalog is a worse failure than duplication. `--full-depth` finds every
 skill without the mirror, but nothing prompts a user to pass it.
 
-The catalog is not the only generated mirror. A skill whose content is
-genuinely platform-neutral can be authored once and shipped by both platforms.
-The `security` skills are authored in the portable package and mirrored into
-both native packages. That holds only while the bodies carry no
-platform-specific instruction. A skill that has to say something different to
-each platform gets two canonical sources instead, the way `maestro` and
-`codex-maestro` do.
+The catalog is not the only generated mirror. `codex-maestro` is authored in
+its portable package and mirrored into its native Codex package. A skill whose
+content is genuinely platform-neutral can also be shipped by both platforms:
+the `security` skills are authored in the portable package and mirrored into
+both native packages. A platform-specific counterpart remains a separate
+canonical source, as Claude `maestro` does.
 
 Edit the canonical source first, then run:
 
@@ -88,8 +87,10 @@ applies to one skill belongs with that skill, not at the end of the README.
    its own plugin when it needs an independent install or release lifecycle;
    bundle skills only when users should normally install and version them
    together. Standalone workflows live under `tools/`.
-2. Create the package under `plugins/<platform>/<plugin>/` with its manifest,
-   `skills/<skill>/SKILL.md`, and any `agents/` or `references/` it ships.
+2. For an eligible Codex skill plugin, create the canonical Agent Plugins
+   package under `plugins/portable/<plugin>/`; generate its native adapter under
+   `plugins/codex/<plugin>/`. Create Claude-only packages directly under
+   `plugins/claude/<plugin>/`.
 3. Add a `README.md` to the package covering its models, agents, configuration,
    and manual install.
 4. Register it in the platform catalog: `.claude-plugin/marketplace.json` or
@@ -116,8 +117,8 @@ check modes before review.
 
 - Keep every skill project-agnostic: no repository-specific paths, secrets, or
   company context.
-- Keep canonical skills inside their installable native or portable plugin
-  package.
+- Keep canonical Codex skills inside their portable package. Keep Claude-only
+  canonical skills inside their native package.
 - Never edit a generated mirror directly, in `skills/` or in a package that
   ships a shared skill. Change the canonical source and run `sync_skills.py`;
   `sync_skills.py` names every mirror it manages.
@@ -156,9 +157,10 @@ this repository releases in lockstep so that one repository tag is unambiguous.
 If versions ever diverge deliberately, the job stops rather than guessing a tag
 name, and tagging becomes a manual per-plugin step.
 
-Bump the plugin manifest and the matching catalog entry together. Generated
-security adapters take their version from `plugins/portable/security/plugin.json`;
-after changing it, run both synchronization scripts.
+Bump every package manifest in lockstep. Generated adapters take their versions
+from their matching `plugins/portable/<plugin>/plugin.json`; after changing a
+portable version, run both synchronization scripts. Claude-native packages and
+their versioned catalog entries remain manual.
 
 - `plugins/<platform>/<plugin>/.{claude,codex}-plugin/plugin.json`
 - the plugin's entry in `.claude-plugin/marketplace.json`, where the Claude

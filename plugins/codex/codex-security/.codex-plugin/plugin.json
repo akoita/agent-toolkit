@@ -1,6 +1,6 @@
 {
   "name": "codex-security",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Project-agnostic security skills for Codex covering repository audits, diff review, the free deterministic toolchain, supply chain, threat modeling, smart contracts, and AI systems.",
   "author": {
     "name": "Aboubakar Koïta",

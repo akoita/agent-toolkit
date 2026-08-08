@@ -24,6 +24,7 @@ PACKAGES = {
     "plugins/codex/codex-security": (
         "plugins/codex/codex-security/.codex-plugin/plugin.json"
     ),
+    "plugins/portable/codex-maestro": "plugins/portable/codex-maestro/plugin.json",
     "plugins/portable/security": "plugins/portable/security/plugin.json",
 }
 
@@ -55,14 +56,26 @@ class LockstepVersionTests(unittest.TestCase):
 
 class BumpDetectionTests(unittest.TestCase):
     def test_portable_package_change_without_bump_is_reported(self) -> None:
-        stale = packages_needing_bump(
-            changed=["plugins/portable/security/skills/security-audit/SKILL.md"],
-            packages=PACKAGES,
-            base_versions={"plugins/portable/security": "0.5.1"},
-            head_versions={"plugins/portable/security": "0.5.1"},
+        cases = (
+            (
+                "plugins/portable/security/skills/security-audit/SKILL.md",
+                "plugins/portable/security",
+            ),
+            (
+                "plugins/portable/codex-maestro/skills/codex-maestro/SKILL.md",
+                "plugins/portable/codex-maestro",
+            ),
         )
+        for changed, package in cases:
+            with self.subTest(package=package):
+                stale = packages_needing_bump(
+                    changed=[changed],
+                    packages=PACKAGES,
+                    base_versions={package: "0.5.2"},
+                    head_versions={package: "0.5.2"},
+                )
 
-        self.assertEqual(stale, ["plugins/portable/security"])
+                self.assertEqual(stale, [package])
 
     def test_changed_package_without_bump_is_reported(self) -> None:
         stale = packages_needing_bump(

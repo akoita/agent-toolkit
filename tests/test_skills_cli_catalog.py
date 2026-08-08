@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import importlib.util
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -7,8 +9,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG_ROOT = ROOT / "skills"
 PORTABLE_SECURITY_SKILLS = ROOT / "plugins" / "portable" / "security" / "skills"
+PORTABLE_CODEX_MAESTRO_SKILLS = (
+    ROOT / "plugins" / "portable" / "codex-maestro" / "skills"
+)
 CLAUDE_SECURITY_SKILLS = ROOT / "plugins" / "claude" / "security" / "skills"
 CODEX_SECURITY_SKILLS = ROOT / "plugins" / "codex" / "codex-security" / "skills"
+CODEX_MAESTRO_SKILLS = ROOT / "plugins" / "codex" / "codex-maestro" / "skills"
 # Authored once in the portable plugin, shipped by both native packages too.
 # Kept in step with `.github/scripts/sync_skills.py`.
 SECURITY_SKILLS = (
@@ -22,24 +28,25 @@ SECURITY_SKILLS = (
 )
 CANONICAL_SKILLS = {
     "maestro": ROOT / "plugins" / "claude" / "maestro" / "skills" / "maestro",
-    "codex-maestro": (
-        ROOT
-        / "plugins"
-        / "codex"
-        / "codex-maestro"
-        / "skills"
-        / "codex-maestro"
-    ),
+    "codex-maestro": PORTABLE_CODEX_MAESTRO_SKILLS / "codex-maestro",
     "setup-agent-toolkit": ROOT / "tools" / "setup-agent-toolkit",
     **{name: PORTABLE_SECURITY_SKILLS / name for name in SECURITY_SKILLS},
 }
 IGNORED_DIRECTORY_NAMES = {"__pycache__"}
 IGNORED_SUFFIXES = {".pyc", ".pyo"}
 
+SYNC_SCRIPT = ROOT / ".github" / "scripts" / "sync_skills.py"
+SPEC = importlib.util.spec_from_file_location("sync_skills", SYNC_SCRIPT)
+assert SPEC and SPEC.loader
+sync_skills = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(sync_skills)
+
 
 def mirrors_for(name: str) -> list[Path]:
     """Every generated copy of a canonical skill."""
     mirrors = [CATALOG_ROOT / name]
+    if name == "codex-maestro":
+        mirrors.append(CODEX_MAESTRO_SKILLS / name)
     if name in SECURITY_SKILLS:
         mirrors.extend(
             [CLAUDE_SECURITY_SKILLS / name, CODEX_SECURITY_SKILLS / name]
@@ -102,6 +109,28 @@ class SkillsCliCatalogTests(unittest.TestCase):
                             bool(canonical_file.stat().st_mode & 0o100),
                             f"executable bit differs for {relative_path}",
                         )
+
+    def test_sync_rejects_source_symlink_before_replacing_mirror(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            canonical = root / "canonical"
+            mirror = root / "mirror"
+            canonical.mkdir()
+            mirror.mkdir()
+            sentinel = root / "outside-secret"
+            sentinel.write_text("do-not-copy\n", encoding="utf-8")
+            marker = mirror / "keep-me"
+            marker.write_text("existing mirror\n", encoding="utf-8")
+            try:
+                (canonical / "leak").symlink_to(sentinel)
+            except OSError as error:
+                self.skipTest(f"symlink creation unavailable: {error}")
+
+            with self.assertRaisesRegex(ValueError, r"contains a symlink"):
+                sync_skills.sync(canonical, mirror)
+
+            self.assertEqual(marker.read_text(encoding="utf-8"), "existing mirror\n")
+            self.assertFalse((mirror / "leak").exists())
 
 
 if __name__ == "__main__":

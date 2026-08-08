@@ -7,6 +7,25 @@ isolated so each tool loads only the format it understands.
 > **Experimental.** Used regularly by the maintainer, but not comprehensively
 > tested. Review generated changes before relying on them.
 
+## Agent Plugins compatibility
+
+Agent Toolkit publishes every eligible Codex skill plugin in the experimental
+[Agent Plugins v1.0.0 format](https://agent-plugins.org/specification). Clients
+that implement the specification can discover the root `plugin.json` and its
+`skills/` directly; generated Codex adapters preserve the established native
+marketplace names and metadata.
+
+| Capability | Agent Plugins package | Native Codex install | Claude Code |
+| --- | --- | --- | --- |
+| Orchestration | [`codex-maestro`](plugins/portable/codex-maestro/) | `codex-maestro@agent-toolkit` | Native-only `maestro`; separate implementation |
+| Security | [`security`](plugins/portable/security/) | `codex-security@agent-toolkit` | Native-only `security`; generated skill mirror |
+
+Claude Code does not currently consume the Agent Plugins package format, so its
+packages are deliberately excluded from this compatibility claim. Native
+marketplace installation remains the recommended complete path for both
+platforms. The [compatibility decision](docs/decisions/0002-portable-codex-packages.md)
+records the mapping and boundary.
+
 ## What it ships
 
 A plugin is the unit of installation and versioning; it ships one or more
@@ -31,12 +50,9 @@ additionally ships two named agents.
 | [security](plugins/claude/security/) | Claude Code | `security@agent-toolkit` |
 | [codex-security](plugins/codex/codex-security/) | Codex | `codex-security@agent-toolkit` |
 
-The security skills are authored once in the experimental Agent Plugins v1.0.0
-package at [`plugins/portable/security/`](plugins/portable/security/). Generated
-Claude and Codex adapters preserve the native install names and remain the
-recommended installation path while direct client support matures. The
-[compatibility decision](docs/decisions/0001-agent-plugins-compatibility.md)
-records the boundary and support evidence.
+The security skills are authored once in the portable package and mirrored into
+the native packages without claiming that Claude Code consumes the portable
+format.
 
 ### Standalone
 

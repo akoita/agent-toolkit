@@ -4,6 +4,11 @@ Native-first GPT-5.6 orchestration for Codex. Keeps requirements, architecture,
 review, and publication in the root task and delegates bounded implementation to
 custom worker agents.
 
+This native Codex package is generated from the experimental
+[Agent Plugins v1.0.0 source](../../portable/codex-maestro/). Its manifest,
+marketplace metadata, and skill tree are mirrors; edit the portable source and
+run the repository synchronization scripts instead of editing them here.
+
 The full workflow is in [SKILL.md](skills/codex-maestro/SKILL.md).
 
 ## What it ships
