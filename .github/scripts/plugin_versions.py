@@ -13,14 +13,23 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-MANIFEST_GLOB = "plugins/*/*/.*-plugin/plugin.json"
+MANIFEST_GLOBS = (
+    "plugins/*/*/.*-plugin/plugin.json",
+    "plugins/portable/*/plugin.json",
+)
 
 
 def discover_packages(root: Path = ROOT) -> dict[str, str]:
     """Map each package directory to its manifest, both repo-relative."""
     packages = {}
-    for manifest in sorted(root.glob(MANIFEST_GLOB)):
-        package = manifest.parent.parent
+    manifests = sorted(
+        manifest for pattern in MANIFEST_GLOBS for manifest in root.glob(pattern)
+    )
+    for manifest in manifests:
+        if manifest.parent.name in {".claude-plugin", ".codex-plugin"}:
+            package = manifest.parent.parent
+        else:
+            package = manifest.parent
         packages[str(package.relative_to(root))] = str(manifest.relative_to(root))
     return packages
 

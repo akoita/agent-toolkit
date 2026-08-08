@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "finding_id": "SEC-YYYY-NNN",
+  "title": "One-line falsifiable finding title",
+  "state": "candidate",
+  "visibility": "private",
+  "source": {
+    "kind": "scanner|researcher|test|model|incident",
+    "name": "source name",
+    "version": "source version or not_applicable",
+    "reported_at": "YYYY-MM-DDTHH:MM:SSZ",
+    "references": []
+  },
+  "scope": {
+    "repository": "owner/repository",
+    "commit": "full commit SHA",
+    "component": "component name",
+    "locations": [
+      {
+        "path": "path/to/file",
+        "line": 1
+      }
+    ],
+    "affected_versions": []
+  },
+  "classification": {
+    "severity": "untriaged",
+    "confidence": "untriaged",
+    "cwe": null,
+    "cve": null,
+    "theoretical_no_proof": false
+  },
+  "evidence": {
+    "preconditions": [],
+    "attacker_controlled_input": "",
+    "attack_path": [],
+    "expected_mitigation": "",
+    "mitigation_search": [],
+    "impact": "",
+    "reproduction": {
+      "status": "not_attempted",
+      "environment": "",
+      "steps_artifact": "private path outside repository",
+      "result": ""
+    }
+  },
+  "deduplication": {
+    "fingerprint": "component|location|CWE|sink|root-cause",
+    "canonical_finding_id": null,
+    "duplicate_sources": []
+  },
+  "ownership": {
+    "human_owner": "unassigned",
+    "suggested_from": "CODEOWNERS|history|component-map|none",
+    "target_response_at": null
+  },
+  "remediation": {
+    "strategy": "containment|minimal_fix|structural_mitigation|undecided",
+    "candidate_fixes": [],
+    "independent_review": {
+      "reviewer": null,
+      "fresh_context": false,
+      "own_analysis_before_candidates": false,
+      "decision": "pending"
+    },
+    "regression_evidence": [],
+    "human_approval": {
+      "required": true,
+      "approver": null,
+      "approved_at": null
+    },
+    "residual_risk": ""
+  },
+  "timestamps": {
+    "discovered_at": "YYYY-MM-DDTHH:MM:SSZ",
+    "triaged_at": null,
+    "reproduced_at": null,
+    "fixed_at": null,
+    "released_at": null,
+    "deployed_or_adopted_at": null,
+    "closed_at": null
+  },
+  "not_applicable_stages": [],
+  "closure_reason": null
+}

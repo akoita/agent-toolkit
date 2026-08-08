@@ -1,0 +1,62 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "security",
+  "version": "0.5.2",
+  "description": "Project-agnostic security skills for repository audits, diff review, deterministic scanning, supply chain, threat modeling, smart contracts, and AI systems.",
+  "author": {
+    "name": "Aboubakar Koïta",
+    "url": "https://github.com/akoita"
+  },
+  "homepage": "https://github.com/akoita/agent-toolkit",
+  "repository": "https://github.com/akoita/agent-toolkit",
+  "keywords": [
+    "security",
+    "audit",
+    "review",
+    "supply-chain",
+    "threat-modeling"
+  ],
+  "extensions": {
+    "io.github.akoita.agent-toolkit": {
+      "adapters": {
+        "claude": {
+          "name": "security",
+          "description": "Project-agnostic security skills for Claude Code covering repository audits, diff review, the free deterministic toolchain, supply chain, threat modeling, smart contracts, and AI systems.",
+          "marketplace": {
+            "source": "./plugins/claude/security",
+            "description": "Project-agnostic security skills for audits, diff review, the free deterministic toolchain, supply chain, threat modeling, smart contracts, and AI systems."
+          }
+        },
+        "codex": {
+          "name": "codex-security",
+          "description": "Project-agnostic security skills for Codex covering repository audits, diff review, the free deterministic toolchain, supply chain, threat modeling, smart contracts, and AI systems.",
+          "interface": {
+            "displayName": "Codex Security",
+            "shortDescription": "Audit, review, and harden a codebase.",
+            "longDescription": "Run repository-wide audits, diff-scoped review, the free deterministic toolchain, supply-chain and threat-modeling passes, plus dedicated smart-contract and AI-system surfaces.",
+            "developerName": "Aboubakar Koïta",
+            "category": "Developer Tools",
+            "capabilities": [
+              "Read",
+              "Write"
+            ],
+            "defaultPrompt": [
+              "Use Codex Security to audit this repository."
+            ]
+          },
+          "marketplace": {
+            "source": {
+              "source": "local",
+              "path": "./plugins/codex/codex-security"
+            },
+            "policy": {
+              "installation": "AVAILABLE",
+              "authentication": "ON_INSTALL"
+            },
+            "category": "Developer Tools"
+          }
+        }
+      }
+    }
+  }
+}

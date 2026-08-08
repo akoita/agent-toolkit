@@ -31,6 +31,13 @@ additionally ships two named agents.
 | [security](plugins/claude/security/) | Claude Code | `security@agent-toolkit` |
 | [codex-security](plugins/codex/codex-security/) | Codex | `codex-security@agent-toolkit` |
 
+The security skills are authored once in the experimental Agent Plugins v1.0.0
+package at [`plugins/portable/security/`](plugins/portable/security/). Generated
+Claude and Codex adapters preserve the native install names and remain the
+recommended installation path while direct client support matures. The
+[compatibility decision](docs/decisions/0001-agent-plugins-compatibility.md)
+records the boundary and support evidence.
+
 ### Standalone
 
 | Skill | Platform | What it does |

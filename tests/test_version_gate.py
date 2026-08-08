@@ -24,6 +24,7 @@ PACKAGES = {
     "plugins/codex/codex-security": (
         "plugins/codex/codex-security/.codex-plugin/plugin.json"
     ),
+    "plugins/portable/security": "plugins/portable/security/plugin.json",
 }
 
 
@@ -53,6 +54,16 @@ class LockstepVersionTests(unittest.TestCase):
 
 
 class BumpDetectionTests(unittest.TestCase):
+    def test_portable_package_change_without_bump_is_reported(self) -> None:
+        stale = packages_needing_bump(
+            changed=["plugins/portable/security/skills/security-audit/SKILL.md"],
+            packages=PACKAGES,
+            base_versions={"plugins/portable/security": "0.5.1"},
+            head_versions={"plugins/portable/security": "0.5.1"},
+        )
+
+        self.assertEqual(stale, ["plugins/portable/security"])
+
     def test_changed_package_without_bump_is_reported(self) -> None:
         stale = packages_needing_bump(
             changed=["plugins/claude/maestro/skills/maestro/SKILL.md"],
