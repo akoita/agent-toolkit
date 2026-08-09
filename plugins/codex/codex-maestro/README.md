@@ -54,9 +54,9 @@ It installs:
 - `codex-maestro` under `~/.agents/skills/`, making the skill available in all
   projects for that user;
 - `implementation_worker` under `$CODEX_HOME/agents/` (or `~/.codex/agents/`),
-  using `gpt-5.6-sol` at medium effort by default;
-- `exploration_worker` in the same agents directory, using `gpt-5.6-terra` at
-  medium effort with a read-only sandbox.
+  using `gpt-5.6-luna` at xhigh effort by default;
+- `exploration_worker` in the same agents directory, using `gpt-5.6-luna` at
+  xhigh effort with a read-only sandbox.
 
 Run it once per environment. Windows and WSL have separate Codex homes and
 configuration directories.
@@ -104,15 +104,14 @@ the marketplace qualifier is required. See
 
 ## Model routing
 
-Model names are deployment choices, not agent identities. The defaults are
-`gpt-5.6-sol` at medium effort for orchestration, demanding implementation, and
-review, and `gpt-5.6-terra` at medium effort for economical read-heavy
-exploration.
+Model names are deployment choices, not agent identities. The root orchestrator
+defaults to `gpt-5.6-sol` at medium effort. Both bounded implementation and
+read-only exploration workers default to `gpt-5.6-luna` at xhigh effort.
 
-Raise effort only for a concrete risk or failure signal — security-sensitive,
-architectural, migration, permissions, payments, public-contract, highly
-ambiguous, or repeatedly failing work. The skill documents an alternative that
-keeps one model family and varies only reasoning effort.
+Raise the root orchestrator above medium only for a concrete risk or failure
+signal — security-sensitive, architectural, migration, permissions, payments,
+public-contract, highly ambiguous, or repeatedly failing work. The worker
+profiles remain pinned to Luna at xhigh.
 
 ## Make it the default
 
@@ -126,8 +125,9 @@ procedure stays in the skill.
 - Use `$codex-maestro` for non-trivial implementation and multi-step debugging.
 - Keep requirements, architecture, planning, review, and publication in the
   root task; delegate only bounded work with disjoint ownership.
-- Default to Balanced: use `gpt-5.6-sol` for the root orchestrator and demanding
-  workers, and `gpt-5.6-terra` for economical read-heavy exploration.
+- Default to Balanced: use `gpt-5.6-sol` at medium effort for the root
+  orchestrator and `gpt-5.6-luna` at xhigh effort for bounded implementation
+  and read-only exploration workers.
 - Handle trivial, localized, low-risk work directly.
 - Escalate to Quality only for security-sensitive, architectural, migration,
   permissions, payments, public-contract, or highly ambiguous work.
