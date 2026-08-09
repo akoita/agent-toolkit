@@ -2,11 +2,11 @@
 name: codex-maestro
 description: >-
   Orchestrate non-trivial software implementation with capability-based GPT-5.6
-  routing. Use gpt-5.6-sol for orchestration, demanding implementation, and
-  review; use gpt-5.6-terra for economical read-heavy exploration, delegate
-  bounded work, inspect the actual diff, and verify results. Use for features,
-  bug fixes, refactors, tests, configuration, and infrastructure; skip trivial
-  edits, pure analysis/review, or explicit no-delegation requests.
+  routing. Keep the root orchestrator on gpt-5.6-sol at medium effort and use
+  gpt-5.6-luna at xhigh effort for bounded implementation and read-only
+  exploration; inspect the actual diff and verify results. Use for features, bug
+  fixes, refactors, tests, configuration, and infrastructure; skip trivial edits,
+  pure analysis/review, or explicit no-delegation requests.
 ---
 
 # Codex Maestro
@@ -28,15 +28,16 @@ override:
 | Work | Default model and effort | Route |
 | --- | --- | --- |
 | Trivial, localized change | Current root session | Work directly; do not orchestrate |
-| Read-heavy discovery, repository search, logs, or test triage | `gpt-5.6-terra`, `medium` | `exploration_worker` or another read-only native agent |
-| Demanding implementation or review | `gpt-5.6-sol`, `medium` | Root maestro or `implementation_worker` |
+| Read-heavy discovery, repository search, logs, or test triage | `gpt-5.6-luna`, `xhigh` | `exploration_worker` or another read-only native agent |
+| Bounded implementation | `gpt-5.6-luna`, `xhigh` | `implementation_worker` |
+| Planning, demanding implementation, or review | `gpt-5.6-sol`, `medium` | Root maestro |
 | Critical or repeatedly failing work | `gpt-5.6-sol`, `high` | Root maestro; delegate only a bounded implementation |
 
-`medium` is the normal implementation default. Raise effort to `high` only for
-security-sensitive, architectural, migration, permissions, payments,
-public-contract, highly ambiguous, or repeatedly failing work. Do not apply
-`max` to every worker; use it only when a repository-specific evaluation shows
-that its extra latency and cost improve outcomes.
+The root stays at `medium` for normal orchestration. Both worker profiles use
+Luna at `xhigh` so delegated work receives deeper reasoning on the faster model.
+Raise the root to `high` only for security-sensitive, architectural, migration,
+permissions, payments, public-contract, highly ambiguous, or repeatedly failing
+work.
 
 A simpler alternative keeps one model family and varies only reasoning effort:
 `low` for read-only scouts, `medium` for routine implementation, `high` for hard
@@ -48,11 +49,11 @@ pin one.
 
 Prefer native custom agents because the maestro can steer the same agent and
 observe its lifecycle. Use `implementation_worker` for bounded writes and
-`exploration_worker` for economical read-only discovery. If native role
+`exploration_worker` for read-only discovery. If native role
 selection is unavailable, use `scripts/run_implementation_worker.py` as the CLI
 fallback. The implementation runner accepts `--model` and `--effort`, or
 `CODEX_MAESTRO_WORKER_MODEL` and `CODEX_MAESTRO_WORKER_EFFORT`; its defaults are
-`gpt-5.6-sol` and `medium`. Never claim a model or effort was used without native
+`gpt-5.6-luna` and `xhigh`. Never claim a model or effort was used without native
 configuration or CLI evidence.
 
 Existing automation may temporarily call `scripts/run_luna_worker.py`; that

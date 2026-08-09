@@ -19,8 +19,9 @@ POLICIES = {
 - Use `$codex-maestro` for non-trivial implementation and multi-step debugging.
 - Keep requirements, architecture, planning, review, and publication in the
   root task; delegate only bounded work with disjoint ownership.
-- Default to Balanced: use `gpt-5.6-sol` for the root orchestrator and
-  demanding workers, and `gpt-5.6-terra` for economical read-heavy exploration.
+- Default to Balanced: use `gpt-5.6-sol` at medium effort for the root
+  orchestrator and `gpt-5.6-luna` at xhigh effort for bounded implementation
+  and read-only exploration workers.
 - Handle trivial, localized, low-risk work directly.
 - Escalate to Quality only for security-sensitive, architectural, migration,
   permissions, payments, public-contract, or highly ambiguous work.

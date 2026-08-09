@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_MODEL = "gpt-5.6-sol"
-DEFAULT_EFFORT = "medium"
+DEFAULT_MODEL = "gpt-5.6-luna"
+DEFAULT_EFFORT = "xhigh"
 
 
 def parse_args() -> argparse.Namespace:

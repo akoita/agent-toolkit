@@ -49,8 +49,9 @@ class ConfigurePolicyTests(unittest.TestCase):
         codex = configure_policy.managed_block("codex", "\n")
         claude = configure_policy.managed_block("claude", "\n")
 
-        self.assertIn("gpt-5.6-terra", codex)
+        self.assertIn("gpt-5.6-luna", codex)
         self.assertIn("gpt-5.6-sol", codex)
+        self.assertIn("xhigh", codex)
         self.assertNotIn("Luna", codex)
         self.assertNotIn("Sol", codex)
         self.assertIn("dynamic workflows", claude)
