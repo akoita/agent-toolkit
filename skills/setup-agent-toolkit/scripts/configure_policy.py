@@ -25,8 +25,11 @@ POLICIES = {
 - Handle trivial, localized, low-risk work directly.
 - Escalate to Quality only for security-sensitive, architectural, migration,
   permissions, payments, public-contract, or highly ambiguous work.
-- Keep subagent nesting disabled by default and avoid parallel write-heavy work
-  unless file ownership and verification boundaries are disjoint.
+- Treat the agent workspace as shared: give parallel writers exclusive,
+  disjoint ownership and serialize overlapping edits. Keep nesting disabled by
+  default.
+- Prefer native spawn, wait, and same-worker steering when exposed; respect the
+  effective runtime thread capacity and use the CLI worker only as a fallback.
 - Follow the installed `codex-maestro` skill for the complete workflow.
 - Do not delegate trivial work or pure analysis/review unnecessarily.""",
     "claude": """## Orchestration policy

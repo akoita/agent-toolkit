@@ -1,6 +1,6 @@
 {
   "name": "maestro",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "Experimental Claude Code workflow for orchestrating non-trivial development work with bounded subagents, explicit planning, review, and verification.",
   "author": {
     "name": "Aboubakar Koïta"
