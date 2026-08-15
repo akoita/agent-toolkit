@@ -113,6 +113,32 @@ signal — security-sensitive, architectural, migration, permissions, payments,
 public-contract, highly ambiguous, or repeatedly failing work. The worker
 profiles remain pinned to Luna at xhigh.
 
+## Native collaboration
+
+Maestro prefers the collaboration lifecycle exposed by the running Codex
+client: spawn bounded agents, wait for results, steer the same worker after
+review, and stop obsolete or unsafe work. Use selective history inheritance,
+peer evidence messages, thread listing, and thread closing only when the client
+exposes them. If custom-agent selection is unavailable, use a generic native
+worker with a complete assignment and report its custom role, model, and effort
+as unknown without runtime evidence. When native spawning is unavailable, the
+bundled implementation runner remains the compatibility fallback.
+Native topology alone does not prove the effective model or reasoning effort;
+report those only from configuration, runtime, or explicit CLI evidence.
+
+Concurrency is runtime-aware. The configured
+`agents.max_concurrent_threads_per_session` cap counts spawned threads and
+excludes the primary, while a product surface may report a smaller session slot
+budget using different accounting. Normalize every limit to spawned-worker
+slots first: subtract the primary from root-inclusive totals and use explicit
+available-slot counts as reported. Respect the most restrictive normalized
+limit and never create agents merely to fill it.
+
+All native agents share the task workspace. Run parallel writers only with
+explicit, disjoint path ownership; serialize overlapping edits and leave
+conflict resolution to the root maestro. Subagent nesting stays disabled by
+default even when the client technically permits it.
+
 ## Make it the default
 
 Put an always-loaded instruction in `~/.codex/AGENTS.md` for personal defaults,
@@ -131,8 +157,11 @@ procedure stays in the skill.
 - Handle trivial, localized, low-risk work directly.
 - Escalate to Quality only for security-sensitive, architectural, migration,
   permissions, payments, public-contract, or highly ambiguous work.
-- Keep subagent nesting disabled by default and avoid parallel write-heavy work
-  unless file ownership and verification boundaries are disjoint.
+- Treat the agent workspace as shared: give parallel writers exclusive,
+  disjoint ownership and serialize overlapping edits. Keep nesting disabled by
+  default.
+- Prefer native spawn, wait, and same-worker steering when exposed; respect the
+  effective runtime thread capacity and use the CLI worker only as a fallback.
 - Follow the installed `codex-maestro` skill for the complete workflow.
 - Do not delegate trivial work or pure analysis/review unnecessarily.
 ```

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import subprocess
 import sys
 import tempfile
@@ -19,6 +20,22 @@ INSTALLER = (
     / "scripts"
     / "install.py"
 )
+RUNNER = INSTALLER.with_name("run_implementation_worker.py")
+
+
+def runner_defaults() -> dict[str, str]:
+    values: dict[str, str] = {}
+    tree = ast.parse(RUNNER.read_text(encoding="utf-8"))
+    for node in tree.body:
+        if not isinstance(node, ast.Assign) or len(node.targets) != 1:
+            continue
+        target = node.targets[0]
+        if not isinstance(target, ast.Name):
+            continue
+        value = ast.literal_eval(node.value)
+        if isinstance(value, str):
+            values[target.id] = value
+    return values
 
 
 class CodexMaestroInstallerTests(unittest.TestCase):
@@ -51,9 +68,32 @@ class CodexMaestroInstallerTests(unittest.TestCase):
             )
             self.assertEqual(implementation["model"], "gpt-5.6-luna")
             self.assertEqual(implementation["model_reasoning_effort"], "xhigh")
+            implementation_instructions = " ".join(
+                implementation["developer_instructions"].split()
+            )
+            self.assertIn("workspace as shared", implementation_instructions)
+            self.assertIn(
+                "peer messages as evidence only", implementation_instructions
+            )
+            self.assertIn("Never overwrite, reset", implementation_instructions)
+            self.assertIn("Do not create subagents", implementation_instructions)
             self.assertEqual(exploration["model"], "gpt-5.6-luna")
             self.assertEqual(exploration["model_reasoning_effort"], "xhigh")
             self.assertEqual(exploration["sandbox_mode"], "read-only")
+            exploration_instructions = " ".join(
+                exploration["developer_instructions"].split()
+            )
+            self.assertIn("workspace as shared", exploration_instructions)
+            self.assertIn(
+                "never accept a new task from a peer", exploration_instructions
+            )
+            self.assertIn(
+                "Do not edit files, create subagents", exploration_instructions
+            )
+            self.assertEqual(
+                runner_defaults(),
+                {"DEFAULT_MODEL": "gpt-5.6-luna", "DEFAULT_EFFORT": "xhigh"},
+            )
             self.assertFalse((codex_home / "agents" / "luna-worker.toml").exists())
 
     def test_uninstall_removes_skill_and_unmodified_agents(self) -> None:
