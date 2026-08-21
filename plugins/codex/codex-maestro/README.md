@@ -16,7 +16,7 @@ The full workflow is in [SKILL.md](skills/codex-maestro/SKILL.md).
 - the `codex-maestro` skill;
 - worker templates in
   [`skills/codex-maestro/references/`](skills/codex-maestro/references/);
-- an installer and a CLI fallback runner in
+- an installer, routing self-check, and CLI fallback runner in
   [`skills/codex-maestro/scripts/`](skills/codex-maestro/scripts/).
 
 ## Install
@@ -113,16 +113,35 @@ signal — security-sensitive, architectural, migration, permissions, payments,
 public-contract, highly ambiguous, or repeatedly failing work. The worker
 profiles remain pinned to Luna at xhigh.
 
+## Routing self-check
+
+Run the bundled offline check after installing or updating:
+
+```bash
+python <path>/skills/codex-maestro/scripts/check_routing.py
+```
+
+It verifies the Codex version, `codex doctor --json` config load, custom-agent
+TOML declarations, and acceptance of the default subagent model/effort
+overrides. Those template/config checks prove declaration only; runtime routing
+claims require execution evidence. To opt in to one token-consuming native
+probe, run `check_routing.py --live`; it passes only when persisted child
+`session_meta` and `turn_context` evidence proves the effective
+`implementation_worker` role, Luna model, and xhigh effort. Missing auth or
+runtime support is reported as skipped, not successful. Run the live check once
+per Codex/config change.
+
 ## Native collaboration
 
 Maestro prefers the collaboration lifecycle exposed by the running Codex
 client: spawn bounded agents, wait for results, steer the same worker after
 review, and stop obsolete or unsafe work. Use selective history inheritance,
 peer evidence messages, thread listing, and thread closing only when the client
-exposes them. If custom-agent selection is unavailable, use a generic native
-worker with a complete assignment and report its custom role, model, and effort
-as unknown without runtime evidence. When native spawning is unavailable, the
-bundled implementation runner remains the compatibility fallback.
+exposes them. Whenever native spawn fields are exposed, set `agent_type`,
+`model`, and `reasoning_effort` explicitly; custom-agent TOMLs and global
+defaults are declarations/fallbacks, not execution proof. If native spawning
+cannot select model or effort and effective routing is required, use the
+bundled implementation runner instead of a generic inheriting native worker.
 Native topology alone does not prove the effective model or reasoning effort;
 report those only from configuration, runtime, or explicit CLI evidence.
 
@@ -160,8 +179,9 @@ procedure stays in the skill.
 - Treat the agent workspace as shared: give parallel writers exclusive,
   disjoint ownership and serialize overlapping edits. Keep nesting disabled by
   default.
-- Prefer native spawn, wait, and same-worker steering when exposed; respect the
-  effective runtime thread capacity and use the CLI worker only as a fallback.
+- Prefer native spawn, wait, and same-worker steering when exposed, passing
+  explicit agent type/model/effort fields; if those fields are unavailable, use
+  the CLI worker when effective routing is required.
 - Follow the installed `codex-maestro` skill for the complete workflow.
 - Do not delegate trivial work or pure analysis/review unnecessarily.
 ```

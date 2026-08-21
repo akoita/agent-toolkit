@@ -42,10 +42,12 @@ work.
 A simpler alternative keeps one model family and varies only reasoning effort:
 `low` for read-only scouts, `medium` for routine implementation, `high` for hard
 problems. Prefer that shape when cross-family routing costs more configuration
-than it saves. Either way, remember that a custom agent file which sets `model`
-or `model_reasoning_effort` takes precedence over the spawn-time value, so
-per-task effort variation needs separate agent files or a spawn that does not
-pin one.
+than it saves. Custom-agent TOMLs and global defaults are declarations and
+fallbacks, not execution proof. Whenever the native spawn API exposes
+`agent_type`, `model`, and `reasoning_effort`, set all three explicitly for the
+worker being delegated. If model or effort cannot be selected at spawn time,
+use the explicit CLI worker fallback when the requested route is a requirement;
+do not use a generic native worker that may inherit the root's settings.
 
 Before delegating, inspect the running client's capabilities. Native
 collaboration is primary when spawning and waiting are exposed. Use
@@ -56,14 +58,12 @@ selective-history, and peer-messaging operations only when the running client
 exposes them. Do not design a workflow around an API that has not been
 feature-detected.
 
-When native spawning is available but custom-agent selection is not, use a
-generic native worker with the full self-contained contract below and report
-the custom role, model, and effort as unknown unless runtime evidence establishes
-them. If native spawning is unavailable, use
-`scripts/run_implementation_worker.py` as the CLI fallback. The CLI is also
-appropriate when the requested model or effort needs independent execution
-evidence that the native runtime cannot provide. The implementation runner
-accepts `--model` and `--effort`, or
+When native spawning is available, pass the explicit `agent_type`, `model`, and
+`reasoning_effort` fields whenever the client exposes them. If native spawning
+does not expose model or effort selection and effective routing is required,
+use `scripts/run_implementation_worker.py` as the CLI fallback instead of a
+generic inheriting native worker. The implementation runner accepts `--model`
+and `--effort`, or
 `CODEX_MAESTRO_WORKER_MODEL` and `CODEX_MAESTRO_WORKER_EFFORT`; its defaults are
 `gpt-5.6-luna` and `xhigh`.
 
@@ -87,6 +87,35 @@ native custom-agent templates, run the same installer with `--agent-only` so it
 does not create a duplicate standalone skill. Do not run the installer silently
 during a task. See `references/implementation-worker.toml` and
 `references/exploration-worker.toml` when checking or repairing configuration.
+
+## Verify routing
+
+Run the bundled self-check after installing or updating the skill:
+
+```text
+python scripts/check_routing.py
+python scripts/check_routing.py --json
+```
+
+The default check is offline and makes no model call. It verifies that the
+installed Codex CLI has a parseable version, `codex doctor --json` reports
+`config.load` as OK, the two custom-agent TOMLs resolve with the declared
+Luna/xhigh settings, and this Codex accepts the default subagent model/effort
+overrides. Template and config checks prove declarations only; they do not
+prove that a native child used them.
+
+For execution evidence, opt in to one minimal native child workflow:
+
+```text
+python scripts/check_routing.py --live
+```
+
+Live mode consumes model tokens and requires auth plus a Codex version that
+supports native subagents. It only passes when persisted child rollout metadata
+records `implementation_worker`, `gpt-5.6-luna`, and `xhigh` in
+`session_meta`/`turn_context`; prompt text or spawn intent is not evidence.
+Auth or unsupported-runtime conditions are reported as `SKIPPED` (exit 2), not
+as a routing success. Run the live check once after each Codex/config change.
 
 ## Native subagent operating limits
 

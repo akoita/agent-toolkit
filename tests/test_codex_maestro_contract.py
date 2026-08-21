@@ -3,7 +3,6 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = (
     ROOT
@@ -33,8 +32,9 @@ class CodexMaestroContractTests(unittest.TestCase):
             "use follow-up when an idle worker",
             "interrupt obsolete or unsafe work",
             "close completed threads",
-            "generic native worker with the full self-contained contract",
-            "If native spawning is unavailable",
+            "set all three explicitly",
+            "`scripts/run_implementation_worker.py` as the CLI fallback",
+            "When native spawning is unavailable",
             "CLI fallback",
         ):
             with self.subTest(required=required):
@@ -74,8 +74,10 @@ class CodexMaestroContractTests(unittest.TestCase):
         self.assertIn("subtract the primary from a root-inclusive total", skill)
         self.assertIn("most restrictive normalized", skill)
         self.assertIn("excludes the primary", skill)
-        self.assertIn(
-            "Keep topology evidence separate from execution evidence", skill
+        self.assertIn("Keep topology evidence separate from execution evidence", skill)
+        self.assertIn("Custom-agent TOMLs and global defaults are declarations", skill)
+        self.assertNotIn(
+            "generic native worker with the full self-contained contract", skill
         )
 
     def test_readme_summarizes_native_runtime_contract(self) -> None:
@@ -86,6 +88,8 @@ class CodexMaestroContractTests(unittest.TestCase):
         self.assertIn("explicit, disjoint path ownership", readme)
         self.assertIn("Subagent nesting stays disabled by default", readme)
         self.assertIn("Native topology alone does not prove", readme)
+        self.assertIn("agent_type", readme)
+        self.assertIn("instead of a generic inheriting native worker", readme)
 
 
 if __name__ == "__main__":
