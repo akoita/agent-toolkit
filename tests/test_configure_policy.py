@@ -8,7 +8,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
 SCRIPT = (
     Path(__file__).resolve().parents[1]
     / "tools"
@@ -52,6 +51,8 @@ class ConfigurePolicyTests(unittest.TestCase):
         self.assertIn("gpt-5.6-luna", codex)
         self.assertIn("gpt-5.6-sol", codex)
         self.assertIn("xhigh", codex)
+        self.assertIn("fail-closed routing preflight", codex)
+        self.assertIn("persisted route is verified", codex)
         self.assertIn("native spawn, wait, and same-worker steering", codex)
         self.assertIn("effective runtime thread capacity", codex)
         self.assertIn("CLI worker only as a fallback", codex)
@@ -131,7 +132,9 @@ class ConfigurePolicyTests(unittest.TestCase):
                 str(root),
             ]
 
-            preview = subprocess.run(command, check=True, capture_output=True, text=True)
+            preview = subprocess.run(
+                command, check=True, capture_output=True, text=True
+            )
 
             self.assertIn("Preview only", preview.stdout)
             self.assertFalse((root / "AGENTS.md").exists())

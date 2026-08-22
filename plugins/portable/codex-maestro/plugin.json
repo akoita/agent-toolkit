@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "codex-maestro",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "description": "Experimental Codex workflow for planning, bounded delegation, review, and verification.",
   "author": {
     "name": "Aboubakar Koïta",

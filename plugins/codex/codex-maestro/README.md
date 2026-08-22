@@ -113,23 +113,31 @@ signal — security-sensitive, architectural, migration, permissions, payments,
 public-contract, highly ambiguous, or repeatedly failing work. The worker
 profiles remain pinned to Luna at xhigh.
 
-## Routing self-check
+## Fail-closed routing attestation
 
-Run the bundled offline check after installing or updating:
+Run this before substantive Maestro work:
 
 ```bash
-python <path>/skills/codex-maestro/scripts/check_routing.py
+python <path>/skills/codex-maestro/scripts/check_routing.py --enforce
 ```
 
-It verifies the Codex version, `codex doctor --json` config load, custom-agent
-TOML declarations, and acceptance of the default subagent model/effort
-overrides. Those template/config checks prove declaration only; runtime routing
-claims require execution evidence. To opt in to one token-consuming native
-probe, run `check_routing.py --live`; it passes only when persisted child
-`session_meta` and `turn_context` evidence proves the effective
-`implementation_worker` role, Luna model, and xhigh effort. Missing auth or
-runtime support is reported as skipped, not successful. Run the live check once
-per Codex/config change.
+Enforcement fails unless a compatibility attestation matches the current Codex,
+Maestro, config, checker/skill, and custom-agent fingerprints and the current
+task's persisted rollout proves a Sol/medium root. A missing or changed
+attestation requires one explicit `check_routing.py --live` probe. The probe
+consumes model tokens but writes the attestation only when persisted root and
+child metadata prove Sol/medium and `implementation_worker` Luna/xhigh. Auth or
+runtime unavailability is skipped, never accepted.
+
+Each newly spawned worker receives only a minimal handshake until its exact
+rollout passes `check_routing.py --worker-rollout <path> --role <role>`. Reuse
+that verified worker for the real assignment. A missing, malformed, Sol/medium,
+wrong-effort, or wrong-role worker is interrupted and receives no substantive
+work. This bounds a routing regression to the handshake instead of an entire
+delegated task.
+
+The ordinary `check_routing.py` mode remains a token-free diagnostic for the
+CLI, config, and agent declarations.
 
 ## Native collaboration
 
@@ -173,6 +181,8 @@ procedure stays in the skill.
 - Default to Balanced: use `gpt-5.6-sol` at medium effort for the root
   orchestrator and `gpt-5.6-luna` at xhigh effort for bounded implementation
   and read-only exploration workers.
+- Run Maestro's fail-closed routing preflight before substantive work; give a
+  native worker its real task only after its persisted route is verified.
 - Handle trivial, localized, low-risk work directly.
 - Escalate to Quality only for security-sensitive, architectural, migration,
   permissions, payments, public-contract, or highly ambiguous work.

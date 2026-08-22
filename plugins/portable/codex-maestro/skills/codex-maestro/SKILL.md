@@ -88,34 +88,58 @@ does not create a duplicate standalone skill. Do not run the installer silently
 during a task. See `references/implementation-worker.toml` and
 `references/exploration-worker.toml` when checking or repairing configuration.
 
-## Verify routing
+## Enforce routing
 
-Run the bundled self-check after installing or updating the skill:
+Before substantive Maestro work, run the fail-closed preflight from this skill
+directory:
+
+```text
+python scripts/check_routing.py --enforce
+```
+
+It requires both a matching compatibility attestation and persisted evidence
+that the current root is `gpt-5.6-sol` at `medium` effort. It discovers the
+current task through `CODEX_THREAD_ID` or `CODEX_SESSION_ID`; missing,
+ambiguous, unreadable, or changed metadata is a failure. If the root route is
+wrong, stop and ask the user to restart on Sol/medium. Do not plan, delegate, or
+fall back to the current root.
+
+The attestation is keyed to the Codex and Maestro versions, routing contract,
+checker and skill, Codex config, and both custom-agent files. When it is missing
+or its fingerprint changes, run the token-consuming compatibility probe once,
+then rerun the preflight:
+
+```text
+python scripts/check_routing.py --live
+python scripts/check_routing.py --enforce
+```
+
+Ordinary offline diagnosis remains token-free:
 
 ```text
 python scripts/check_routing.py
 python scripts/check_routing.py --json
 ```
 
-The default check is offline and makes no model call. It verifies that the
-installed Codex CLI has a parseable version, `codex doctor --json` reports
-`config.load` as OK, the two custom-agent TOMLs resolve with the declared
-Luna/xhigh settings, and this Codex accepts the default subagent model/effort
-overrides. Template and config checks prove declarations only; they do not
-prove that a native child used them.
+The live probe explicitly starts a Sol/medium root and a Luna/xhigh
+implementation worker. It writes an attestation only when both persisted
+rollouts match. Auth or unsupported-runtime conditions are `SKIPPED` (exit 2),
+not success.
 
-For execution evidence, opt in to one minimal native child workflow:
+Before giving a newly spawned native worker its real assignment, use a minimal
+handshake turn with all three spawn fields explicit. Locate that exact child's
+rollout by its unique agent path and parent task, then verify it:
 
 ```text
-python scripts/check_routing.py --live
+python scripts/check_routing.py \
+  --worker-rollout <exact-child-rollout.jsonl> \
+  --role implementation_worker
 ```
 
-Live mode consumes model tokens and requires auth plus a Codex version that
-supports native subagents. It only passes when persisted child rollout metadata
-records `implementation_worker`, `gpt-5.6-luna`, and `xhigh` in
-`session_meta`/`turn_context`; prompt text or spawn intent is not evidence.
-Auth or unsupported-runtime conditions are reported as `SKIPPED` (exit 2), not
-as a routing success. Run the live check once after each Codex/config change.
+Use `exploration_worker` for a scout. Keep at most one unattested worker, and
+reuse the verified worker through follow-up for its real assignment. On missing
+or mismatched evidence, interrupt it and stop; never send substantive work to
+an unattested worker or silently use an inheriting fallback.
 
 ## Native subagent operating limits
 
@@ -211,7 +235,9 @@ the front of repeated prompts so prompt caching can help.
 Use read-only agents early when broad discovery can happen independently. After
 the maestro reviews that evidence and decides the plan, prefer the native
 `implementation_worker` custom agent for bounded code, test, configuration, and
-documentation changes. First record which collaboration operations, role
+documentation changes. For each newly spawned native worker, perform the
+minimal routing handshake above and send the self-contained assignment through
+follow-up only after its persisted rollout passes. First record which collaboration operations, role
 selection, history control, concurrency limits, and model/effort evidence the
 running client actually exposes. Choose native or CLI execution from that
 evidence, and distinguish the requested topology from the effective
