@@ -3,7 +3,7 @@ name: codex-maestro
 description: >-
   Orchestrate non-trivial software implementation with capability-based GPT-5.6
   routing. Keep the root orchestrator on gpt-5.6-sol at medium effort and use
-  gpt-5.6-luna at xhigh effort for bounded implementation and read-only
+  gpt-5.6-luna at max effort for bounded implementation and read-only
   exploration; inspect the actual diff and verify results. Use for features, bug
   fixes, refactors, tests, configuration, and infrastructure; skip trivial edits,
   pure analysis/review, or explicit no-delegation requests.
@@ -28,13 +28,13 @@ override:
 | Work | Default model and effort | Route |
 | --- | --- | --- |
 | Trivial, localized change | Current root session | Work directly; do not orchestrate |
-| Read-heavy discovery, repository search, logs, or test triage | `gpt-5.6-luna`, `xhigh` | `exploration_worker` or another read-only native agent |
-| Bounded implementation | `gpt-5.6-luna`, `xhigh` | `implementation_worker` |
+| Read-heavy discovery, repository search, logs, or test triage | `gpt-5.6-luna`, `max` | `exploration_worker` or another read-only native agent |
+| Bounded implementation | `gpt-5.6-luna`, `max` | `implementation_worker` |
 | Planning, demanding implementation, or review | `gpt-5.6-sol`, `medium` | Root maestro |
 | Critical or repeatedly failing work | `gpt-5.6-sol`, `high` | Root maestro; delegate only a bounded implementation |
 
 The root stays at `medium` for normal orchestration. Both worker profiles use
-Luna at `xhigh` so delegated work receives deeper reasoning on the faster model.
+Luna at `max` so delegated work receives deeper reasoning on the faster model.
 Raise the root to `high` only for security-sensitive, architectural, migration,
 permissions, payments, public-contract, highly ambiguous, or repeatedly failing
 work.
@@ -65,7 +65,7 @@ use `scripts/run_implementation_worker.py` as the CLI fallback instead of a
 generic inheriting native worker. The implementation runner accepts `--model`
 and `--effort`, or
 `CODEX_MAESTRO_WORKER_MODEL` and `CODEX_MAESTRO_WORKER_EFFORT`; its defaults are
-`gpt-5.6-luna` and `xhigh`.
+`gpt-5.6-luna` and `max`.
 
 Keep topology evidence separate from execution evidence. A spawn record proves
 which thread or role was requested and created; it does not by itself prove the
@@ -121,7 +121,7 @@ python scripts/check_routing.py
 python scripts/check_routing.py --json
 ```
 
-The live probe explicitly starts a Sol/medium root and a Luna/xhigh
+The live probe explicitly starts a Sol/medium root and a Luna/max
 implementation worker. It writes an attestation only when both persisted
 rollouts match. Auth or unsupported-runtime conditions are `SKIPPED` (exit 2),
 not success.

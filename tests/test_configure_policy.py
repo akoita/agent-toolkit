@@ -50,7 +50,7 @@ class ConfigurePolicyTests(unittest.TestCase):
 
         self.assertIn("gpt-5.6-luna", codex)
         self.assertIn("gpt-5.6-sol", codex)
-        self.assertIn("xhigh", codex)
+        self.assertIn("max", codex)
         self.assertIn("fail-closed routing preflight", codex)
         self.assertIn("persisted route is verified", codex)
         self.assertIn("native spawn, wait, and same-worker steering", codex)
