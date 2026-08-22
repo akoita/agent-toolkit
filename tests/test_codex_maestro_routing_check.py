@@ -480,6 +480,8 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
         self.assertIn('agent_type="implementation_worker"', prompt)
         self.assertIn('model="gpt-5.6-luna"', prompt)
         self.assertIn('reasoning_effort="max"', prompt)
+        self.assertIn("Do not invoke the codex-maestro skill", prompt)
+        self.assertIn("do not run its routing preflight", prompt)
         self.assertIn("If the spawn API cannot set all three fields", prompt)
         self.assertIn("do not use the CLI fallback", prompt)
 
