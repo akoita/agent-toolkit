@@ -1137,6 +1137,10 @@ def unavailable_status(output: str) -> str | None:
 
 LIVE_PROMPT = """Run a routing self-check and then stop.
 
+This prompt is the compatibility probe invoked by `check_routing.py --live`.
+Do not invoke the codex-maestro skill and do not run its routing preflight or
+checker: that would recursively require the attestation this probe is creating.
+
 Use native collaboration to spawn exactly one child with all three routing
 fields explicitly set at spawn time: `agent_type="implementation_worker"`,
 `model="gpt-5.6-luna"`, and `reasoning_effort="max"`. Do not rely on
