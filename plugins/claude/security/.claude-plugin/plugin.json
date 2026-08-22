@@ -1,6 +1,6 @@
 {
   "name": "security",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "description": "Project-agnostic security skills for Claude Code covering repository audits, diff review, the free deterministic toolchain, supply chain, threat modeling, smart contracts, and AI systems.",
   "author": {
     "name": "Aboubakar Koïta"

@@ -12,7 +12,6 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-
 POLICIES = {
     "codex": """## Orchestration policy
 
@@ -22,6 +21,8 @@ POLICIES = {
 - Default to Balanced: use `gpt-5.6-sol` at medium effort for the root
   orchestrator and `gpt-5.6-luna` at xhigh effort for bounded implementation
   and read-only exploration workers.
+- Run Maestro's fail-closed routing preflight before substantive work; give a
+  native worker its real task only after its persisted route is verified.
 - Handle trivial, localized, low-risk work directly.
 - Escalate to Quality only for security-sensitive, architectural, migration,
   permissions, payments, public-contract, or highly ambiguous work.
@@ -123,8 +124,10 @@ def updated_text(current: str, platform: str, newline: str) -> str:
 
     if not current:
         return block + newline
-    separator = "" if current.endswith(newline * 2) else (
-        newline if current.endswith(newline) else newline * 2
+    separator = (
+        ""
+        if current.endswith(newline * 2)
+        else (newline if current.endswith(newline) else newline * 2)
     )
     return current + separator + block + newline
 

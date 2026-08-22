@@ -80,6 +80,23 @@ class CodexMaestroContractTests(unittest.TestCase):
             "generic native worker with the full self-contained contract", skill
         )
 
+    def test_routing_is_fail_closed_before_root_and_worker_work(self) -> None:
+        skill = normalized(SKILL)
+
+        for required in (
+            "python scripts/check_routing.py --enforce",
+            "current root is `gpt-5.6-sol` at `medium` effort",
+            "missing, ambiguous, unreadable, or changed metadata is a failure",
+            "Do not plan, delegate",
+            "writes an attestation only when both persisted rollouts match",
+            "Keep at most one unattested worker",
+            "reuse the verified worker through follow-up",
+            "interrupt it and stop",
+            "never send substantive work to an unattested worker",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, skill)
+
     def test_readme_summarizes_native_runtime_contract(self) -> None:
         readme = normalized(README)
 
@@ -90,6 +107,8 @@ class CodexMaestroContractTests(unittest.TestCase):
         self.assertIn("Native topology alone does not prove", readme)
         self.assertIn("agent_type", readme)
         self.assertIn("instead of a generic inheriting native worker", readme)
+        self.assertIn("## Fail-closed routing attestation", readme)
+        self.assertIn("bounds a routing regression to the handshake", readme)
 
 
 if __name__ == "__main__":
