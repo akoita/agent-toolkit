@@ -19,7 +19,7 @@ POLICIES = {
 - Keep requirements, architecture, planning, review, and publication in the
   root task; delegate only bounded work with disjoint ownership.
 - Default to Balanced: use `gpt-5.6-sol` at medium effort for the root
-  orchestrator and `gpt-5.6-luna` at xhigh effort for bounded implementation
+  orchestrator and `gpt-5.6-luna` at max effort for bounded implementation
   and read-only exploration workers.
 - Run Maestro's fail-closed routing preflight before substantive work; give a
   native worker its real task only after its persisted route is verified.

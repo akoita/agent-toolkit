@@ -111,7 +111,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                 'agents.default_subagent_model="gpt-5.6-luna"', override_command
             )
             self.assertIn(
-                'agents.default_subagent_reasoning_effort="xhigh"',
+                'agents.default_subagent_reasoning_effort="max"',
                 override_command,
             )
 
@@ -456,7 +456,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                                 "type": "turn_context",
                                 "payload": {
                                     "model": "gpt-5.6-luna",
-                                    "effort": "xhigh",
+                                    "effort": "max",
                                 },
                             }
                         ),
@@ -472,14 +472,14 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             assert evidence is not None
             self.assertEqual(evidence["agent_role"], "implementation_worker")
             self.assertEqual(evidence["model"], "gpt-5.6-luna")
-            self.assertEqual(evidence["effort"], "xhigh")
+            self.assertEqual(evidence["effort"], "max")
 
     def test_live_prompt_requires_explicit_spawn_routing(self) -> None:
         prompt = routing.LIVE_PROMPT
 
         self.assertIn('agent_type="implementation_worker"', prompt)
         self.assertIn('model="gpt-5.6-luna"', prompt)
-        self.assertIn('reasoning_effort="xhigh"', prompt)
+        self.assertIn('reasoning_effort="max"', prompt)
         self.assertIn("If the spawn API cannot set all three fields", prompt)
         self.assertIn("do not use the CLI fallback", prompt)
 
@@ -626,7 +626,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                                 "type": "turn_context",
                                 "payload": {
                                     "model": "gpt-5.6-luna",
-                                    "effort": "xhigh",
+                                    "effort": "max",
                                 },
                             }
                         ),
@@ -666,7 +666,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             self.assertEqual(
                 result["details"]["child_evidence"]["model"], "gpt-5.6-luna"
             )
-            self.assertEqual(result["details"]["child_evidence"]["effort"], "xhigh")
+            self.assertEqual(result["details"]["child_evidence"]["effort"], "max")
 
     def test_live_probe_marks_auth_absence_as_skipped(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

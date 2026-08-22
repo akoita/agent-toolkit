@@ -25,7 +25,7 @@ from typing import Any, Iterable
 
 ROUTING_CONTRACT_VERSION = 1
 EXPECTED_MODEL = "gpt-5.6-luna"
-EXPECTED_EFFORT = "xhigh"
+EXPECTED_EFFORT = "max"
 EXPECTED_ROOT_MODEL = "gpt-5.6-sol"
 EXPECTED_ROOT_EFFORT = "medium"
 EXPECTED_IMPLEMENTATION_ROLE = "implementation_worker"
@@ -406,7 +406,7 @@ def agent_templates_check(agents_dir: Path) -> dict[str, Any]:
     return check(
         "agents.templates",
         "ok",
-        "required custom-agent TOMLs resolve with Luna/xhigh",
+        "required custom-agent TOMLs resolve with Luna/max",
         agents_dir=str(agents_dir),
         resolved=resolved,
     )
@@ -929,7 +929,7 @@ def verify_worker_rollout(path: Path, expected_role: str) -> dict[str, Any]:
     if evidence.get("model") != EXPECTED_MODEL:
         mismatches.append("model does not match gpt-5.6-luna")
     if evidence.get("effort") != EXPECTED_EFFORT:
-        mismatches.append("effort does not match xhigh")
+        mismatches.append("effort does not match max")
     if mismatches:
         return check(
             "worker.rollout",
@@ -940,7 +940,7 @@ def verify_worker_rollout(path: Path, expected_role: str) -> dict[str, Any]:
     return check(
         "worker.rollout",
         "ok",
-        "persisted worker rollout matches the requested role and Luna/xhigh",
+        "persisted worker rollout matches the requested role and Luna/max",
         role=expected_role,
     )
 
@@ -1139,7 +1139,7 @@ LIVE_PROMPT = """Run a routing self-check and then stop.
 
 Use native collaboration to spawn exactly one child with all three routing
 fields explicitly set at spawn time: `agent_type="implementation_worker"`,
-`model="gpt-5.6-luna"`, and `reasoning_effort="xhigh"`. Do not rely on
+`model="gpt-5.6-luna"`, and `reasoning_effort="max"`. Do not rely on
 custom-agent TOMLs or global defaults, do not use the CLI fallback, and do not
 spawn any other child. If the spawn API cannot set all three fields, report
 ROUTING_UNSUPPORTED without spawning a generic child. Give the child a minimal
@@ -1292,7 +1292,7 @@ def live_check(
         return check(
             "live.probe",
             "fail",
-            "persisted child routing evidence does not match Luna/xhigh",
+            "persisted child routing evidence does not match Luna/max",
             mismatches=mismatches,
             root_evidence=root,
             child_evidence=child,

@@ -54,9 +54,9 @@ It installs:
 - `codex-maestro` under `~/.agents/skills/`, making the skill available in all
   projects for that user;
 - `implementation_worker` under `$CODEX_HOME/agents/` (or `~/.codex/agents/`),
-  using `gpt-5.6-luna` at xhigh effort by default;
+  using `gpt-5.6-luna` at max effort by default;
 - `exploration_worker` in the same agents directory, using `gpt-5.6-luna` at
-  xhigh effort with a read-only sandbox.
+  max effort with a read-only sandbox.
 
 Run it once per environment. Windows and WSL have separate Codex homes and
 configuration directories.
@@ -106,12 +106,12 @@ the marketplace qualifier is required. See
 
 Model names are deployment choices, not agent identities. The root orchestrator
 defaults to `gpt-5.6-sol` at medium effort. Both bounded implementation and
-read-only exploration workers default to `gpt-5.6-luna` at xhigh effort.
+read-only exploration workers default to `gpt-5.6-luna` at max effort.
 
 Raise the root orchestrator above medium only for a concrete risk or failure
 signal — security-sensitive, architectural, migration, permissions, payments,
 public-contract, highly ambiguous, or repeatedly failing work. The worker
-profiles remain pinned to Luna at xhigh.
+profiles remain pinned to Luna at max.
 
 ## Fail-closed routing attestation
 
@@ -126,7 +126,7 @@ Maestro, config, checker/skill, and custom-agent fingerprints and the current
 task's persisted rollout proves a Sol/medium root. A missing or changed
 attestation requires one explicit `check_routing.py --live` probe. The probe
 consumes model tokens but writes the attestation only when persisted root and
-child metadata prove Sol/medium and `implementation_worker` Luna/xhigh. Auth or
+child metadata prove Sol/medium and `implementation_worker` Luna/max. Auth or
 runtime unavailability is skipped, never accepted.
 
 Each newly spawned worker receives only a minimal handshake until its exact
@@ -179,7 +179,7 @@ procedure stays in the skill.
 - Keep requirements, architecture, planning, review, and publication in the
   root task; delegate only bounded work with disjoint ownership.
 - Default to Balanced: use `gpt-5.6-sol` at medium effort for the root
-  orchestrator and `gpt-5.6-luna` at xhigh effort for bounded implementation
+  orchestrator and `gpt-5.6-luna` at max effort for bounded implementation
   and read-only exploration workers.
 - Run Maestro's fail-closed routing preflight before substantive work; give a
   native worker its real task only after its persisted route is verified.
