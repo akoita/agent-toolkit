@@ -1,0 +1,32 @@
+{
+  "name": "codex-utilities",
+  "version": "0.5.9",
+  "description": "General-purpose, project-agnostic workflow skills for Codex, initially focused on dependency-aware milestone planning.",
+  "author": {
+    "name": "Aboubakar Koïta",
+    "url": "https://github.com/akoita"
+  },
+  "homepage": "https://github.com/akoita/agent-toolkit",
+  "repository": "https://github.com/akoita/agent-toolkit",
+  "keywords": [
+    "utilities",
+    "workflow",
+    "planning",
+    "project-management"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Utilities",
+    "shortDescription": "Plan executable milestones safely.",
+    "longDescription": "Use broadly reusable workflow utilities, beginning with dependency-aware milestone planning that preserves capacity and approval boundaries.",
+    "developerName": "Aboubakar Koïta",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use Codex Utilities to plan an executable milestone."
+    ]
+  }
+}

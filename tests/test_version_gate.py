@@ -18,14 +18,21 @@ from plugin_versions import (  # noqa: E402
 PACKAGES = {
     "plugins/claude/maestro": "plugins/claude/maestro/.claude-plugin/plugin.json",
     "plugins/claude/security": "plugins/claude/security/.claude-plugin/plugin.json",
+    "plugins/claude/utilities": (
+        "plugins/claude/utilities/.claude-plugin/plugin.json"
+    ),
     "plugins/codex/codex-maestro": (
         "plugins/codex/codex-maestro/.codex-plugin/plugin.json"
     ),
     "plugins/codex/codex-security": (
         "plugins/codex/codex-security/.codex-plugin/plugin.json"
     ),
+    "plugins/codex/codex-utilities": (
+        "plugins/codex/codex-utilities/.codex-plugin/plugin.json"
+    ),
     "plugins/portable/codex-maestro": "plugins/portable/codex-maestro/plugin.json",
     "plugins/portable/security": "plugins/portable/security/plugin.json",
+    "plugins/portable/utilities": "plugins/portable/utilities/plugin.json",
 }
 
 

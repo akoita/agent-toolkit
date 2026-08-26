@@ -1,0 +1,61 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "utilities",
+  "version": "0.5.9",
+  "description": "General-purpose, project-agnostic workflow skills for planning and delivering useful software changes.",
+  "author": {
+    "name": "Aboubakar Koïta",
+    "url": "https://github.com/akoita"
+  },
+  "homepage": "https://github.com/akoita/agent-toolkit",
+  "repository": "https://github.com/akoita/agent-toolkit",
+  "keywords": [
+    "utilities",
+    "workflow",
+    "planning",
+    "project-management"
+  ],
+  "extensions": {
+    "io.github.akoita.agent-toolkit": {
+      "adapters": {
+        "claude": {
+          "name": "utilities",
+          "description": "General-purpose, project-agnostic workflow skills for Claude Code, initially focused on dependency-aware milestone planning.",
+          "marketplace": {
+            "source": "./plugins/claude/utilities",
+            "description": "General-purpose project utilities, initially focused on dependency-aware milestone planning."
+          }
+        },
+        "codex": {
+          "name": "codex-utilities",
+          "description": "General-purpose, project-agnostic workflow skills for Codex, initially focused on dependency-aware milestone planning.",
+          "interface": {
+            "displayName": "Codex Utilities",
+            "shortDescription": "Plan executable milestones safely.",
+            "longDescription": "Use broadly reusable workflow utilities, beginning with dependency-aware milestone planning that preserves capacity and approval boundaries.",
+            "developerName": "Aboubakar Koïta",
+            "category": "Developer Tools",
+            "capabilities": [
+              "Read",
+              "Write"
+            ],
+            "defaultPrompt": [
+              "Use Codex Utilities to plan an executable milestone."
+            ]
+          },
+          "marketplace": {
+            "source": {
+              "source": "local",
+              "path": "./plugins/codex/codex-utilities"
+            },
+            "policy": {
+              "installation": "AVAILABLE",
+              "authentication": "ON_INSTALL"
+            },
+            "category": "Developer Tools"
+          }
+        }
+      }
+    }
+  }
+}

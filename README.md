@@ -54,6 +54,17 @@ The security skills are authored once in the portable package and mirrored into
 the native packages without claiming that Claude Code consumes the portable
 format.
 
+### Utilities
+
+| Plugin | Platform | Install as | What it does |
+| --- | --- | --- | --- |
+| [utilities](plugins/claude/utilities/) | Claude Code | `utilities@agent-toolkit` | General-purpose, project-agnostic workflow skills, currently dependency-aware milestone planning. |
+| [codex-utilities](plugins/codex/codex-utilities/) | Codex | `codex-utilities@agent-toolkit` | General-purpose, project-agnostic workflow skills, currently dependency-aware milestone planning. |
+
+The utilities plugin currently ships `plan-milestone`; future additions must
+remain broadly reusable and independent of the specialized Maestro, Security,
+and setup capabilities.
+
 ### Standalone
 
 | Skill | Platform | What it does |
@@ -84,11 +95,18 @@ codex plugin marketplace add .
 codex plugin add <plugin>@agent-toolkit
 ```
 
-Both capability areas on Claude Code, for example:
+The capability plugins on Claude Code, for example:
 
 ```bash
 claude plugin install maestro@agent-toolkit
 claude plugin install security@agent-toolkit
+claude plugin install utilities@agent-toolkit
+```
+
+The utilities plugin on Codex:
+
+```bash
+codex plugin add codex-utilities@agent-toolkit
 ```
 
 Restart the tool afterwards, then invoke a skill by name or let its description
@@ -96,12 +114,13 @@ trigger it.
 
 For a portable, skill-only install through the
 [skills CLI](https://www.skills.sh/docs), name the **skill** rather than the
-plugin — the security plugins carry seven of them:
+plugin — individual skills can be installed without their plugin:
 
 ```bash
 npx skills add akoita/agent-toolkit --skill maestro -g -a claude-code
 npx skills add akoita/agent-toolkit --skill codex-maestro -g -a codex
 npx skills add akoita/agent-toolkit --skill security-audit -g -a claude-code
+npx skills add akoita/agent-toolkit --skill plan-milestone -g -a codex
 npx skills add akoita/agent-toolkit --skill setup-agent-toolkit -g -a codex
 ```
 
