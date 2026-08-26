@@ -12,9 +12,12 @@ PORTABLE_SECURITY_SKILLS = ROOT / "plugins" / "portable" / "security" / "skills"
 PORTABLE_CODEX_MAESTRO_SKILLS = (
     ROOT / "plugins" / "portable" / "codex-maestro" / "skills"
 )
+PORTABLE_UTILITIES_SKILLS = ROOT / "plugins" / "portable" / "utilities" / "skills"
 CLAUDE_SECURITY_SKILLS = ROOT / "plugins" / "claude" / "security" / "skills"
 CODEX_SECURITY_SKILLS = ROOT / "plugins" / "codex" / "codex-security" / "skills"
 CODEX_MAESTRO_SKILLS = ROOT / "plugins" / "codex" / "codex-maestro" / "skills"
+CLAUDE_UTILITIES_SKILLS = ROOT / "plugins" / "claude" / "utilities" / "skills"
+CODEX_UTILITIES_SKILLS = ROOT / "plugins" / "codex" / "codex-utilities" / "skills"
 # Authored once in the portable plugin, shipped by both native packages too.
 # Kept in step with `.github/scripts/sync_skills.py`.
 SECURITY_SKILLS = (
@@ -26,9 +29,11 @@ SECURITY_SKILLS = (
     "security-smart-contracts",
     "security-ai",
 )
+UTILITIES_SKILLS = ("plan-milestone",)
 CANONICAL_SKILLS = {
     "maestro": ROOT / "plugins" / "claude" / "maestro" / "skills" / "maestro",
     "codex-maestro": PORTABLE_CODEX_MAESTRO_SKILLS / "codex-maestro",
+    "plan-milestone": PORTABLE_UTILITIES_SKILLS / "plan-milestone",
     "setup-agent-toolkit": ROOT / "tools" / "setup-agent-toolkit",
     **{name: PORTABLE_SECURITY_SKILLS / name for name in SECURITY_SKILLS},
 }
@@ -51,6 +56,8 @@ def mirrors_for(name: str) -> list[Path]:
         mirrors.extend(
             [CLAUDE_SECURITY_SKILLS / name, CODEX_SECURITY_SKILLS / name]
         )
+    if name in UTILITIES_SKILLS:
+        mirrors.extend([CLAUDE_UTILITIES_SKILLS / name, CODEX_UTILITIES_SKILLS / name])
     return mirrors
 
 
@@ -80,6 +87,15 @@ class SkillsCliCatalogTests(unittest.TestCase):
                 }
 
                 self.assertEqual(skill_directories, set(SECURITY_SKILLS))
+
+    def test_native_utilities_packages_contain_only_the_mirrored_skills(self) -> None:
+        for package_root in (CLAUDE_UTILITIES_SKILLS, CODEX_UTILITIES_SKILLS):
+            with self.subTest(package=package_root.parent.name):
+                skill_directories = {
+                    path.name for path in package_root.iterdir() if path.is_dir()
+                }
+
+                self.assertEqual(skill_directories, set(UTILITIES_SKILLS))
 
     def test_mirrors_match_canonical_sources_byte_for_byte(self) -> None:
         for skill_name, canonical_root in CANONICAL_SKILLS.items():

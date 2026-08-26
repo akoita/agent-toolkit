@@ -22,6 +22,7 @@ EXTENSION_NAMESPACE = "io.github.akoita.agent-toolkit"
 PORTABLE_MANIFESTS = (
     Path("plugins/portable/codex-maestro/plugin.json"),
     Path("plugins/portable/security/plugin.json"),
+    Path("plugins/portable/utilities/plugin.json"),
 )
 CLAUDE_MARKETPLACE = Path(".claude-plugin/marketplace.json")
 CODEX_MARKETPLACE = Path(".agents/plugins/marketplace.json")

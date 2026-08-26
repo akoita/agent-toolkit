@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOTS = {
     "codex-maestro": ROOT / "plugins" / "portable" / "codex-maestro",
     "security": ROOT / "plugins" / "portable" / "security",
+    "utilities": ROOT / "plugins" / "portable" / "utilities",
 }
 MANIFEST_PATHS = {
     name: package / "plugin.json" for name, package in PACKAGE_ROOTS.items()
@@ -37,6 +38,7 @@ EXPECTED_SKILLS = {
         "security-supply-chain",
         "security-threat-model",
     },
+    "utilities": {"plan-milestone"},
 }
 
 SPEC = importlib.util.spec_from_file_location("sync_plugin_adapters", SYNC_SCRIPT)
@@ -221,6 +223,19 @@ class AgentPluginsSchemaAndPackageTests(unittest.TestCase):
 
         self.assertEqual(set(adapters), {"codex"})
 
+    def test_portable_utilities_declares_both_native_adapters(self) -> None:
+        manifest = read_json(MANIFEST_PATHS["utilities"])
+        adapters = manifest["extensions"][
+            sync_plugin_adapters.EXTENSION_NAMESPACE
+        ]["adapters"]
+
+        self.assertEqual(set(adapters), {"claude", "codex"})
+        self.assertEqual(adapters["claude"]["name"], "utilities")
+        self.assertEqual(adapters["codex"]["name"], "codex-utilities")
+        self.assertEqual(
+            adapters["codex"]["marketplace"]["category"], "Developer Tools"
+        )
+
     def test_generated_adapter_paths_are_repository_contained(self) -> None:
         for package_name, manifest_path in MANIFEST_PATHS.items():
             manifest = read_json(manifest_path)
@@ -338,10 +353,11 @@ class GeneratedAdapterTests(unittest.TestCase):
                 for path in sync_plugin_adapters.MARKETPLACES.values()
             }
             generated_names = {
-                sync_plugin_adapters.CLAUDE_MARKETPLACE: ("security",),
+                sync_plugin_adapters.CLAUDE_MARKETPLACE: ("security", "utilities"),
                 sync_plugin_adapters.CODEX_MARKETPLACE: (
                     "codex-maestro",
                     "codex-security",
+                    "codex-utilities",
                 ),
             }
             for path, names in generated_names.items():

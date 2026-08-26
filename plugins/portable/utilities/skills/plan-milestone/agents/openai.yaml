@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan a Milestone"
+  short_description: "Plan milestones with dependency-aware delivery"
+  default_prompt: "Use $plan-milestone to discover dependencies and propose an executable milestone."

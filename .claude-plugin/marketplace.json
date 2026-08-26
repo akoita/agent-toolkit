@@ -18,6 +18,12 @@
       "source": "./plugins/claude/security",
       "version": "0.5.9",
       "description": "Project-agnostic security skills for audits, diff review, the free deterministic toolchain, supply chain, threat modeling, smart contracts, and AI systems."
+    },
+    {
+      "name": "utilities",
+      "source": "./plugins/claude/utilities",
+      "version": "0.5.9",
+      "description": "General-purpose project utilities, initially focused on dependency-aware milestone planning."
     }
   ]
 }

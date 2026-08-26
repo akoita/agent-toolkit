@@ -1,0 +1,9 @@
+{
+  "name": "utilities",
+  "version": "0.5.9",
+  "description": "General-purpose, project-agnostic workflow skills for Claude Code, initially focused on dependency-aware milestone planning.",
+  "author": {
+    "name": "Aboubakar Koïta"
+  },
+  "repository": "https://github.com/akoita/agent-toolkit"
+}
