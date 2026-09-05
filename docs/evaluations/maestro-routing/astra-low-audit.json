@@ -1,0 +1,16 @@
+{
+  "trials": 3,
+  "accepted": 3,
+  "first_pass_accepted": 3,
+  "scenario_checks_passed": 31,
+  "scenario_checks_total": 31,
+  "distinct_roots": 3,
+  "distinct_workers": 3,
+  "all_routes_and_scopes_verified": true,
+  "all_execution_completed": true,
+  "usage_counters_match": true,
+  "cost_recomputed_independently": true,
+  "frozen_inputs_unchanged": true,
+  "production_worktree_unchanged": true,
+  "long_context_surcharge_triggered": false
+}

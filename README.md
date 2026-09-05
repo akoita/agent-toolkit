@@ -168,3 +168,4 @@ Codex requires the `@agent-toolkit` qualifier. See
 | [Updating](docs/updating.md) | Refreshing each install path; checking what you have |
 | [Uninstalling](docs/uninstalling.md) | Removing each install path |
 | [Contributing](docs/contributing.md) | Layout, conventions, adding a skill, releasing |
+| [Routing evaluation](docs/research/2026-09-maestro-routing-evaluation.md) | Orchestrator, worker, and advisor pilot results and methodology |

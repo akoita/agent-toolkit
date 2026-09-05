@@ -1,0 +1,18 @@
+{
+  "trials": 9,
+  "accepted": 9,
+  "first_pass_accepted": 6,
+  "scenario_checks_passed": 93,
+  "scenario_checks_total": 93,
+  "distinct_roots": 9,
+  "distinct_advisors": 3,
+  "advisor_consultations": 3,
+  "advisor_tool_calls": 0,
+  "protocol_violations": [],
+  "all_execution_completed": true,
+  "usage_counters_match": true,
+  "cost_recomputed_independently": true,
+  "frozen_inputs_unchanged": true,
+  "production_worktree_unchanged": true,
+  "long_context_surcharge_triggered": false
+}
