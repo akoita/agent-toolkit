@@ -37,33 +37,10 @@ read from its path, while a Git one is a snapshot refreshed with
 Run `/reload-plugins` in an existing Claude Code session or start a new
 session. Restart Codex or open a new task.
 
-A Codex plugin install does not write custom-agent TOML files into
-`$CODEX_HOME/agents/`. Skills that ship worker agents can use their bundled CLI
-fallback immediately; use the agent-led setup below, or the skill's own
-installer, when native custom agents should also be installed.
-
-### Running a skill's installer after a marketplace install
-
-Not every skill ships an installer script — the security packages, for
-example, don't. Where one does, it ships inside the package, so you do not
-need a checkout to run it. `codex plugin list` reports the installed package
-path in its `PATH` column:
-
-```bash
-codex plugin list
-```
-
-Use that path as the base. For codex-maestro:
-
-```bash
-python <path>/skills/codex-maestro/scripts/install.py --agent-only
-```
-
-`--agent-only` writes the worker definitions without installing a second copy
-of the skill, which the plugin already provides. Read the path from
-`codex plugin list` rather than writing one down: the package also exists under
-`$CODEX_HOME/plugins/cache/<marketplace>/<plugin>/<version>/`, and that location
-changes with every release.
+Codex Maestro runs alone and requires no custom-agent setup after a plugin
+install. Its standalone installer is for skill-only installations or explicit
+maintenance of legacy worker definitions, not a required marketplace step.
+See the [Codex Maestro README](../plugins/codex/codex-maestro/README.md).
 
 ## Portable skill-only install
 
@@ -96,20 +73,12 @@ remain the recommended complete path:
 
 - `maestro` installed this way does not include the Claude plugin's named
   subagent definitions.
-- `codex-maestro` retains its bundled implementation-worker CLI fallback. To
-  enable its native Codex workers too, run the installer from the installed
-  skill:
-
-  ```bash
-  python ~/.agents/skills/codex-maestro/scripts/install.py --agent-only
-  ```
-
-  If the skills CLI reports a different destination, use that installed path
-  instead. The installer writes only the custom-agent templates in this mode.
+- `codex-maestro` runs alone; a skill-only install is complete and needs no
+  custom-agent definitions.
 - `security` installed this way does not include the Claude plugin's
   `security-auditor` and `security-scan-runner` named agents either, for the
   same reason as `maestro` — and the security packages ship no installer
-  script, so there is no equivalent of the `codex-maestro` step above.
+  script, so install the native Claude plugin when those agents are needed.
 - `codex-security` ships no agent definitions at all, so a skill-only install
   of it is already complete.
 - `setup-agent-toolkit` is self-contained and needs no separate worker install.

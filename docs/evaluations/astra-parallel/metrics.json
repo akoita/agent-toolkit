@@ -1,0 +1,38 @@
+{
+  "low": {
+    "route": [
+      "gpt-6-astra",
+      "low"
+    ],
+    "handshake_ms": 4792,
+    "assignment_ms": 15647,
+    "worker_active_ms": 20439,
+    "outer_tool_calls": 1,
+    "tokens_including_handshake": {
+      "input_tokens": 69881,
+      "cached_input_tokens": 45824,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 493,
+      "reasoning_output_tokens": 0,
+      "total_tokens": 70374
+    }
+  },
+  "medium": {
+    "route": [
+      "gpt-6-astra",
+      "medium"
+    ],
+    "handshake_ms": 5291,
+    "assignment_ms": 10657,
+    "worker_active_ms": 15948,
+    "outer_tool_calls": 1,
+    "tokens_including_handshake": {
+      "input_tokens": 69916,
+      "cached_input_tokens": 52608,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 433,
+      "reasoning_output_tokens": 0,
+      "total_tokens": 70349
+    }
+  }
+}

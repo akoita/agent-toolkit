@@ -36,7 +36,7 @@ skills. Everything below installs from the same marketplace.
 | Plugin | Platform | Install as | What it does |
 | --- | --- | --- | --- |
 | [maestro](plugins/claude/maestro/) | Claude Code | `maestro@agent-toolkit` | Capability-based orchestration across named subagents, agent teams, and dynamic workflows. |
-| [codex-maestro](plugins/codex/codex-maestro/) | Codex | `codex-maestro@agent-toolkit` | Astra/medium alone by default; explicit economy mode with a Sol/medium root and Luna/max workers. |
+| [codex-maestro](plugins/codex/codex-maestro/) | Codex | `codex-maestro@agent-toolkit` | Structured analysis, planning, implementation, and verification with solo Astra/medium; efficiency benefits are unproven. |
 
 ### Security
 
@@ -168,3 +168,4 @@ Codex requires the `@agent-toolkit` qualifier. See
 | [Updating](docs/updating.md) | Refreshing each install path; checking what you have |
 | [Uninstalling](docs/uninstalling.md) | Removing each install path |
 | [Contributing](docs/contributing.md) | Layout, conventions, adding a skill, releasing |
+| [Routing evaluation](docs/research/2026-09-maestro-routing-evaluation.md) | Orchestrator, worker, and advisor pilot results and methodology |

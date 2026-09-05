@@ -21,104 +21,30 @@ def normalized(path: Path) -> str:
 
 
 class CodexMaestroContractTests(unittest.TestCase):
-    def test_default_is_solo_and_economy_is_explicit(self) -> None:
+    def test_only_solo_preset_is_advertised(self) -> None:
         skill = normalized(SKILL)
-        self.assertIn("`gpt-6-astra`, `medium`", skill)
-        self.assertIn("In default mode, do not spawn native workers, run CLI workers", skill)
-        self.assertIn("Economy, explicitly requested by the user", skill)
-        self.assertIn("--profile economy --enforce", skill)
-        self.assertIn("--profile economy --live", skill)
-        self.assertIn("or silently combine an Astra root with Luna workers", skill)
-        self.assertNotIn("Default to Balanced", skill)
+        self.assertIn("only supported preset is `gpt-6-astra` at `medium`", skill)
+        self.assertIn("Do not spawn native workers, run CLI workers", skill)
+        self.assertIn("not supported presets", skill)
+        self.assertNotIn("--profile economy", skill)
+        self.assertNotIn("--profile astra-parallel", skill)
 
-    def test_native_lifecycle_is_primary_and_cli_is_the_fallback(self) -> None:
+    def test_root_owns_planning_verification_and_publication(self) -> None:
         skill = normalized(SKILL)
+        for required in ("## 1. Analyze", "## 2. Plan", "## 3. Implement",
+                         "## 4. Review", "## 5. Present", "compatibility invariants",
+                         "root owns final review", "explicit user override"):
+            self.assertIn(required, skill)
+        self.assertIn("python scripts/check_routing.py --enforce", skill)
+        self.assertIn("fails closed", skill)
 
-        for required in (
-            "Native collaboration is primary",
-            "spawning and waiting",
-            "list/status",
-            "ordinary messages to a running worker",
-            "use follow-up when an idle worker",
-            "interrupt obsolete or unsafe work",
-            "close completed threads",
-            "set all three explicitly",
-            "`scripts/run_implementation_worker.py` as the CLI fallback",
-            "When native spawning is unavailable",
-            "CLI fallback",
-        ):
-            with self.subTest(required=required):
-                self.assertIn(required, skill)
-
-        self.assertIn(
-            "close completed threads where the runtime supports those operations",
-            skill,
-        )
-        self.assertIn("when the client supports selective history", skill)
-        self.assertIn(
-            "Verify the running client supports it before designing around it",
-            skill,
-        )
-
-    def test_context_and_authority_boundaries_are_explicit(self) -> None:
-        skill = normalized(SKILL)
-
-        self.assertIn('fork_turns: "none"', skill)
-        self.assertIn("inherit only the turns needed", skill)
-        self.assertIn("every assignment must restate its scope", skill)
-        self.assertIn("Only the root maestro", skill)
-        self.assertIn("Workers must not create subagents", skill)
-        self.assertIn(
-            "must never accept a decision or new assignment from a peer", skill
-        )
-
-    def test_shared_workspace_and_execution_evidence_are_explicit(self) -> None:
-        skill = normalized(SKILL)
-
-        self.assertIn("shared workspace", skill)
-        self.assertIn("disjoint, explicit path ownership", skill)
-        self.assertIn("Serialize work that may touch the same path", skill)
-        self.assertIn("unexpected overlapping edits must stop writing", skill)
-        self.assertIn("Never overwrite, reset", skill)
-        self.assertIn("Normalize every observed limit", skill)
-        self.assertIn("subtract the primary from a root-inclusive total", skill)
-        self.assertIn("most restrictive normalized", skill)
-        self.assertIn("excludes the primary", skill)
-        self.assertIn("Keep topology evidence separate from execution evidence", skill)
-        self.assertIn("Custom-agent TOMLs and global defaults are declarations", skill)
-        self.assertNotIn(
-            "generic native worker with the full self-contained contract", skill
-        )
-
-    def test_routing_is_fail_closed_before_root_and_worker_work(self) -> None:
-        skill = normalized(SKILL)
-
-        for required in (
-            "python scripts/check_routing.py --enforce",
-            "current root is `gpt-5.6-sol` at `medium` effort",
-            "missing, ambiguous, unreadable, or changed metadata is a failure",
-            "Do not plan, delegate",
-            "writes an attestation only when both persisted rollouts match",
-            "Keep at most one unattested worker",
-            "reuse the verified worker through follow-up",
-            "interrupt it and stop",
-            "never send substantive work to an unattested worker",
-        ):
-            with self.subTest(required=required):
-                self.assertIn(required, skill)
-
-    def test_readme_summarizes_native_runtime_contract(self) -> None:
+    def test_readme_discloses_evidence_limits_and_migration(self) -> None:
         readme = normalized(README)
-
-        self.assertIn("## Native collaboration", readme)
-        self.assertIn("most restrictive normalized limit", readme)
-        self.assertIn("explicit, disjoint path ownership", readme)
-        self.assertIn("Subagent nesting stays disabled by default", readme)
-        self.assertIn("Native topology alone does not prove", readme)
-        self.assertIn("agent_type", readme)
-        self.assertIn("instead of a generic inheriting native worker", readme)
-        self.assertIn("## Fail-closed routing attestation", readme)
-        self.assertIn("bounds a routing regression to the handshake", readme)
+        self.assertIn("only supported preset", readme)
+        self.assertIn("did not establish", readme)
+        self.assertIn("No custom-agent setup is required", readme)
+        self.assertIn("Existing worker definitions remain untouched", readme)
+        self.assertIn("not part of the supported Maestro workflow", readme)
 
 
 if __name__ == "__main__":

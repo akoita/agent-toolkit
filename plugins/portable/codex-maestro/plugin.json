@@ -1,10 +1,10 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "codex-maestro",
-  "version": "0.6.0",
-  "description": "Experimental Codex workflow: Astra/medium alone by default, with explicit Sol/medium and Luna/max economy mode.",
+  "version": "0.7.0",
+  "description": "Experimental solo Astra/medium workflow for analysis, planning, implementation, and verification; no proven efficiency gain over using the model directly.",
   "author": {
-    "name": "Aboubakar Koïta",
+    "name": "Aboubakar Ko\u00efta",
     "url": "https://github.com/akoita"
   },
   "homepage": "https://github.com/akoita/agent-toolkit",
@@ -19,12 +19,12 @@
       "adapters": {
         "codex": {
           "name": "codex-maestro",
-          "description": "Experimental Codex workflow: Astra/medium alone by default, with explicit Sol/medium and Luna/max economy mode.",
+          "description": "Experimental solo Astra/medium workflow for analysis, planning, implementation, and verification; no proven efficiency gain over using the model directly.",
           "interface": {
             "displayName": "Codex Maestro",
-            "shortDescription": "Orchestrate non-trivial development work.",
-            "longDescription": "Implement and verify with Astra/medium alone by default. Opt into economy mode for a Sol/medium root with bounded Luna/max workers.",
-            "developerName": "Aboubakar Koïta",
+            "shortDescription": "Analyze, plan, implement, and verify with solo Astra.",
+            "longDescription": "Experimental solo Astra/medium workflow for analysis, planning, implementation, and verification; no proven efficiency gain over using the model directly.",
+            "developerName": "Aboubakar Ko\u00efta",
             "category": "Developer Tools",
             "capabilities": [
               "Read",

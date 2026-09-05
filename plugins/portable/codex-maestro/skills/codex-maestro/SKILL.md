@@ -1,383 +1,95 @@
 ---
 name: codex-maestro
 description: >-
-  Implement non-trivial software changes with gpt-6-astra at medium effort
-  alone by default. When the user explicitly requests economy mode, use a
-  gpt-5.6-sol medium root with gpt-5.6-luna max workers for bounded work.
-  Keep planning and review in the root, inspect the diff, and verify results.
-  Use for features, fixes, refactors, tests, configuration, and infrastructure;
-  skip trivial edits and pure analysis/review.
+  Analyze, plan, implement, and verify non-trivial software changes with
+  gpt-6-astra at medium effort in one root task. Keep review and publication
+  in the root. Use for features, fixes, refactors, configuration, and multi-step
+  debugging; skip trivial edits and pure analysis/review.
 ---
 
 # Codex Maestro
 
-This workflow is experimental. Codex and its models evolve quickly, and the
-skill is not yet comprehensively tested. Inspect changes and verify results
-before relying on them.
+Use one Astra/medium root for structured analysis, planning, implementation,
+and verification. This workflow is experimental. The routing pilot did not
+establish that installing this skill improves speed, cost, or quality over
+using the same model directly. Verify changes against the task's requirements.
 
-Use the root task as the maestro. Keep requirements, design decisions, final
-review, Git publication, and user-facing communication in the root task.
-Work directly by default. Delegate bounded work only in explicit economy mode.
+## Supported route
 
-## Choose the profile
+The only supported preset is `gpt-6-astra` at `medium` effort, working alone.
+Do not spawn native workers, run CLI workers, or perform compatibility probes
+as part of the standard workflow. Economy, Astra parallel, and advisor
+configurations are research results, not supported presets. Do not infer
+permission to delegate from task size or an old configuration file.
 
-| Profile | Root model and effort | Workers |
-| --- | --- | --- |
-| Default | `gpt-6-astra`, `medium` | None; implement and verify in the root |
-| Economy, explicitly requested by the user | `gpt-5.6-sol`, `medium` | `gpt-5.6-luna`, `max` for bounded implementation and read-only exploration |
-
-Use default mode unless the user asks for economy mode, for example:
-“Use Codex Maestro in economy mode for this change.” Do not infer economy mode
-from task size or silently combine an Astra root with Luna workers. Economy is
-a cost-oriented option, not a guarantee of lower cost for every task.
-
-In default mode, do not spawn native workers, run CLI workers, or run a worker
-compatibility probe. Analyze, plan, implement, review, and verify directly in
-the Astra root. Follow phases 1, 3, and 5 below, applying review to your own
-changes; skip delegation and worker steering. The worker instructions in the
-remaining sections apply only to economy mode.
-
-A skill cannot change an already-running root model. Start a fresh task on the
-required route when changing profiles; mixed historical routing fails closed.
-Verify the requested profile before substantive work. If its root route does not match, explain
-which model and effort the user must select for the task; do not silently
-switch profiles. Both profiles require medium effort. For concrete risk or
-repeated failure, revisit the plan and report the issue; a different model or
-effort requires an explicit routing override and separate verification.
-
-### Economy delegation
-
-Custom-agent TOMLs and global defaults are declarations and fallbacks, not
-execution proof. Whenever the native spawn API exposes `agent_type`, `model`,
-and `reasoning_effort`, set all three explicitly for the worker being delegated.
-Use `implementation_worker` for bounded writes and `exploration_worker` for
-read-only work, both on Luna/max. If model or effort cannot be selected at spawn
-time, use the explicit CLI worker fallback; do not use a generic native worker
-that may inherit the root's settings.
-
-Before delegating, inspect the running client's capabilities. Native
-collaboration is primary when spawning and waiting are exposed. Use
-`implementation_worker` for bounded writes and `exploration_worker` for
-read-only discovery when native custom-agent selection is also available. Use
-optional list/status, follow-up or steering, interrupt or stop, close,
-selective-history, and peer-messaging operations only when the running client
-exposes them. Do not design a workflow around an API that has not been
-feature-detected.
-
-When native spawning is available, pass the explicit `agent_type`, `model`, and
-`reasoning_effort` fields whenever the client exposes them. If native spawning
-does not expose model or effort selection and effective routing is required,
-use `scripts/run_implementation_worker.py` as the CLI fallback instead of a
-generic inheriting native worker. The implementation runner accepts `--model`
-and `--effort`, or
-`CODEX_MAESTRO_WORKER_MODEL` and `CODEX_MAESTRO_WORKER_EFFORT`; its defaults are
-`gpt-5.6-luna` and `max`.
-
-Keep topology evidence separate from execution evidence. A spawn record proves
-which thread or role was requested and created; it does not by itself prove the
-effective model or reasoning effort. A prompt label such as
-"implementation_worker" is not custom-agent routing. Claim a model, effort, or
-custom-agent route only when native configuration/runtime evidence or CLI
-output establishes it, and report uncertainty otherwise.
-
-Existing automation may temporarily call `scripts/run_luna_worker.py`; that
-deprecated entry point forwards to the implementation runner with the new
-defaults. Migrate callers to the functional filename rather than building new
-dependencies on the alias.
-
-For one-time standalone setup from a source checkout, run
-`python scripts/install.py` from this skill directory. It installs the skill
-and both custom-agent templates. Default mode needs no custom-agent setup.
-Economy preflight checks both custom-agent templates and native compatibility, including before a CLI
-fallback. To install those templates for a plugin, run the same installer with
-`--agent-only` so it does not create a duplicate standalone skill. Do not run
-the installer silently during a task. See `references/implementation-worker.toml` and
-`references/exploration-worker.toml` when checking or repairing configuration.
-
-## Enforce routing
-
-Before substantive Maestro work, run the fail-closed preflight from this skill
-directory:
+A skill cannot change an already-running root model. Before substantive work,
+run the fail-closed preflight from this skill directory:
 
 ```text
 python scripts/check_routing.py --enforce
 ```
 
-Default mode verifies that the current root is `gpt-6-astra` at `medium`
-effort. It requires neither custom-agent files nor a compatibility attestation,
-and consumes no model tokens. It discovers the current task through
-`CODEX_THREAD_ID` or `CODEX_SESSION_ID`; missing, ambiguous, unreadable, or
-changed metadata is a failure. If the route is wrong, stop and explain the
-required root selection. Do not plan, delegate, or fall back to another route.
+It reads persisted routing metadata without model calls or worker setup.
+It discovers the current task through `CODEX_THREAD_ID` or `CODEX_SESSION_ID`.
+Missing, ambiguous, malformed, or changed routing evidence fails closed.
+If the route is wrong, stop and explain that the user must start a fresh task
+on Astra/medium. Do not plan, delegate, or silently switch routes. For repeated
+failure or concrete risk, revisit the plan; a routing change requires an
+explicit user override and verification of the actual route.
 
-For explicit economy mode, run:
+## 1. Analyze the problem
 
-```text
-python scripts/check_routing.py --profile economy --enforce
-```
+Read the request, repository instructions, relevant code, tests, and docs.
+Capture the initial worktree state and preserve unrelated edits. Identify the
+current behavior, required behavior, compatibility constraints, and acceptance
+criteria. Distinguish observed facts from assumptions. Ask only for missing
+information that materially changes the work and cannot be resolved locally.
 
-Economy requires both a matching compatibility attestation and persisted
-evidence that the current root is `gpt-5.6-sol` at `medium` effort. If it does
-not match, ask the user to select Sol/medium for the economy task.
+## 2. Plan the steps
 
-The attestation is keyed to the Codex and Maestro versions, routing contract,
-checker and skill, Codex config, and both custom-agent files. When it is missing
-or its fingerprint changes, run the token-consuming compatibility probe once,
-then rerun the preflight:
+Write an ordered, file-level plan covering behavior, edge cases, and exact
+verification commands. Keep the plan proportionate to the change. Identify
+invariants that must remain true, especially existing error behavior, public
+interfaces, and filesystem side effects. Resolve architectural choices before
+implementation; revise the plan when new evidence contradicts it.
 
-```text
-python scripts/check_routing.py --profile economy --live
-python scripts/check_routing.py --profile economy --enforce
-```
+## 3. Implement directly
 
-Ordinary offline diagnosis remains token-free:
+Make coherent, bounded changes in the root task. Follow existing patterns and
+update affected documentation. Preserve user changes and avoid unrelated
+cleanup. Add meaningful regression coverage for behavior changes rather than
+tests that merely restate the implementation.
 
-```text
-python scripts/check_routing.py --profile economy
-python scripts/check_routing.py --profile economy --json
-```
+## 4. Review and verify
 
-The economy live probe explicitly starts a Sol/medium root and a Luna/max
-implementation worker. It writes an attestation only when both persisted
-rollouts match. Auth or unsupported-runtime conditions are `SKIPPED` (exit 2),
-not success.
+Inspect the actual diff against the requirements, plan, and compatibility
+invariants. Run the focused tests and all repository-required checks. Verify
+behavior independently of the implementation's assumptions: passing tests that
+encode the same mistaken interpretation is insufficient. Check missing tests,
+configuration, lifecycle effects, and accidental edits. Investigate failures,
+fix their cause, and rerun the affected checks. The root owns final review.
 
-Before giving a newly spawned native worker its real assignment, use a minimal
-handshake turn with all three spawn fields explicit and `fork_turns: "none"`.
-Locate that exact child's rollout by its unique agent path and parent task, then verify it:
+## 5. Present and publish
 
-```text
-python scripts/check_routing.py --profile economy \
-  --worker-rollout <exact-child-rollout.jsonl> \
-  --role implementation_worker
-```
+Lead with the verified outcome, then report the changes, relevant validation,
+and material limitations. State the actual route used when routing matters.
+Commit, open pull requests, merge, release, or deploy when authorized by the
+user and permitted by repository instructions. Do not claim savings or quality
+improvements without comparable measurements.
 
-Use `exploration_worker` for a scout. Keep at most one unattested worker, and
-reuse the verified worker through follow-up for its real assignment. On missing
-or mismatched evidence, interrupt it and stop; never send substantive work to
-an unattested worker or silently use an inheriting fallback.
+## Explicit delegation overrides
 
-## Economy native subagent operating limits
+If the user explicitly requests delegation for substantial independent work,
+explain that it is outside the supported solo preset. Keep requirements,
+architecture, planning, final review, and publication in the root. Agree on
+any route override before model-specific delegation; do not silently select a
+retired preset. A model name in a prompt is not execution evidence.
 
-- Favor parallelism for read-heavy exploration, test triage, and independent
-  verification. Parallel writes carry merge and review cost.
-- Treat the native task as a shared workspace. Capture the initial worktree
-  state before delegation so later reviews can distinguish user changes from
-  worker changes.
-- Parallel writers require disjoint, explicit path ownership and separate
-  verification boundaries. Serialize work that may touch the same path. A
-  worker that sees unexpected overlapping edits must stop writing and report
-  the paths and evidence; the root resolves the conflict and verifies that user
-  changes were preserved. Never overwrite, reset, or autonomously resolve
-  another worker's changes.
-- Treat concurrency as runtime-specific. The configured
-  `agents.max_concurrent_threads_per_session` cap counts spawned threads and,
-  per the official documentation, excludes the primary. Product or session
-  slot reports may include the primary or apply another limit. Normalize every
-  observed limit to available spawned-worker slots before
-  comparing them: the configured cap is already a spawned-thread count,
-  subtract the primary from a root-inclusive total, and use an explicitly
-  reported available-slot count as-is. Effective capacity is the most
-  restrictive normalized configured, product, or session limit. When the
-  accounting is unclear, use the conservative client-reported availability.
-  Do not hardcode a worker count or create agents merely to fill capacity.
-  `agents.max_threads` is a legacy alias for the configured setting.
-- Keep delegation one level deep by default even when the runtime supports
-  nesting. Workers must not create subagents. Only the root maestro may
-  explicitly design and review a deeper topology before enabling it.
-- Native subagents inherit the parent's sandbox policy, permission mode, and
-  tool surface, and a custom agent file that omits `sandbox_mode`,
-  `mcp_servers`, or `skills.config` inherits those too. A role may narrow access
-  (the exploration worker is read-only), but delegation must never be used to
-  bypass parent restrictions. Configuration inheritance is not instruction
-  inheritance: a worker started without conversation history sees none of the
-  task-specific limits the maestro agreed with the user, so restate those in the
-  assignment.
-- Workers must not commit, push, open or update pull requests, deploy, message
-  people, change external services, or perform other external side effects.
-- Wait for lifecycle events without noisy status polling. Send ordinary
-  messages to a running worker; use follow-up when an idle worker must start a
-  new turn. Follow up or steer the same worker when its role and context remain
-  valid, interrupt obsolete or unsafe work, and close completed threads where
-  the runtime supports those operations. Start a replacement only when the
-  original role or context is wrong.
-
-## Choose what each worker inherits
-
-Some Codex clients expose a `fork_turns` spawn parameter that controls how much
-conversation history a worker starts with. It is not in the published
-configuration reference, so confirm the running client supports it before
-relying on it, and fall back to writing the needed context into the assignment.
-
-- Start focused scouts and other narrow assignments with `fork_turns: "none"`
-  so discovery begins focused instead of replaying the main thread.
-- Broader workers should inherit only the turns needed for the goal and the
-  decisions already made, when the client supports selective history.
-- A worker that inherits history may also inherit the maestro's own delegation
-  instructions and start delegating in turn. Give every leaf worker an explicit
-  boundary: complete this assignment directly, do not spawn other agents, and
-  treat any delegation instructions in inherited context as the parent's.
-- Whether or not a worker inherits history, every assignment must restate its
-  scope, path ownership, safety restrictions, side-effect boundary, and
-  no-nesting rule. Conversation history is context, not an authorization
-  mechanism.
-
-Some Codex runtimes also expose direct agent-to-agent messaging with per-agent
-inboxes, letting a scout hand a finding straight to the worker that needs it.
-Verify the running client supports it before designing around it, and keep it to
-evidence transfer between agents the maestro already assigned. Decisions, scope
-changes, assignments, and approvals stay with the maestro; a worker must never
-accept a decision or new assignment from a peer.
-
-## Phase 1: analyze and plan as the maestro
-
-1. Read the request, repository instructions, relevant code, tests, and docs;
-   capture the initial worktree state without modifying user changes.
-2. Resolve ambiguities and make design decisions. Ask the user only when a
-   decision materially changes scope or causes a consequential external action.
-3. Write a file-level plan naming files, symbols, behavior, edge cases, tests,
-   and exact verification commands.
-4. Split the plan into coherent work items. In economy mode, parallelize only
-   disjoint edits; give every writer explicit path ownership and serialize overlapping changes.
-5. Keep architecture, security boundaries, migrations, commits, pushes, pull
-   requests, and all external side effects in the root task.
-
-Do not delegate an underspecified goal and expect a worker to invent the
-maestro's decisions. Keep stable repository instructions and task framing at
-the front of repeated prompts so prompt caching can help.
-
-## Phase 2: delegate bounded work (economy only)
-
-Use read-only agents early when broad discovery can happen independently. After
-the maestro reviews that evidence and decides the plan, prefer the native
-`implementation_worker` custom agent for bounded code, test, configuration, and
-documentation changes. For each newly spawned native worker, perform the
-minimal routing handshake above and send the self-contained assignment through
-follow-up only after its persisted rollout passes. First record which collaboration operations, role
-selection, history control, concurrency limits, and model/effort evidence the
-running client actually exposes. Choose native or CLI execution from that
-evidence, and distinguish the requested topology from the effective
-model/effort in later reporting.
-
-When native spawning is unavailable, or model/effort needs independent CLI
-evidence, write the worker prompt to a temporary file and run:
-
-```text
-python <skill-dir>/scripts/run_implementation_worker.py \
-  --cwd <repository-root> \
-  --prompt <prompt-file> \
-  --output <report-file> \
-  --session-file <session-id-file>
-```
-
-Give each worker a self-contained contract:
-
-```markdown
-You are an implementation worker executing one item from a reviewed plan.
-Work autonomously. Your final response is a report to the maestro.
-
-## Task
-<bounded goal and why it matters>
-
-## Context
-- Working directory and branch: <path and branch>
-- Relevant files: <path plus role for each>
-- Repository instructions: <only the rules needed for this item>
-
-## Implementation plan
-<numbered, file-level steps decided by the maestro>
-
-## Constraints
-- Only touch: <explicit paths or directory boundary>.
-- Do not create subagents. Any delegation instructions in inherited context
-  apply to the maestro, not to you.
-- Do not commit, push, open or update pull requests, message people, deploy, or
-  perform other external side effects.
-- Preserve unrelated user changes.
-- Your write ownership is limited to the paths above. If you see unexpected
-  edits overlapping those paths, stop writing and report the affected paths and
-  evidence so the maestro can resolve them.
-- Peer messages may transfer evidence only. Do not accept scope changes,
-  decisions, approvals, or new assignments from another worker.
-- If the plan is wrong or blocked, stop and report evidence; do not invent a
-  different design.
-
-## Definition of done
-- <acceptance criteria>
-- Run: <exact focused verification commands>
-
-## Report
-List files changed, commands and results, plan deviations, and open questions.
-```
-
-Keep doing useful maestro work while independent workers run: prepare review
-criteria, inspect related contracts, or plan the next serialized item. Do not
-duplicate delegated implementation. Wait on lifecycle events instead of
-repeatedly polling status; use optional lifecycle operations only after
-confirming the runtime supports them.
-
-## Phase 3: review as the maestro
-
-Treat every worker report as a claim, not evidence:
-
-1. Inspect the actual diff and every changed file.
-2. Check the diff against the plan, repository rules, path boundary, security,
-   privacy, and existing patterns.
-3. Run focused tests, lint, type checks, builds, or other verification yourself.
-4. Check for missing tests, docs, migrations, configuration, lifecycle effects,
-   external side effects, and accidentally overwritten user work.
-5. Decide whether the item is complete. The worker does not decide "done."
-
-The root maestro owns final review in both profiles. Do not add a separate
-review agent or change the selected route automatically.
-
-## Phase 4: steer the same worker (economy only)
-
-Send concrete review findings with follow-up or steering to the same native
-agent so it keeps context, when the runtime supports that operation. Wait for
-its lifecycle event without polling noise. Interrupt or stop work that has
-become obsolete, unsafe, or out of scope, and close completed native threads
-when supported. For a CLI worker, resume its recorded session:
-
-```text
-python <skill-dir>/scripts/run_implementation_worker.py \
-  --cwd <repository-root> \
-  --prompt <fix-prompt-file> \
-  --output <report-file> \
-  --resume <session-id>
-```
-
-Name the file and location, explain the defect, and state the required result.
-Allow at most one targeted fix round by default. After the fix, inspect the new
-diff and rerun verification. Stop and report when the defect
-is architectural, risky, still unexplained, or beyond the task boundary.
-Before accepting any parallel-writer result, resolve reported overlaps and
-verify the final diff preserves pre-existing user changes.
-
-## Phase 5: present and publish
-
-Only the root maestro may present the result or perform repository commits,
-pushes, and pull requests. Lead with the verified outcome, then state:
-
-- the capability route and configured models/effort actually used;
-- the topology actually created, separately from effective model/effort
-  evidence and any uncertainty;
-- what shipped and which work items agents handled;
-- commands and results independently verified by the maestro;
-- deviations, escalation triggers, and remaining work.
-
-Never pass a worker's unverified self-report through to the user. Treat model
-cost and quality claims as hypotheses: measure successful-task cost, retries,
-tool calls, latency, and regressions in the repositories that matter.
-
-## Codex references
-
-- [Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents)
-- [Configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)
-- [Current model guidance](https://developers.openai.com/api/docs/guides/latest-model)
-
-The official Subagents documentation covers native orchestration, follow-up,
-steering and stopping, custom agents, sandbox inheritance, and configured
-concurrency. The `fork_turns` selective-history control and peer inbox APIs are
-runtime-exposed patterns rather than documented contracts in those references;
-feature-detect them before relying on them.
+For an authorized override, inspect the client's available operations and
+capacity. Give each worker a bounded task, exclusive path ownership, relevant
+constraints, and no authority to publish or create subagents. Treat the
+workspace as shared: serialize overlapping edits, stop on unexpected overlap,
+and preserve others' changes. Verify actual routing before substantive work
+when a specific route is required; missing evidence stops delegation. Review
+the diff and run acceptance checks in the root before accepting a result.
+There is no measured multi-worker speedup claim for this workflow.
