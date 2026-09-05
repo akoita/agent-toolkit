@@ -22,7 +22,7 @@
     {
       "name": "utilities",
       "source": "./plugins/claude/utilities",
-      "version": "0.5.9",
+      "version": "0.6.0",
       "description": "General-purpose project utilities, initially focused on dependency-aware milestone planning."
     }
   ]
