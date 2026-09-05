@@ -81,6 +81,68 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+    def test_default_enforce_is_solo_and_needs_no_worker_setup(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            rollout = root / "root.jsonl"
+            for model, effort, expected in (
+                ("gpt-6-astra", "medium", 0),
+                ("gpt-5.6-sol", "medium", 1),
+                ("gpt-6-astra", "high", 1),
+                ("gpt-5.6-luna", "max", 1),
+            ):
+                with self.subTest(model=model, effort=effort):
+                    self.write_rollout(rollout, model=model, effort=effort)
+                    output = io.StringIO()
+                    with patch.object(routing, "run_command") as run, \
+                         patch.object(routing, "offline_checks") as offline, \
+                         patch.object(routing, "live_check") as live, \
+                         contextlib.redirect_stdout(output):
+                        code = routing.main([
+                            "--enforce", "--root-rollout", str(rollout),
+                            "--thread-id", "rollout-1",
+                            "--codex-home", str(root), "--json",
+                        ])
+                    self.assertEqual(code, expected)
+                    report = json.loads(output.getvalue())
+                    self.assertEqual(report["profile"], "default")
+                    self.assertEqual([c["name"] for c in report["checks"]], ["root.rollout"])
+                    run.assert_not_called()
+                    offline.assert_not_called()
+                    live.assert_not_called()
+
+    def test_default_rejects_worker_operations_before_execution(self) -> None:
+        for option in (["--live"], ["--worker-rollout", "worker.jsonl"]):
+            with self.subTest(option=option), \
+                 patch.object(routing, "run_command") as run, \
+                 contextlib.redirect_stderr(io.StringIO()), \
+                 self.assertRaises(SystemExit) as raised:
+                routing.main(option)
+            self.assertEqual(raised.exception.code, 2)
+            run.assert_not_called()
+
+    def test_default_enforce_rejects_worker_as_root_and_wrong_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            rollout = root / "root.jsonl"
+            self.write_rollout(rollout, model="gpt-6-astra", effort="medium",
+                               role="implementation_worker", parent="parent")
+            self.assertEqual(routing.root_rollout_check(
+                codex_home=root, rollout_path=rollout)["status"], "fail")
+            self.write_rollout(rollout, model="gpt-6-astra", effort="medium")
+            self.assertEqual(routing.root_rollout_check(
+                codex_home=root, rollout_path=rollout, thread_id="wrong")["status"], "fail")
+
+    def test_economy_cli_enforces_attestation_and_sol_root(self) -> None:
+        with patch.object(routing, "resolve_codex", return_value="codex"), \
+             patch.object(routing, "offline_checks", return_value=[]) as offline, \
+             patch.object(routing, "enforce_check", return_value=[
+                 routing.check("root.rollout", "fail", "wrong root")
+             ]) as enforce, contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(routing.main(["--profile", "economy", "--enforce"]), 1)
+        offline.assert_called_once()
+        enforce.assert_called_once()
+
     def test_offline_success_checks_cli_doctor_agents_and_overrides(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             agents = self.make_agents(Path(directory))
@@ -270,7 +332,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             rollout = root / "sessions" / "root.jsonl"
             self.write_rollout(
                 rollout,
-                model=routing.EXPECTED_ROOT_MODEL,
+                model=routing.DEFAULT_ROOT_MODEL,
                 effort=routing.EXPECTED_ROOT_EFFORT,
                 identifier="root-1",
             )
@@ -321,7 +383,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             wrong = root / "wrong.jsonl"
             self.write_rollout(
                 wrong,
-                model=routing.EXPECTED_ROOT_MODEL,
+                model=routing.ECONOMY_ROOT_MODEL,
                 effort=routing.EXPECTED_ROOT_EFFORT,
                 role=routing.EXPECTED_EXPLORATION_ROLE,
             )
@@ -356,6 +418,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             with contextlib.redirect_stdout(output):
                 passed = routing.main(
                     [
+                        "--profile", "economy",
                         "--worker-rollout",
                         str(rollout),
                         "--role",
@@ -367,7 +430,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             self.assertEqual(json.loads(output.getvalue())["status"], "ok")
             self.write_rollout(
                 rollout,
-                model=routing.EXPECTED_ROOT_MODEL,
+                model=routing.ECONOMY_ROOT_MODEL,
                 effort=routing.EXPECTED_ROOT_EFFORT,
                 role=routing.EXPECTED_IMPLEMENTATION_ROLE,
             )
@@ -375,6 +438,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             with contextlib.redirect_stdout(output):
                 failed = routing.main(
                     [
+                        "--profile", "economy",
                         "--worker-rollout",
                         str(rollout),
                         "--role",
@@ -391,7 +455,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             rollout = root / "sessions" / "root.jsonl"
             self.write_rollout(
                 rollout,
-                model=routing.EXPECTED_ROOT_MODEL,
+                model=routing.ECONOMY_ROOT_MODEL,
                 effort=routing.EXPECTED_ROOT_EFFORT,
                 identifier="root-1",
             )
@@ -420,6 +484,18 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                 )
             self.assertEqual(results[-2]["status"], "ok")
             self.assertEqual(results[-1]["status"], "ok")
+            self.write_rollout(
+                rollout, model="gpt-6-astra", effort="medium", identifier="root-1"
+            )
+            with patch.object(routing.time, "time", return_value=100):
+                rejected = routing.enforce_check(
+                    codex="codex", codex_home=root, agents_dir=root / "agents",
+                    timeout=1, thread_id="root-1", attestation_path=destination,
+                    offline_results=offline,
+                )
+            self.assertEqual(rejected[-2]["status"], "ok")
+            self.assertEqual(rejected[-1]["status"], "fail")
+            self.assertIn("gpt-5.6-sol", rejected[-1]["message"])
             outside = routing.enforce_check(
                 codex="codex",
                 codex_home=root,

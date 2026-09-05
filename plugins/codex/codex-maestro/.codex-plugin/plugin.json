@@ -1,7 +1,7 @@
 {
   "name": "codex-maestro",
-  "version": "0.5.9",
-  "description": "Experimental Codex workflow for planning, bounded delegation, review, and verification.",
+  "version": "0.6.0",
+  "description": "Experimental Codex workflow: Astra/medium alone by default, with explicit Sol/medium and Luna/max economy mode.",
   "author": {
     "name": "Aboubakar Koïta",
     "url": "https://github.com/akoita"
@@ -17,7 +17,7 @@
   "interface": {
     "displayName": "Codex Maestro",
     "shortDescription": "Orchestrate non-trivial development work.",
-    "longDescription": "Plan complex changes, delegate bounded implementation, inspect the resulting diff, and verify the outcome.",
+    "longDescription": "Implement and verify with Astra/medium alone by default. Opt into economy mode for a Sol/medium root with bounded Luna/max workers.",
     "developerName": "Aboubakar Koïta",
     "category": "Developer Tools",
     "capabilities": [

@@ -21,6 +21,16 @@ def normalized(path: Path) -> str:
 
 
 class CodexMaestroContractTests(unittest.TestCase):
+    def test_default_is_solo_and_economy_is_explicit(self) -> None:
+        skill = normalized(SKILL)
+        self.assertIn("`gpt-6-astra`, `medium`", skill)
+        self.assertIn("In default mode, do not spawn native workers, run CLI workers", skill)
+        self.assertIn("Economy, explicitly requested by the user", skill)
+        self.assertIn("--profile economy --enforce", skill)
+        self.assertIn("--profile economy --live", skill)
+        self.assertIn("or silently combine an Astra root with Luna workers", skill)
+        self.assertNotIn("Default to Balanced", skill)
+
     def test_native_lifecycle_is_primary_and_cli_is_the_fallback(self) -> None:
         skill = normalized(SKILL)
 

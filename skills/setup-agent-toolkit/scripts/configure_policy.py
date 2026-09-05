@@ -18,18 +18,20 @@ POLICIES = {
 - Use `$codex-maestro` for non-trivial implementation and multi-step debugging.
 - Keep requirements, architecture, planning, review, and publication in the
   root task; delegate only bounded work with disjoint ownership.
-- Default to Balanced: use `gpt-5.6-sol` at medium effort for the root
-  orchestrator and `gpt-5.6-luna` at max effort for bounded implementation
-  and read-only exploration workers.
+- Default to `gpt-6-astra` at medium effort, working alone in the root.
+  Do not spawn native or CLI workers in default mode.
+- Use economy mode only when explicitly requested: `gpt-5.6-sol` at medium
+  effort in the root with `gpt-5.6-luna` at max effort for bounded implementation
+  and read-only exploration workers. Never silently combine Astra with Luna.
 - Run Maestro's fail-closed routing preflight before substantive work; give a
   native worker its real task only after its persisted route is verified.
 - Handle trivial, localized, low-risk work directly.
-- Escalate to Quality only for security-sensitive, architectural, migration,
-  permissions, payments, public-contract, or highly ambiguous work.
+- Keep both profiles at medium root effort. For concrete risk or repeated
+  failure, revisit the plan; changing the route requires an explicit override.
 - Treat the agent workspace as shared: give parallel writers exclusive,
   disjoint ownership and serialize overlapping edits. Keep nesting disabled by
   default.
-- Prefer native spawn, wait, and same-worker steering when exposed; respect the
+- In economy mode, prefer native spawn, wait, and same-worker steering; respect the
   effective runtime thread capacity and use the CLI worker only as a fallback.
 - Follow the installed `codex-maestro` skill for the complete workflow.
 - Do not delegate trivial work or pure analysis/review unnecessarily.""",

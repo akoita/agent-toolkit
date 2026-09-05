@@ -1,8 +1,8 @@
 # codex-maestro
 
-Native-first GPT-5.6 orchestration for Codex. Keeps requirements, architecture,
-review, and publication in the root task and delegates bounded implementation to
-custom worker agents.
+Implement and verify software changes with **Astra/medium alone by default**.
+Request **economy mode** to use a **Sol/medium root with Luna/max workers**.
+Requirements, architecture, review, and publication stay in the root task.
 
 This native Codex package is generated from the experimental
 [Agent Plugins v1.0.0 source](../../portable/codex-maestro/). Its manifest,
@@ -27,8 +27,9 @@ codex plugin add codex-maestro@agent-toolkit
 ```
 
 A plugin install does not write custom-agent TOML files into
-`$CODEX_HOME/agents/`; the skill uses its bundled CLI fallback immediately. To
-add the native worker agents, run the bundled installer — it ships inside the
+`$CODEX_HOME/agents/`. Default mode needs no worker setup. Economy preflight
+requires the worker templates and native compatibility proof, even when later using the CLI
+fallback. To add the agents, run the bundled installer — it ships inside the
 package, so no checkout is needed. Take the base path from the `PATH` column of
 `codex plugin list`:
 
@@ -104,45 +105,62 @@ the marketplace qualifier is required. See
 
 ## Model routing
 
-Model names are deployment choices, not agent identities. The root orchestrator
-defaults to `gpt-5.6-sol` at medium effort. Both bounded implementation and
-read-only exploration workers default to `gpt-5.6-luna` at max effort.
+| Profile | Root | Workers |
+| --- | --- | --- |
+| Default | `gpt-6-astra`, `medium` | None |
+| Economy (explicit opt-in) | `gpt-5.6-sol`, `medium` | `gpt-5.6-luna`, `max` |
 
-Raise the root orchestrator above medium only for a concrete risk or failure
-signal — security-sensitive, architectural, migration, permissions, payments,
-public-contract, highly ambiguous, or repeatedly failing work. The worker
-profiles remain pinned to Luna at max.
+Invoke `$codex-maestro` for the default, or say “Use Codex Maestro in economy
+mode” to opt in. Default mode performs planning, implementation, and verification
+in Astra without native or CLI workers. Economy delegates only bounded work.
+It is a cost-oriented option; savings depend on the task. Astra with Luna is not
+a supported profile.
+
+Start a fresh Codex task with the matching root model and medium effort when
+changing profiles; mixed historical routing fails closed.
+The skill cannot switch the model of a running task and will stop on a mismatch.
+Higher effort or a different model requires an explicit routing override.
 
 ## Fail-closed routing attestation
 
-Run this before substantive Maestro work:
+Before default work, verify the current Astra/medium root:
 
 ```bash
 python <path>/skills/codex-maestro/scripts/check_routing.py --enforce
 ```
 
-Enforcement fails unless a compatibility attestation matches the current Codex,
-Maestro, config, checker/skill, and custom-agent fingerprints and the current
-task's persisted rollout proves a Sol/medium root. A missing or changed
-attestation requires one explicit `check_routing.py --live` probe. The probe
-consumes model tokens but writes the attestation only when persisted root and
-child metadata prove Sol/medium and `implementation_worker` Luna/max. Auth or
-runtime unavailability is skipped, never accepted.
+This reads persisted routing evidence without model calls, worker templates,
+or an economy attestation. Missing, ambiguous, malformed, or mismatched root
+evidence fails closed. The check verifies model and effort; the skill's
+instructions enforce the no-delegation workflow.
 
-Each newly spawned worker receives only a minimal handshake until its exact
-rollout passes `check_routing.py --worker-rollout <path> --role <role>`. Reuse
-that verified worker for the real assignment. A missing, malformed, Sol/medium,
-wrong-effort, or wrong-role worker is interrupted and receives no substantive
-work. This bounds a routing regression to the handshake instead of an entire
-delegated task.
+Economy mode retains compatibility and worker verification:
 
-The ordinary `check_routing.py` mode remains a token-free diagnostic for the
-CLI, config, and agent declarations.
+```bash
+python <path>/skills/codex-maestro/scripts/check_routing.py --profile economy --enforce
+```
+
+The attestation must match Codex, Maestro, config, checker/skill, and custom-agent
+fingerprints, and the current root must prove Sol/medium. When the attestation
+is missing or stale, run `check_routing.py --profile economy --live`, then rerun
+enforcement. The live probe consumes tokens and attests only persisted proof of
+a Sol/medium root and Luna/max implementation worker. Auth or runtime
+unavailability is skipped, never accepted. `--live` requires economy explicitly.
+
+Each new economy worker receives a minimal handshake until its exact rollout
+passes `check_routing.py --profile economy --worker-rollout <path> --role <role>`.
+Use `fork_turns: "none"` for the handshake, then reuse the verified worker for
+the real assignment. Missing or mismatched evidence stops the worker before
+substantive work. This bounds a routing regression to the handshake.
+
+`check_routing.py --profile economy` diagnoses CLI, config, and agent declarations
+without model calls. With no profile or flags, the script describes the default
+route; use `--enforce` to verify it.
 
 ## Native collaboration
 
-Maestro prefers the collaboration lifecycle exposed by the running Codex
-client: spawn bounded agents, wait for results, steer the same worker after
+In economy mode, Maestro prefers the collaboration lifecycle exposed by the
+running Codex client: spawn bounded agents, wait for results, steer the same worker after
 review, and stop obsolete or unsafe work. Use selective history inheritance,
 peer evidence messages, thread listing, and thread closing only when the client
 exposes them. Whenever native spawn fields are exposed, set `agent_type`,
@@ -178,20 +196,21 @@ procedure stays in the skill.
 - Use `$codex-maestro` for non-trivial implementation and multi-step debugging.
 - Keep requirements, architecture, planning, review, and publication in the
   root task; delegate only bounded work with disjoint ownership.
-- Default to Balanced: use `gpt-5.6-sol` at medium effort for the root
-  orchestrator and `gpt-5.6-luna` at max effort for bounded implementation
-  and read-only exploration workers.
+- Default to `gpt-6-astra` at medium effort, working alone in the root.
+  Do not spawn native or CLI workers in default mode.
+- Use economy mode only when explicitly requested: `gpt-5.6-sol` at medium
+  effort in the root with `gpt-5.6-luna` at max effort for bounded implementation
+  and read-only exploration workers. Never silently combine Astra with Luna.
 - Run Maestro's fail-closed routing preflight before substantive work; give a
   native worker its real task only after its persisted route is verified.
 - Handle trivial, localized, low-risk work directly.
-- Escalate to Quality only for security-sensitive, architectural, migration,
-  permissions, payments, public-contract, or highly ambiguous work.
+- Keep both profiles at medium root effort. For concrete risk or repeated
+  failure, revisit the plan; changing the route requires an explicit override.
 - Treat the agent workspace as shared: give parallel writers exclusive,
   disjoint ownership and serialize overlapping edits. Keep nesting disabled by
   default.
-- Prefer native spawn, wait, and same-worker steering when exposed, passing
-  explicit agent type/model/effort fields; if those fields are unavailable, use
-  the CLI worker when effective routing is required.
+- In economy mode, prefer native spawn, wait, and same-worker steering; respect the
+  effective runtime thread capacity and use the CLI worker only as a fallback.
 - Follow the installed `codex-maestro` skill for the complete workflow.
 - Do not delegate trivial work or pure analysis/review unnecessarily.
 ```
