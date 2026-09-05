@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "utilities",
-  "version": "0.5.9",
+  "version": "0.6.0",
   "description": "General-purpose, project-agnostic workflow skills for planning and delivering useful software changes.",
   "author": {
     "name": "Aboubakar Koïta",

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Check whether Codex Maestro's declared and effective routing is working.
 
-The default check is local and does not run a model.  ``--live`` is an
+The default profile checks Astra/medium alone without worker dependencies.
+The economy profile checks Sol/medium with Luna/max. ``--profile economy --live`` is an
 explicit opt-in probe: it runs one minimal native child workflow and inspects
 the persisted child rollout for effective role, model, and effort evidence.
 """
@@ -23,10 +24,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
-ROUTING_CONTRACT_VERSION = 1
+ROUTING_CONTRACT_VERSION = 2
 EXPECTED_MODEL = "gpt-5.6-luna"
 EXPECTED_EFFORT = "max"
-EXPECTED_ROOT_MODEL = "gpt-5.6-sol"
+DEFAULT_ROOT_MODEL = "gpt-6-astra"
+ECONOMY_ROOT_MODEL = "gpt-5.6-sol"
 EXPECTED_ROOT_EFFORT = "medium"
 EXPECTED_IMPLEMENTATION_ROLE = "implementation_worker"
 EXPECTED_EXPLORATION_ROLE = "exploration_worker"
@@ -86,6 +88,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="emit machine-readable JSON instead of concise human output",
     )
+    parser.add_argument(
+        "--profile", choices=("default", "economy"), default="default",
+        help="default: Astra/medium alone; economy: Sol/medium + Luna/max",
+    )
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument(
         "--live",
@@ -95,7 +101,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     modes.add_argument(
         "--enforce",
         action="store_true",
-        help="enforce a fresh attestation and the current root route",
+        help="verify the selected root route (economy also requires an attestation)",
     )
     modes.add_argument(
         "--worker-rollout",
@@ -161,7 +167,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=Path,
         help="explicit current root rollout path for --enforce",
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.profile != "economy" and (args.live or args.worker_rollout):
+        parser.error("--live and --worker-rollout require --profile economy")
+    return args
 
 
 def check(
@@ -535,7 +544,7 @@ def compatibility_fingerprint(
         "package_version": discover_package_version(script),
         "routes": {
             "root": {
-                "model": EXPECTED_ROOT_MODEL,
+                "model": ECONOMY_ROOT_MODEL,
                 "effort": EXPECTED_ROOT_EFFORT,
             },
             "workers": {
@@ -1000,6 +1009,7 @@ def root_rollout_check(
     thread_id: str | None = None,
     session_id: str | None = None,
     rollout_path: Path | None = None,
+    expected_model: str = DEFAULT_ROOT_MODEL,
 ) -> dict[str, Any]:
     identity = thread_id or session_id
     path, error = locate_root_rollout(
@@ -1021,21 +1031,21 @@ def root_rollout_check(
             "current root rollout metadata is malformed or schema-changed",
         )
     mismatches: list[str] = []
-    if evidence.get("model") != EXPECTED_ROOT_MODEL:
-        mismatches.append("model does not match gpt-5.6-sol")
+    if evidence.get("model") != expected_model:
+        mismatches.append(f"model does not match {expected_model}")
     if evidence.get("effort") != EXPECTED_ROOT_EFFORT:
         mismatches.append("effort does not match medium")
     if mismatches:
         return check(
             "root.rollout",
             "fail",
-            "current root rollout does not match Sol/medium",
+            f"current root rollout does not match {expected_model}/medium",
             mismatches=mismatches,
         )
     return check(
         "root.rollout",
         "ok",
-        "current root rollout proves gpt-5.6-sol/medium",
+        f"current root rollout proves {expected_model}/medium",
     )
 
 
@@ -1137,13 +1147,15 @@ def unavailable_status(output: str) -> str | None:
 
 LIVE_PROMPT = """Run a routing self-check and then stop.
 
-This prompt is the compatibility probe invoked by `check_routing.py --live`.
+This prompt is the compatibility probe invoked by `check_routing.py --profile economy --live`.
+Economy mode is explicitly requested for this probe.
 Do not invoke the codex-maestro skill and do not run its routing preflight or
 checker: that would recursively require the attestation this probe is creating.
 
 Use native collaboration to spawn exactly one child with all three routing
 fields explicitly set at spawn time: `agent_type="implementation_worker"`,
-`model="gpt-5.6-luna"`, and `reasoning_effort="max"`. Do not rely on
+`model="gpt-5.6-luna"`, and `reasoning_effort="max"`. When supported, set
+`fork_turns="none"` so full-history inheritance cannot override the route. Do not rely on
 custom-agent TOMLs or global defaults, do not use the CLI fallback, and do not
 spawn any other child. If the spawn API cannot set all three fields, report
 ROUTING_UNSUPPORTED without spawning a generic child. Give the child a minimal
@@ -1172,7 +1184,7 @@ def live_check(
         "exec",
         "--json",
         "--model",
-        "gpt-5.6-sol",
+        ECONOMY_ROOT_MODEL,
         "--sandbox",
         "read-only",
         "--cd",
@@ -1274,9 +1286,9 @@ def live_check(
     child = child_evidence[0]
     root = root_evidence[0]
     mismatches = []
-    if root.get("model") != EXPECTED_ROOT_MODEL:
+    if root.get("model") != ECONOMY_ROOT_MODEL:
         mismatches.append(
-            f"root model={root.get('model')!r}, expected {EXPECTED_ROOT_MODEL!r}"
+            f"root model={root.get('model')!r}, expected {ECONOMY_ROOT_MODEL!r}"
         )
     if root.get("effort") != EXPECTED_ROOT_EFFORT:
         mismatches.append(
@@ -1318,7 +1330,7 @@ def live_check(
     )
     destination = attestation_path or default_attestation_path(codex_home)
     proof = {
-        "root": {"model": EXPECTED_ROOT_MODEL, "effort": EXPECTED_ROOT_EFFORT},
+        "root": {"model": ECONOMY_ROOT_MODEL, "effort": EXPECTED_ROOT_EFFORT},
         "worker": {
             "role": EXPECTED_IMPLEMENTATION_ROLE,
             "model": EXPECTED_MODEL,
@@ -1365,7 +1377,7 @@ def enforce_check(
     attestation_path: Path | None = None,
     offline_results: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
-    """Run fail-closed compatibility and current-root enforcement checks."""
+    """Run economy compatibility and Sol root enforcement checks."""
 
     results = (
         offline_results
@@ -1408,6 +1420,7 @@ def enforce_check(
             thread_id=effective_thread_id,
             session_id=effective_session_id,
             rollout_path=rollout_path or root_rollout_path,
+            expected_model=ECONOMY_ROOT_MODEL,
         )
     )
     return results
@@ -1464,7 +1477,27 @@ def main(argv: list[str] | None = None) -> int:
             else default_attestation_path(codex_home)
         )
     )
-    if args.worker_rollout is not None:
+    if args.profile == "default":
+        # Solo work has no worker compatibility dependency and must not launch
+        # a model or require custom-agent files or an economy attestation.
+        mode = "enforce" if args.enforce else "offline"
+        if args.enforce:
+            results = [
+                root_rollout_check(
+                    codex_home=codex_home,
+                    thread_id=args.root_thread_id or os.environ.get("CODEX_THREAD_ID"),
+                    session_id=args.root_session_id or os.environ.get("CODEX_SESSION_ID"),
+                    rollout_path=args.root_rollout,
+                )
+            ]
+        else:
+            results = [
+                check(
+                    "profile", "ok",
+                    "default requires Astra/medium alone; use --enforce to verify the current root",
+                )
+            ]
+    elif args.worker_rollout is not None:
         if not args.expected_role:
             results = [
                 check(
@@ -1488,7 +1521,7 @@ def main(argv: list[str] | None = None) -> int:
             timeout=args.timeout,
         )
         mode = "enforce" if args.enforce else ("live" if args.live else "offline")
-    if args.enforce:
+    if args.enforce and args.profile == "economy":
         results = enforce_check(
             codex=codex,
             codex_home=codex_home,
@@ -1542,6 +1575,7 @@ def main(argv: list[str] | None = None) -> int:
     report = {
         "status": overall_status(results),
         "mode": mode,
+        "profile": args.profile,
         "checks": results,
     }
     if args.json_output:

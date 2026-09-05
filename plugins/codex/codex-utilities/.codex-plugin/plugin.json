@@ -1,6 +1,6 @@
 {
   "name": "codex-utilities",
-  "version": "0.5.9",
+  "version": "0.6.0",
   "description": "General-purpose, project-agnostic workflow skills for Codex, initially focused on dependency-aware milestone planning.",
   "author": {
     "name": "Aboubakar Koïta",

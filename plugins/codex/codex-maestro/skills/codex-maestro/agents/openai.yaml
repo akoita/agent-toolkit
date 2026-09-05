@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex Maestro"
-  short_description: "Capability-based GPT-5.6 orchestration"
-  default_prompt: "Use $codex-maestro: keep planning and review in the root task on gpt-5.6-sol at medium effort, route bounded implementation and read-only exploration to gpt-5.6-luna at max effort, and escalate root effort only when concrete risk justifies it."
+  short_description: "Astra by default; opt-in economy routing"
+  default_prompt: "Use $codex-maestro: implement and verify directly with gpt-6-astra at medium effort by default. Only when I explicitly request economy mode, use a gpt-5.6-sol medium root with gpt-5.6-luna max workers. Keep planning and review in the root and verify the selected route."
