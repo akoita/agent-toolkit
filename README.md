@@ -36,7 +36,7 @@ skills. Everything below installs from the same marketplace.
 | Plugin | Platform | Install as | What it does |
 | --- | --- | --- | --- |
 | [maestro](plugins/claude/maestro/) | Claude Code | `maestro@agent-toolkit` | Capability-based orchestration across named subagents, agent teams, and dynamic workflows. |
-| [codex-maestro](plugins/codex/codex-maestro/) | Codex | `codex-maestro@agent-toolkit` | Astra/medium alone by default; explicit economy mode with a Sol/medium root and Luna/max workers. |
+| [codex-maestro](plugins/codex/codex-maestro/) | Codex | `codex-maestro@agent-toolkit` | Structured analysis, planning, implementation, and verification with solo Astra/medium; efficiency benefits are unproven. |
 
 ### Security
 

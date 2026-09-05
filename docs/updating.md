@@ -44,19 +44,13 @@ npx skills update -g codex-maestro maestro setup-agent-toolkit
 A multi-skill plugin such as `security` or `codex-security` has one entry per
 skill (`security-audit`, `security-review`, and so on), so update each name
 you installed. Or name one skill, and omit `-g` for a project-scoped
-installation. This updates the installed skill directory only. If you
-installed Codex Maestro's native custom-agent TOMLs separately, refresh them
-from the newly updated skill:
-
-```bash
-python ~/.agents/skills/codex-maestro/scripts/install.py --agent-only --force
-```
-
-Use the destination reported by the skills CLI if it differs. `--force`
-replaces the existing TOMLs, so inspect and back up any local edits first.
-This step applies to skills that ship an installer script, such as
-`codex-maestro`; the security packages ship no installer, so there is nothing
-equivalent to run for them.
+installation. This updates the installed skill directory only. Codex Maestro
+0.7.0 uses solo execution and needs no worker-template refresh. Its normal
+installer update leaves existing custom-agent files untouched. If old policy
+blocks still select economy or parallel workers, preview an update with the
+[setup workflow](../tools/setup-agent-toolkit/SKILL.md), then start a fresh task.
+Legacy agent maintenance remains available through the skill's installer;
+inspect callers and preserve local customizations before using `--agent-only`.
 
 ## Reinstalling over an existing install
 

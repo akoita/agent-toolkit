@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex Maestro"
-  short_description: "Astra by default; opt-in economy routing"
-  default_prompt: "Use $codex-maestro: implement and verify directly with gpt-6-astra at medium effort by default. Only when I explicitly request economy mode, use a gpt-5.6-sol medium root with gpt-5.6-luna max workers. Keep planning and review in the root and verify the selected route."
+  short_description: "Analyze, plan, implement, and verify with solo Astra"
+  default_prompt: "Use $codex-maestro with gpt-6-astra at medium effort, working alone. Verify the root route, analyze the problem, plan the steps, implement, and independently review and test the result. Do not automatically delegate or add an advisor."

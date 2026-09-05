@@ -37,9 +37,9 @@ change, and mutate only the requested platform and scope.
 Locate this repository and confirm the requested source exists:
 
 - Codex skill: `plugins/codex/codex-maestro/skills/codex-maestro/`
-- Codex implementation worker:
+- Legacy Codex implementation worker (explicit maintenance only):
   `plugins/codex/codex-maestro/skills/codex-maestro/references/implementation-worker.toml`
-- Codex exploration worker:
+- Legacy Codex exploration worker (explicit maintenance only):
   `plugins/codex/codex-maestro/skills/codex-maestro/references/exploration-worker.toml`
 - Claude skill: `plugins/claude/maestro/skills/maestro/`
 - Claude agents: `plugins/claude/maestro/agents/`
@@ -98,11 +98,12 @@ python plugins/codex/codex-maestro/skills/codex-maestro/scripts/install.py
 ```
 
 Use `--link` only when the user wants a development checkout to remain the
-live source. The installer adds `implementation-worker.toml` and
-`exploration-worker.toml`. For project scope, copy only the requested skill
-directory and, when agents are requested, those two templates to
-`.codex/agents/`. The deprecated `run_luna_worker.py` script is only a CLI
-compatibility entry point; do not install a new `luna_worker` custom agent.
+live source. The installer installs only the skill. Codex Maestro's supported
+route is solo Astra/medium, so do not install or refresh worker templates during
+normal setup or upgrade. Existing agent definitions remain user-owned and
+untouched. For project scope, copy only the requested skill directory to
+`.agents/skills/`. Use `--agent-only` only for explicitly requested legacy
+maintenance; it does not enable a supported worker preset.
 
 For Claude, copy or link `plugins/claude/maestro/skills/maestro/` to the selected
 skills directory and copy the three Markdown definitions from

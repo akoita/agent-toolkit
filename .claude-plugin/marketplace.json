@@ -10,19 +10,19 @@
     {
       "name": "maestro",
       "source": "./plugins/claude/maestro",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "description": "Experimental Claude Code workflow for orchestrating non-trivial development work."
     },
     {
       "name": "security",
       "source": "./plugins/claude/security",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "description": "Project-agnostic security skills for audits, diff review, the free deterministic toolchain, supply chain, threat modeling, smart contracts, and AI systems."
     },
     {
       "name": "utilities",
       "source": "./plugins/claude/utilities",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "description": "General-purpose project utilities, initially focused on dependency-aware milestone planning."
     }
   ]

@@ -16,25 +16,20 @@ POLICIES = {
     "codex": """## Orchestration policy
 
 - Use `$codex-maestro` for non-trivial implementation and multi-step debugging.
-- Keep requirements, architecture, planning, review, and publication in the
-  root task; delegate only bounded work with disjoint ownership.
-- Default to `gpt-6-astra` at medium effort, working alone in the root.
-  Do not spawn native or CLI workers in default mode.
-- Use economy mode only when explicitly requested: `gpt-5.6-sol` at medium
-  effort in the root with `gpt-5.6-luna` at max effort for bounded implementation
-  and read-only exploration workers. Never silently combine Astra with Luna.
-- Run Maestro's fail-closed routing preflight before substantive work; give a
-  native worker its real task only after its persisted route is verified.
+- Use `gpt-6-astra` at medium effort, working alone in the root task.
+- Keep requirements, architecture, analysis, planning, implementation, review,
+  verification, and publication in the root.
+- Run Maestro's fail-closed routing preflight before substantive work.
+- Do not automatically spawn native or CLI workers or add an advisor.
+- Economy, Astra parallel, and advisor routes are not supported presets.
+- Delegate only when the user explicitly requests it, with bounded tasks,
+  disjoint ownership, verified routing, and no worker publication or nesting.
+- For concrete risk or repeated failure, revisit the plan; changing the route
+  requires an explicit user override.
 - Handle trivial, localized, low-risk work directly.
-- Keep both profiles at medium root effort. For concrete risk or repeated
-  failure, revisit the plan; changing the route requires an explicit override.
-- Treat the agent workspace as shared: give parallel writers exclusive,
-  disjoint ownership and serialize overlapping edits. Keep nesting disabled by
-  default.
-- In economy mode, prefer native spawn, wait, and same-worker steering; respect the
-  effective runtime thread capacity and use the CLI worker only as a fallback.
 - Follow the installed `codex-maestro` skill for the complete workflow.
-- Do not delegate trivial work or pure analysis/review unnecessarily.""",
+- Treat efficiency claims as hypotheses; the pilot did not establish a benefit
+  from installing the skill over using the same model directly.""",
     "claude": """## Orchestration policy
 
 - Use `/maestro` for non-trivial implementation work such as features, bug
