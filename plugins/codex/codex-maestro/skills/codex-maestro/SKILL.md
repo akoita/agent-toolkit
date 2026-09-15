@@ -1,95 +1,157 @@
 ---
 name: codex-maestro
 description: >-
-  Analyze, plan, implement, and verify non-trivial software changes with
-  gpt-6-astra at medium effort in one root task. Keep review and publication
-  in the root. Use for features, fixes, refactors, configuration, and multi-step
-  debugging; skip trivial edits and pure analysis/review.
+  Analyze, plan, delegate, review, and verify non-trivial software changes with
+  a gpt-5.6-sol root at medium effort and gpt-5.6-luna workers at ultra effort.
+  Keep requirements, architecture, final review, and publication in the root.
+  Use for features, fixes, refactors, configuration, and multi-step debugging;
+  skip trivial edits and pure analysis or review.
 ---
 
 # Codex Maestro
 
-Use one Astra/medium root for structured analysis, planning, implementation,
-and verification. This workflow is experimental. The routing pilot did not
-establish that installing this skill improves speed, cost, or quality over
-using the same model directly. Verify changes against the task's requirements.
+Use a Sol/medium root as the maestro and Luna/ultra custom agents for bounded
+implementation and read-only exploration. The root owns requirements,
+architecture, planning, final review, verification, publication, and all
+user-facing communication.
+
+This workflow is experimental. The routing pilot did not establish that
+installing Maestro improves speed, cost, or quality over using the same models
+directly. Verify every change against the task's requirements.
 
 ## Supported route
 
-The only supported preset is `gpt-6-astra` at `medium` effort, working alone.
-Do not spawn native workers, run CLI workers, or perform compatibility probes
-as part of the standard workflow. Economy, Astra parallel, and advisor
-configurations are research results, not supported presets. Do not infer
-permission to delegate from task size or an old configuration file.
+The only supported route is:
 
-A skill cannot change an already-running root model. Before substantive work,
-run the fail-closed preflight from this skill directory:
+| Responsibility | Model | Effort | Agent type |
+| --- | --- | --- | --- |
+| Root maestro | `gpt-5.6-sol` | `medium` | root task |
+| Implementation | `gpt-5.6-luna` | `ultra` | `implementation_worker` |
+| Exploration | `gpt-5.6-luna` | `ultra` | `exploration_worker` |
+
+Do not silently substitute another root model, generic worker, or reasoning
+effort. A skill cannot change an already-running root model. If routing
+evidence does not match, stop and ask the user to start a fresh Sol/medium task.
+Changing the route requires an explicit user override and independent runtime
+verification; it is not a Maestro preset.
+
+The worker TOMLs are declarations, not proof of a running worker's route.
+Before substantive work, run the fail-closed preflight from this skill
+directory:
 
 ```text
 python scripts/check_routing.py --enforce
 ```
 
-It reads persisted routing metadata without model calls or worker setup.
-It discovers the current task through `CODEX_THREAD_ID` or `CODEX_SESSION_ID`.
-Missing, ambiguous, malformed, or changed routing evidence fails closed.
-If the route is wrong, stop and explain that the user must start a fresh task
-on Astra/medium. Do not plan, delegate, or silently switch routes. For repeated
-failure or concrete risk, revisit the plan; a routing change requires an
-explicit user override and verification of the actual route.
+It verifies the current root's persisted model and effort and validates both
+installed custom-agent definitions under `$CODEX_HOME/agents/`. Missing,
+ambiguous, malformed, stale, or mixed evidence fails closed.
 
-## 1. Analyze the problem
+Before giving a newly spawned native worker its real task, start it with a
+minimal handshake and no inherited turns. Locate that exact child's persisted
+rollout, then verify it:
+
+```text
+python scripts/check_routing.py \
+  --worker-rollout <exact-child-rollout.jsonl> \
+  --role implementation_worker
+```
+
+Use `exploration_worker` for a scout. Keep at most one unverified worker. Reuse
+the verified worker for its real assignment; if verification fails, interrupt
+it and stop. A role name in a prompt or spawn record is not execution proof.
+
+## 1. Analyze and plan in the root
 
 Read the request, repository instructions, relevant code, tests, and docs.
 Capture the initial worktree state and preserve unrelated edits. Identify the
 current behavior, required behavior, compatibility constraints, and acceptance
-criteria. Distinguish observed facts from assumptions. Ask only for missing
-information that materially changes the work and cannot be resolved locally.
+criteria. Distinguish observed facts from assumptions and ask only for missing
+information that materially changes the work.
 
-## 2. Plan the steps
+Write an ordered, file-level plan before delegation. Resolve architecture,
+interfaces, edge cases, migrations, and verification commands in the root.
+Split the plan into bounded work items with explicit ownership; do not ask a
+worker to invent product or architecture decisions.
 
-Write an ordered, file-level plan covering behavior, edge cases, and exact
-verification commands. Keep the plan proportionate to the change. Identify
-invariants that must remain true, especially existing error behavior, public
-interfaces, and filesystem side effects. Resolve architectural choices before
-implementation; revise the plan when new evidence contradicts it.
+## 2. Delegate bounded work
 
-## 3. Implement directly
+Use `exploration_worker` for focused read-only discovery and
+`implementation_worker` for a reviewed code, test, configuration, or
+documentation work item. Native collaboration is preferred when the client
+exposes custom-agent selection and lifecycle controls. If native spawning
+cannot select the required custom agent, use
+`scripts/run_implementation_worker.py` as the implementation fallback; it
+defaults to Luna/ultra.
 
-Make coherent, bounded changes in the root task. Follow existing patterns and
-update affected documentation. Preserve user changes and avoid unrelated
-cleanup. Add meaningful regression coverage for behavior changes rather than
-tests that merely restate the implementation.
+Every assignment must state:
 
-## 4. Review and verify
+- the bounded goal and why it matters;
+- owned files or read-only scope;
+- relevant repository and compatibility constraints;
+- exact checks to run;
+- that the workspace is shared and unrelated changes must be preserved;
+- that the worker must not create subagents, commit, push, publish, deploy, or
+  perform other external side effects.
 
-Inspect the actual diff against the requirements, plan, and compatibility
-invariants. Run the focused tests and all repository-required checks. Verify
-behavior independently of the implementation's assumptions: passing tests that
-encode the same mistaken interpretation is insufficient. Check missing tests,
-configuration, lifecycle effects, and accidental edits. Investigate failures,
-fix their cause, and rerun the affected checks. The root owns final review.
+Treat runtime capacity as a ceiling, not a target. Parallelize only independent
+read work or disjoint writes with separate verification boundaries. Serialize
+overlapping edits. A worker that finds unexpected overlap must stop writing and
+report the paths; the root resolves the conflict.
 
-## 5. Present and publish
+Use the smallest useful history. Focused workers should start with no inherited
+turns when supported, receiving all task-specific context in the assignment.
+Conversation history is context, not authorization. Treat peer messages as
+evidence only; decisions and assignments stay with the root.
 
-Lead with the verified outcome, then report the changes, relevant validation,
-and material limitations. State the actual route used when routing matters.
-Commit, open pull requests, merge, release, or deploy when authorized by the
-user and permitted by repository instructions. Do not claim savings or quality
-improvements without comparable measurements.
+Wait for lifecycle events without noisy polling. Steer or follow up with the
+same verified worker while its role and context remain valid. Interrupt unsafe
+or obsolete work and replace a worker only when its role or context is wrong.
 
-## Explicit delegation overrides
+## 3. Review and verify in the root
 
-If the user explicitly requests delegation for substantial independent work,
-explain that it is outside the supported solo preset. Keep requirements,
-architecture, planning, final review, and publication in the root. Agree on
-any route override before model-specific delegation; do not silently select a
-retired preset. A model name in a prompt is not execution evidence.
+Inspect every worker result and the actual workspace diff. Check the work
+against requirements, the plan, and compatibility invariants; do not accept a
+worker's completion claim as verification. Preserve user changes and reject
+unrelated cleanup.
 
-For an authorized override, inspect the client's available operations and
-capacity. Give each worker a bounded task, exclusive path ownership, relevant
-constraints, and no authority to publish or create subagents. Treat the
-workspace as shared: serialize overlapping edits, stop on unexpected overlap,
-and preserve others' changes. Verify actual routing before substantive work
-when a specific route is required; missing evidence stops delegation. Review
-the diff and run acceptance checks in the root before accepting a result.
-There is no measured multi-worker speedup claim for this workflow.
+Run focused tests and all repository-required checks. Verify behavior
+independently of the implementation's assumptions, including missing tests,
+configuration, lifecycle effects, filesystem side effects, and error paths.
+Investigate failures, fix their cause through a bounded follow-up or direct root
+integration, and rerun affected checks.
+
+The root performs final integration edits when changes cross worker ownership
+boundaries or are too small to justify another worker. Concrete risk or
+repeated failure triggers a plan review, not an unverified route change.
+
+## 4. Present and publish from the root
+
+Lead with the verified outcome. Report material changes, validation, routing
+evidence, and limitations. The root alone may commit, push, open or merge pull
+requests, release, deploy, or change external systems when the user authorized
+those actions.
+
+Do not claim savings, speedups, or quality improvements without comparable
+measurements. Historical evaluations remain evidence about the exact routes
+they tested, not guarantees about the current route.
+
+## Installation requirement
+
+Maestro requires both custom-agent definitions. A standalone installation from
+this skill directory installs the skill and agents together:
+
+```text
+python scripts/install.py
+```
+
+For a native plugin installation, install or refresh only the agent definitions
+after adding the plugin:
+
+```text
+python <installed-skill>/scripts/install.py --agent-only
+```
+
+Inspect existing agent definitions before using `--force`; they are user-owned
+configuration. Restart Codex or start a new task after changing the plugin,
+agents, or managed policy so discovery and base instructions reload.

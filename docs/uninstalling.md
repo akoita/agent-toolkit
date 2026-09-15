@@ -58,8 +58,8 @@ including its canonical shared copy. It never installed Claude's separate
 named-agent definitions, so there is nothing additional to remove for
 `maestro` or, for the same reason, for `security`.
 
-If you used Codex Maestro's `--agent-only` setup, remove those native custom
-agents **before** removing the skill, while its installer is still available:
+Codex Maestro requires native custom agents. Remove them **before** removing
+the skill, while its installer is still available:
 
 ```bash
 python ~/.agents/skills/codex-maestro/scripts/install.py --uninstall --agent-only

@@ -39,7 +39,7 @@ def runner_defaults() -> dict[str, str]:
 
 
 class CodexMaestroInstallerTests(unittest.TestCase):
-    def test_default_install_and_update_leave_agents_untouched(self) -> None:
+    def test_default_install_includes_skill_and_required_agents(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             codex_home = root / "codex"
@@ -48,13 +48,37 @@ class CodexMaestroInstallerTests(unittest.TestCase):
                     "--skills-root", str(skills_root)]
             subprocess.run(args, check=True, capture_output=True)
             self.assertTrue((skills_root / "codex-maestro" / "SKILL.md").is_file())
-            self.assertFalse(codex_home.exists())
+            for filename in (
+                "implementation-worker.toml",
+                "exploration-worker.toml",
+            ):
+                self.assertTrue((codex_home / "agents" / filename).is_file())
+
+    def test_skill_only_install_leaves_agents_untouched(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            codex_home = root / "codex"
+            skills_root = root / "skills"
             worker = codex_home / "agents" / "implementation-worker.toml"
             worker.parent.mkdir(parents=True)
             worker.write_bytes(b"user-owned worker\n")
-            subprocess.run([*args, "--force"], check=True, capture_output=True)
+
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(INSTALLER),
+                    "--skill-only",
+                    "--codex-home",
+                    str(codex_home),
+                    "--skills-root",
+                    str(skills_root),
+                ],
+                check=True,
+                capture_output=True,
+            )
+
+            self.assertTrue((skills_root / "codex-maestro" / "SKILL.md").is_file())
             self.assertEqual(worker.read_bytes(), b"user-owned worker\n")
-            self.assertEqual(list(worker.parent.iterdir()), [worker])
 
     def test_agent_install_uses_capability_based_templates(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -131,10 +155,6 @@ class CodexMaestroInstallerTests(unittest.TestCase):
                 text=True,
             )
             self.assertTrue((skills_root / "codex-maestro" / "SKILL.md").is_file())
-            subprocess.run(
-                [sys.executable, str(INSTALLER), "--agent-only", *common],
-                check=True, capture_output=True, text=True,
-            )
 
             subprocess.run(
                 [sys.executable, str(INSTALLER), "--uninstall", *common],

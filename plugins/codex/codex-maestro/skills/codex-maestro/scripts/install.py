@@ -34,7 +34,7 @@ def parse_args() -> argparse.Namespace:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--skill-only", action="store_true")
     mode.add_argument("--agent-only", action="store_true",
-                      help="explicit legacy agent maintenance; not needed for solo Maestro")
+                      help="install or remove only the required custom agents")
     parser.add_argument(
         "--link",
         action="store_true",
@@ -131,7 +131,7 @@ def main() -> int:
         else:
             install_skill(skill_source, skill_destination, args.link, args.force)
 
-    if args.agent_only or (args.uninstall and not args.skill_only):
+    if not args.skill_only:
         legacy_agent = agents_root / LEGACY_AGENT_FILENAME
         if legacy_agent.exists() or legacy_agent.is_symlink():
             print(
