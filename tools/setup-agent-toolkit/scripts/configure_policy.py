@@ -16,14 +16,16 @@ POLICIES = {
     "codex": """## Orchestration policy
 
 - Use `$codex-maestro` for non-trivial implementation and multi-step debugging.
-- Use `gpt-6-astra` at medium effort, working alone in the root task.
-- Keep requirements, architecture, analysis, planning, implementation, review,
-  verification, and publication in the root.
-- Run Maestro's fail-closed routing preflight before substantive work.
-- Do not automatically spawn native or CLI workers or add an advisor.
-- Economy, Astra parallel, and advisor routes are not supported presets.
-- Delegate only when the user explicitly requests it, with bounded tasks,
-  disjoint ownership, verified routing, and no worker publication or nesting.
+- Use `gpt-5.6-sol` at medium effort in the root with `gpt-5.6-luna` at ultra
+  effort for bounded implementation and read-only exploration workers.
+- Keep requirements, architecture, analysis, planning, final review,
+  verification, publication, and user communication in the root.
+- Run Maestro's fail-closed root and worker routing checks before substantive
+  work; stop on missing or mismatched evidence.
+- Give workers bounded tasks with explicit ownership, shared-workspace safety,
+  and no authority to publish, deploy, or create subagents.
+- Serialize overlapping writes and use parallel workers only for independent,
+  disjoint work that benefits from concurrency.
 - For concrete risk or repeated failure, revisit the plan; changing the route
   requires an explicit user override.
 - Handle trivial, localized, low-risk work directly.

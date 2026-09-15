@@ -45,13 +45,12 @@ A multi-skill plugin such as `security` or `codex-security` has one entry per
 skill (`security-audit`, `security-review`, and so on), so update each name
 you installed. Or name one skill, and omit `-g` for a project-scoped
 installation. This updates the installed skill directory only. Codex Maestro
-0.7.1 uses solo execution by default; its retained legacy Luna worker templates
-now use `ultra` reasoning effort. The normal installer update leaves existing
-custom-agent files untouched, so explicitly refresh them with `--agent-only`
-only after inspecting callers and preserving local customizations. If old
-policy blocks still select economy or parallel workers, preview an update with
-the [setup workflow](../tools/setup-agent-toolkit/SKILL.md), then start a fresh
-task.
+0.7.2 uses a Sol/medium root with Luna/ultra workers by default. Plugin and
+skills-CLI updates leave existing custom-agent files untouched, so inspect and
+preserve local customizations before explicitly refreshing them with
+`scripts/install.py --agent-only --force`. Preview and update old managed
+policy blocks with the [setup workflow](../tools/setup-agent-toolkit/SKILL.md),
+then start a fresh task so Codex reloads the route and agent definitions.
 
 ## Reinstalling over an existing install
 

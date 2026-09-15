@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "codex-maestro",
-  "version": "0.7.1",
-  "description": "Experimental solo Astra/medium workflow for analysis, planning, implementation, and verification; no proven efficiency gain over using the model directly.",
+  "version": "0.7.2",
+  "description": "Experimental Sol/medium root workflow with Luna/ultra workers for bounded implementation and exploration.",
   "author": {
     "name": "Aboubakar Ko\u00efta",
     "url": "https://github.com/akoita"
@@ -19,11 +19,11 @@
       "adapters": {
         "codex": {
           "name": "codex-maestro",
-          "description": "Experimental solo Astra/medium workflow for analysis, planning, implementation, and verification; no proven efficiency gain over using the model directly.",
+          "description": "Experimental Sol/medium root workflow with Luna/ultra workers for bounded implementation and exploration.",
           "interface": {
             "displayName": "Codex Maestro",
-            "shortDescription": "Analyze, plan, implement, and verify with solo Astra.",
-            "longDescription": "Experimental solo Astra/medium workflow for analysis, planning, implementation, and verification; no proven efficiency gain over using the model directly.",
+            "shortDescription": "Orchestrate changes with Sol and Luna workers.",
+            "longDescription": "Experimental Sol/medium root workflow with Luna/ultra workers for bounded implementation and exploration.",
             "developerName": "Aboubakar Ko\u00efta",
             "category": "Developer Tools",
             "capabilities": [

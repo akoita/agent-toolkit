@@ -1,7 +1,7 @@
 {
   "name": "codex-maestro",
-  "version": "0.7.1",
-  "description": "Experimental solo Astra/medium workflow for analysis, planning, implementation, and verification; no proven efficiency gain over using the model directly.",
+  "version": "0.7.2",
+  "description": "Experimental Sol/medium root workflow with Luna/ultra workers for bounded implementation and exploration.",
   "author": {
     "name": "Aboubakar Koïta",
     "url": "https://github.com/akoita"
@@ -16,8 +16,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Codex Maestro",
-    "shortDescription": "Analyze, plan, implement, and verify with solo Astra.",
-    "longDescription": "Experimental solo Astra/medium workflow for analysis, planning, implementation, and verification; no proven efficiency gain over using the model directly.",
+    "shortDescription": "Orchestrate changes with Sol and Luna workers.",
+    "longDescription": "Experimental Sol/medium root workflow with Luna/ultra workers for bounded implementation and exploration.",
     "developerName": "Aboubakar Koïta",
     "category": "Developer Tools",
     "capabilities": [

@@ -37,10 +37,11 @@ read from its path, while a Git one is a snapshot refreshed with
 Run `/reload-plugins` in an existing Claude Code session or start a new
 session. Restart Codex or open a new task.
 
-Codex Maestro runs alone and requires no custom-agent setup after a plugin
-install. Its standalone installer is for skill-only installations or explicit
-maintenance of legacy worker definitions, not a required marketplace step.
-See the [Codex Maestro README](../plugins/codex/codex-maestro/README.md).
+Codex Maestro requires its Luna/ultra implementation and exploration agents.
+After a plugin install, take its package path from `codex plugin list` and run
+the bundled installer with `--agent-only`. Native plugin installation does not
+write user-owned files under `$CODEX_HOME/agents/`. See the
+[Codex Maestro README](../plugins/codex/codex-maestro/README.md).
 
 ## Portable skill-only install
 
@@ -73,8 +74,8 @@ remain the recommended complete path:
 
 - `maestro` installed this way does not include the Claude plugin's named
   subagent definitions.
-- `codex-maestro` runs alone; a skill-only install is complete and needs no
-  custom-agent definitions.
+- `codex-maestro` requires its custom-agent definitions. After a skill-only
+  install, run the installed `scripts/install.py --agent-only` before use.
 - `security` installed this way does not include the Claude plugin's
   `security-auditor` and `security-scan-runner` named agents either, for the
   same reason as `maestro` — and the security packages ship no installer

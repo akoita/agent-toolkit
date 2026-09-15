@@ -1,33 +1,56 @@
 #!/usr/bin/env python3
-"""Verify the supported solo Astra/medium root without model calls.
-
-Worker presets and token-consuming compatibility probes have been retired.
-"""
+"""Verify the supported Sol/medium root and Luna/ultra workers."""
 from __future__ import annotations
 
 import argparse
 import json
 import os
+import tomllib
 from pathlib import Path
 from typing import Any
 
-DEFAULT_ROOT_MODEL = "gpt-6-astra"
+DEFAULT_ROOT_MODEL = "gpt-5.6-sol"
 EXPECTED_ROOT_EFFORT = "medium"
+EXPECTED_WORKER_MODEL = "gpt-5.6-luna"
+EXPECTED_WORKER_EFFORT = "ultra"
+EXPECTED_WORKER_ROLES = ("implementation_worker", "exploration_worker")
+AGENT_REQUIREMENTS = {
+    "implementation-worker.toml": {
+        "name": "implementation_worker",
+        "model": EXPECTED_WORKER_MODEL,
+        "model_reasoning_effort": EXPECTED_WORKER_EFFORT,
+        "sandbox_mode": "workspace-write",
+    },
+    "exploration-worker.toml": {
+        "name": "exploration_worker",
+        "model": EXPECTED_WORKER_MODEL,
+        "model_reasoning_effort": EXPECTED_WORKER_EFFORT,
+        "sandbox_mode": "read-only",
+    },
+}
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", dest="json_output", action="store_true")
     parser.add_argument("--profile", choices=("default",), default="default",
-                        help="only the solo default preset is supported")
-    parser.add_argument("--enforce", action="store_true",
-                        help="verify the current root's persisted model and effort")
+                        help="the Sol/Luna route is the only supported preset")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--enforce", action="store_true",
+                      help="verify installed agents and the current root route")
+    mode.add_argument("--worker-rollout", type=Path,
+                      help="verify one persisted worker rollout")
+    parser.add_argument("--role", choices=EXPECTED_WORKER_ROLES,
+                        help="expected role for --worker-rollout")
     parser.add_argument("--codex-home", type=Path,
                         default=Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")))
     parser.add_argument("--thread-id", "--root-thread-id", dest="root_thread_id")
     parser.add_argument("--session-id", "--root-session-id", dest="root_session_id")
     parser.add_argument("--root-rollout", type=Path)
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if (args.worker_rollout is None) != (args.role is None):
+        parser.error("--worker-rollout and --role must be supplied together")
+    return args
 
 
 def check(
@@ -44,6 +67,36 @@ def check(
     if details:
         value["details"] = details
     return value
+
+
+def agent_templates_check(agents_dir: Path) -> dict[str, Any]:
+    failures: list[str] = []
+    for filename, expected in AGENT_REQUIREMENTS.items():
+        path = agents_dir / filename
+        try:
+            with path.open("rb") as stream:
+                actual = tomllib.load(stream)
+        except FileNotFoundError:
+            failures.append(f"{filename} is missing")
+            continue
+        except (OSError, tomllib.TOMLDecodeError):
+            failures.append(f"{filename} is unreadable or invalid TOML")
+            continue
+        for key, value in expected.items():
+            if actual.get(key) != value:
+                failures.append(f"{filename} {key} does not match {value}")
+    if failures:
+        return check(
+            "agents.configuration",
+            "fail",
+            "installed custom-agent definitions do not match Luna/ultra",
+            failures=failures,
+        )
+    return check(
+        "agents.configuration",
+        "ok",
+        "installed implementation and exploration agents match Luna/ultra",
+    )
 
 
 def rollout_roots(codex_home: Path) -> tuple[Path, ...]:
@@ -195,6 +248,37 @@ def parse_persisted_rollout(path: Path) -> dict[str, Any] | None:
     }
 
 
+def verify_worker_rollout(path: Path, expected_role: str) -> dict[str, Any]:
+    evidence = parse_persisted_rollout(path)
+    if evidence is None:
+        return check(
+            "worker.rollout",
+            "fail",
+            "worker rollout metadata is malformed or schema-changed",
+        )
+    failures: list[str] = []
+    if not evidence.get("is_subagent"):
+        failures.append("rollout is a root task, not a worker")
+    if evidence.get("agent_role") != expected_role:
+        failures.append(f"agent role does not match {expected_role}")
+    if evidence.get("model") != EXPECTED_WORKER_MODEL:
+        failures.append(f"model does not match {EXPECTED_WORKER_MODEL}")
+    if evidence.get("effort") != EXPECTED_WORKER_EFFORT:
+        failures.append(f"effort does not match {EXPECTED_WORKER_EFFORT}")
+    if failures:
+        return check(
+            "worker.rollout",
+            "fail",
+            f"worker rollout does not match {expected_role} on Luna/ultra",
+            failures=failures,
+        )
+    return check(
+        "worker.rollout",
+        "ok",
+        f"worker rollout proves {expected_role} on Luna/ultra",
+    )
+
+
 def _all_rollouts(codex_home: Path) -> list[Path]:
     paths: list[Path] = list(codex_home.glob("*.jsonl"))
     for root in rollout_roots(codex_home):
@@ -313,17 +397,29 @@ def human_report(report: dict[str, Any]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    results = [root_rollout_check(
-        codex_home=args.codex_home.expanduser().resolve(),
-        thread_id=args.root_thread_id or os.environ.get("CODEX_THREAD_ID"),
-        session_id=args.root_session_id or os.environ.get("CODEX_SESSION_ID"),
-        rollout_path=args.root_rollout,
-    )] if args.enforce else [check(
-        "profile", "ok",
-        "default requires Astra/medium alone; use --enforce to verify the current root",
-    )]
+    codex_home = args.codex_home.expanduser().resolve()
+    if args.worker_rollout is not None:
+        assert args.role is not None
+        results = [verify_worker_rollout(
+            args.worker_rollout.expanduser().resolve(), args.role
+        )]
+        mode = "worker"
+    elif args.enforce:
+        results = [
+            agent_templates_check(codex_home / "agents"),
+            root_rollout_check(
+                codex_home=codex_home,
+                thread_id=args.root_thread_id or os.environ.get("CODEX_THREAD_ID"),
+                session_id=args.root_session_id or os.environ.get("CODEX_SESSION_ID"),
+                rollout_path=args.root_rollout,
+            ),
+        ]
+        mode = "enforce"
+    else:
+        results = [agent_templates_check(codex_home / "agents")]
+        mode = "offline"
     report = {"status": overall_status(results),
-              "mode": "enforce" if args.enforce else "offline",
+              "mode": mode,
               "profile": "default", "checks": results}
     print(json.dumps(report, sort_keys=True) if args.json_output else human_report(report))
     return 0 if report["status"] == "ok" else 1
