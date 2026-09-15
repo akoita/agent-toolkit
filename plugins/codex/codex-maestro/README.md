@@ -75,6 +75,9 @@ cannot rewrite existing task instructions; start a fresh task after updating.
 The legacy worker templates, `--agent-only` installer option, and standalone
 CLI runners remain for explicit maintenance of existing integrations. They
 are not part of the supported Maestro workflow and are never invoked by it.
+Version 0.7.1 changes those retained Luna worker templates and the CLI runner
+default from `max` to `ultra` reasoning effort. Existing installed worker
+definitions remain untouched unless they are explicitly refreshed.
 Old custom-agent files, including `luna-worker.toml`, are not removed on upgrade.
 Inspect their callers before retiring them; preserve customized definitions.
 
