@@ -77,7 +77,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             code = routing.main([*args, "--json"])
         return code, json.loads(output.getvalue())
 
-    def test_default_enforce_requires_sol_medium_and_luna_ultra_agents(self) -> None:
+    def test_default_enforce_requires_sol_medium_and_luna_max_agents(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             rollout = root / "root.jsonl"
@@ -86,7 +86,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                 ("gpt-5.6-sol", "medium", 0),
                 ("gpt-6-astra", "medium", 1),
                 ("gpt-5.6-sol", "high", 1),
-                ("gpt-5.6-luna", "ultra", 1),
+                ("gpt-5.6-luna", "max", 1),
             ):
                 with self.subTest(model=model, effort=effort):
                     self.write_rollout(rollout, model=model, effort=effort)
@@ -119,7 +119,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             implementation.write_text(
                 'name = "implementation_worker"\n'
                 'model = "gpt-5.6-luna"\n'
-                'model_reasoning_effort = "max"\n'
+                'model_reasoning_effort = "ultra"\n'
                 'sandbox_mode = "workspace-write"\n',
                 encoding="utf-8",
             )
@@ -136,7 +136,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                     self.write_rollout(
                         rollout,
                         model="gpt-5.6-luna",
-                        effort="ultra",
+                        effort="max",
                         role=role,
                         parent="root-1",
                     )
@@ -144,9 +144,9 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                         routing.verify_worker_rollout(rollout, role)["status"], "ok"
                     )
             for model, effort, role in (
-                ("gpt-5.6-luna", "max", "implementation_worker"),
-                ("gpt-5.6-sol", "ultra", "implementation_worker"),
-                ("gpt-5.6-luna", "ultra", "exploration_worker"),
+                ("gpt-5.6-luna", "ultra", "implementation_worker"),
+                ("gpt-5.6-sol", "max", "implementation_worker"),
+                ("gpt-5.6-luna", "max", "exploration_worker"),
             ):
                 with self.subTest(model=model, effort=effort, role=role):
                     self.write_rollout(
@@ -162,7 +162,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                         )["status"],
                         "fail",
                     )
-            self.write_rollout(rollout, model="gpt-5.6-luna", effort="ultra")
+            self.write_rollout(rollout, model="gpt-5.6-luna", effort="max")
             self.assertEqual(
                 routing.verify_worker_rollout(
                     rollout, "implementation_worker"

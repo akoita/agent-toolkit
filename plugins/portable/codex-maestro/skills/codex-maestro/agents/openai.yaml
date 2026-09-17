@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex Maestro"
   short_description: "Orchestrate changes with a Sol root and Luna workers"
-  default_prompt: "Use $codex-maestro with a gpt-5.6-sol root at medium effort and gpt-5.6-luna workers at ultra effort. Verify root and worker routing, keep requirements and planning in the root, delegate bounded work, and independently review and test the result."
+  default_prompt: "Use $codex-maestro with a gpt-5.6-sol root at medium effort and gpt-5.6-luna workers at max effort. Verify root and worker routing, keep requirements and planning in the root, delegate bounded work, and independently review and test the result."

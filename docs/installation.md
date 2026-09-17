@@ -37,7 +37,7 @@ read from its path, while a Git one is a snapshot refreshed with
 Run `/reload-plugins` in an existing Claude Code session or start a new
 session. Restart Codex or open a new task.
 
-Codex Maestro requires its Luna/ultra implementation and exploration agents.
+Codex Maestro requires its Luna/max implementation and exploration agents.
 After a plugin install, take its package path from `codex plugin list` and run
 the bundled installer with `--agent-only`. Native plugin installation does not
 write user-owned files under `$CODEX_HOME/agents/`. See the

@@ -14,7 +14,7 @@ from typing import Any
 
 
 DEFAULT_MODEL = "gpt-5.6-luna"
-DEFAULT_EFFORT = "ultra"
+DEFAULT_EFFORT = "max"
 
 
 def parse_args() -> argparse.Namespace:

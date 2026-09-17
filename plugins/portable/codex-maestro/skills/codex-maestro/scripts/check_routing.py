@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the supported Sol/medium root and Luna/ultra workers."""
+"""Verify the supported Sol/medium root and Luna/max workers."""
 from __future__ import annotations
 
 import argparse
@@ -12,7 +12,7 @@ from typing import Any
 DEFAULT_ROOT_MODEL = "gpt-5.6-sol"
 EXPECTED_ROOT_EFFORT = "medium"
 EXPECTED_WORKER_MODEL = "gpt-5.6-luna"
-EXPECTED_WORKER_EFFORT = "ultra"
+EXPECTED_WORKER_EFFORT = "max"
 EXPECTED_WORKER_ROLES = ("implementation_worker", "exploration_worker")
 AGENT_REQUIREMENTS = {
     "implementation-worker.toml": {
@@ -89,13 +89,13 @@ def agent_templates_check(agents_dir: Path) -> dict[str, Any]:
         return check(
             "agents.configuration",
             "fail",
-            "installed custom-agent definitions do not match Luna/ultra",
+            "installed custom-agent definitions do not match Luna/max",
             failures=failures,
         )
     return check(
         "agents.configuration",
         "ok",
-        "installed implementation and exploration agents match Luna/ultra",
+        "installed implementation and exploration agents match Luna/max",
     )
 
 
@@ -269,13 +269,13 @@ def verify_worker_rollout(path: Path, expected_role: str) -> dict[str, Any]:
         return check(
             "worker.rollout",
             "fail",
-            f"worker rollout does not match {expected_role} on Luna/ultra",
+            f"worker rollout does not match {expected_role} on Luna/max",
             failures=failures,
         )
     return check(
         "worker.rollout",
         "ok",
-        f"worker rollout proves {expected_role} on Luna/ultra",
+        f"worker rollout proves {expected_role} on Luna/max",
     )
 
 
