@@ -1,7 +1,7 @@
 {
   "name": "codex-maestro",
   "version": "0.7.3",
-  "description": "Experimental Sol/medium root workflow with Luna/ultra workers for bounded implementation and exploration.",
+  "description": "Experimental Sol/medium root workflow with Luna/max workers for bounded implementation and exploration.",
   "author": {
     "name": "Aboubakar Koïta",
     "url": "https://github.com/akoita"
@@ -17,7 +17,7 @@
   "interface": {
     "displayName": "Codex Maestro",
     "shortDescription": "Orchestrate changes with Sol and Luna workers.",
-    "longDescription": "Experimental Sol/medium root workflow with Luna/ultra workers for bounded implementation and exploration.",
+    "longDescription": "Experimental Sol/medium root workflow with Luna/max workers for bounded implementation and exploration.",
     "developerName": "Aboubakar Koïta",
     "category": "Developer Tools",
     "capabilities": [

@@ -45,7 +45,7 @@ A multi-skill plugin such as `security` or `codex-security` has one entry per
 skill (`security-audit`, `security-review`, and so on), so update each name
 you installed. Or name one skill, and omit `-g` for a project-scoped
 installation. This updates the installed skill directory only. Codex Maestro
-0.7.2 uses a Sol/medium root with Luna/ultra workers by default. Plugin and
+0.7.2 uses a Sol/medium root with Luna/max workers by default. Plugin and
 skills-CLI updates leave existing custom-agent files untouched, so inspect and
 preserve local customizations before explicitly refreshing them with
 `scripts/install.py --agent-only --force`. Preview and update old managed

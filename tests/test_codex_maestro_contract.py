@@ -26,7 +26,7 @@ class CodexMaestroContractTests(unittest.TestCase):
         self.assertIn("only supported route", skill)
         self.assertIn("`gpt-5.6-sol`", skill)
         self.assertIn("`gpt-5.6-luna`", skill)
-        self.assertIn("`ultra`", skill)
+        self.assertIn("`max`", skill)
         self.assertIn("implementation_worker", skill)
         self.assertIn("exploration_worker", skill)
         self.assertNotIn("gpt-6-astra", skill)

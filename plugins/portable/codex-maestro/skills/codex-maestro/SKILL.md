@@ -2,7 +2,7 @@
 name: codex-maestro
 description: >-
   Analyze, plan, delegate, review, and verify non-trivial software changes with
-  a gpt-5.6-sol root at medium effort and gpt-5.6-luna workers at ultra effort.
+  a gpt-5.6-sol root at medium effort and gpt-5.6-luna workers at max effort.
   Keep requirements, architecture, final review, and publication in the root.
   Use for features, fixes, refactors, configuration, and multi-step debugging;
   skip trivial edits and pure analysis or review.
@@ -10,7 +10,7 @@ description: >-
 
 # Codex Maestro
 
-Use a Sol/medium root as the maestro and Luna/ultra custom agents for bounded
+Use a Sol/medium root as the maestro and Luna/max custom agents for bounded
 implementation and read-only exploration. The root owns requirements,
 architecture, planning, final review, verification, publication, and all
 user-facing communication.
@@ -26,8 +26,8 @@ The only supported route is:
 | Responsibility | Model | Effort | Agent type |
 | --- | --- | --- | --- |
 | Root maestro | `gpt-5.6-sol` | `medium` | root task |
-| Implementation | `gpt-5.6-luna` | `ultra` | `implementation_worker` |
-| Exploration | `gpt-5.6-luna` | `ultra` | `exploration_worker` |
+| Implementation | `gpt-5.6-luna` | `max` | `implementation_worker` |
+| Exploration | `gpt-5.6-luna` | `max` | `exploration_worker` |
 
 Do not silently substitute another root model, generic worker, or reasoning
 effort. A skill cannot change an already-running root model. If routing
@@ -82,7 +82,7 @@ documentation work item. Native collaboration is preferred when the client
 exposes custom-agent selection and lifecycle controls. If native spawning
 cannot select the required custom agent, use
 `scripts/run_implementation_worker.py` as the implementation fallback; it
-defaults to Luna/ultra.
+defaults to Luna/max.
 
 Every assignment must state:
 

@@ -98,7 +98,7 @@ python plugins/codex/codex-maestro/skills/codex-maestro/scripts/install.py
 ```
 
 Use `--link` only when the user wants a development checkout to remain the
-live source. The installer installs the skill and both required Luna/ultra
+live source. The installer installs the skill and both required Luna/max
 worker definitions. Existing agent definitions remain user-owned; refuse to
 replace them until the user approves the exact diff and verified backups. For
 project scope, copy the requested skill directory to `.agents/skills/` and both
