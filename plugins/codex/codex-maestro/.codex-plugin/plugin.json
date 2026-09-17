@@ -1,6 +1,6 @@
 {
   "name": "codex-maestro",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Experimental Sol/medium root workflow with Luna/max workers for bounded implementation and exploration.",
   "author": {
     "name": "Aboubakar Koïta",
