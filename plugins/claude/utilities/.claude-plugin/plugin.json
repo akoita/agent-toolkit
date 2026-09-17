@@ -1,7 +1,7 @@
 {
   "name": "utilities",
-  "version": "0.7.2",
-  "description": "General-purpose, project-agnostic workflow skills for Claude Code, initially focused on dependency-aware milestone planning.",
+  "version": "0.7.3",
+  "description": "General-purpose, project-agnostic workflow skills for Claude Code, including dependency-aware milestone planning and maintainable software documentation.",
   "author": {
     "name": "Aboubakar Koïta"
   },

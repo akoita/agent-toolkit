@@ -29,11 +29,11 @@ SECURITY_SKILLS = (
     "security-smart-contracts",
     "security-ai",
 )
-UTILITIES_SKILLS = ("plan-milestone",)
+UTILITIES_SKILLS = ("document-software", "plan-milestone")
 CANONICAL_SKILLS = {
     "maestro": ROOT / "plugins" / "claude" / "maestro" / "skills" / "maestro",
     "codex-maestro": PORTABLE_CODEX_MAESTRO_SKILLS / "codex-maestro",
-    "plan-milestone": PORTABLE_UTILITIES_SKILLS / "plan-milestone",
+    **{name: PORTABLE_UTILITIES_SKILLS / name for name in UTILITIES_SKILLS},
     "setup-agent-toolkit": ROOT / "tools" / "setup-agent-toolkit",
     **{name: PORTABLE_SECURITY_SKILLS / name for name in SECURITY_SKILLS},
 }

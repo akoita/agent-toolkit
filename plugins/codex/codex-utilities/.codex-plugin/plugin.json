@@ -1,7 +1,7 @@
 {
   "name": "codex-utilities",
-  "version": "0.7.2",
-  "description": "General-purpose, project-agnostic workflow skills for Codex, initially focused on dependency-aware milestone planning.",
+  "version": "0.7.3",
+  "description": "General-purpose, project-agnostic workflow skills for Codex, including dependency-aware milestone planning and maintainable software documentation.",
   "author": {
     "name": "Aboubakar Koïta",
     "url": "https://github.com/akoita"
@@ -12,13 +12,15 @@
     "utilities",
     "workflow",
     "planning",
-    "project-management"
+    "project-management",
+    "documentation",
+    "software-architecture"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Codex Utilities",
-    "shortDescription": "Plan executable milestones safely.",
-    "longDescription": "Use broadly reusable workflow utilities, beginning with dependency-aware milestone planning that preserves capacity and approval boundaries.",
+    "shortDescription": "Plan milestones and document software.",
+    "longDescription": "Use broadly reusable workflow utilities for dependency-aware milestone planning and maturity-scaled software documentation.",
     "developerName": "Aboubakar Koïta",
     "category": "Developer Tools",
     "capabilities": [
@@ -26,7 +28,7 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Use Codex Utilities to plan an executable milestone."
+      "Use Codex Utilities to plan a milestone or improve software documentation."
     ]
   }
 }

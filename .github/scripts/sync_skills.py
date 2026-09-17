@@ -40,7 +40,7 @@ SECURITY_SKILLS = (
     "security-smart-contracts",
     "security-ai",
 )
-UTILITIES_SKILLS = ("plan-milestone",)
+UTILITIES_SKILLS = ("document-software", "plan-milestone")
 CANONICAL_SKILLS = {
     "maestro": ROOT / "plugins" / "claude" / "maestro" / "skills" / "maestro",
     "codex-maestro": PORTABLE_CODEX_MAESTRO_SKILLS / "codex-maestro",

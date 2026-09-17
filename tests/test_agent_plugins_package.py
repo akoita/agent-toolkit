@@ -38,7 +38,7 @@ EXPECTED_SKILLS = {
         "security-supply-chain",
         "security-threat-model",
     },
-    "utilities": {"plan-milestone"},
+    "utilities": {"document-software", "plan-milestone"},
 }
 
 SPEC = importlib.util.spec_from_file_location("sync_plugin_adapters", SYNC_SCRIPT)
