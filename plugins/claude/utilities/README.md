@@ -1,10 +1,15 @@
 # utilities
 
 General-purpose, project-agnostic workflow utilities for Claude Code. The
-bundle currently ships `plan-milestone`, which produces dependency-aware,
-capacity-coherent milestone proposals and keeps tracker writes behind explicit
-approval. Future additions must remain broadly reusable rather than becoming
-specialized orchestration, security, or setup capabilities.
+bundle ships:
+
+- `document-software`, which scaffolds or normalizes maturity-scaled software
+  documentation while preserving current truth and useful conventions;
+- `plan-milestone`, which produces dependency-aware, capacity-coherent
+  milestone proposals and keeps tracker writes behind explicit approval.
+
+Future additions must remain broadly reusable rather than becoming specialized
+orchestration, security, or setup capabilities.
 
 ## Install
 
@@ -13,10 +18,10 @@ claude plugin marketplace add .
 claude plugin install utilities@agent-toolkit
 ```
 
-The plugin contains the `plan-milestone` skill. For an individual skill
-installation without the plugin:
+For an individual skill installation without the plugin:
 
 ```bash
+npx skills add akoita/agent-toolkit --skill document-software -g -a claude-code
 npx skills add akoita/agent-toolkit --skill plan-milestone -g -a claude-code
 ```
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Document Software"
+  short_description: "Create maintainable project documentation"
+  default_prompt: "Use $document-software to scaffold or improve this project's documentation with the smallest maintainable structure that fits its maturity and risk."

@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "utilities",
-  "version": "0.7.2",
-  "description": "General-purpose, project-agnostic workflow skills for planning and delivering useful software changes.",
+  "version": "0.7.3",
+  "description": "General-purpose, project-agnostic workflow skills for planning milestones and maintaining useful software documentation.",
   "author": {
     "name": "Aboubakar Koïta",
     "url": "https://github.com/akoita"
@@ -13,26 +13,28 @@
     "utilities",
     "workflow",
     "planning",
-    "project-management"
+    "project-management",
+    "documentation",
+    "software-architecture"
   ],
   "extensions": {
     "io.github.akoita.agent-toolkit": {
       "adapters": {
         "claude": {
           "name": "utilities",
-          "description": "General-purpose, project-agnostic workflow skills for Claude Code, initially focused on dependency-aware milestone planning.",
+          "description": "General-purpose, project-agnostic workflow skills for Claude Code, including dependency-aware milestone planning and maintainable software documentation.",
           "marketplace": {
             "source": "./plugins/claude/utilities",
-            "description": "General-purpose project utilities, initially focused on dependency-aware milestone planning."
+            "description": "General-purpose project utilities for milestone planning and software documentation."
           }
         },
         "codex": {
           "name": "codex-utilities",
-          "description": "General-purpose, project-agnostic workflow skills for Codex, initially focused on dependency-aware milestone planning.",
+          "description": "General-purpose, project-agnostic workflow skills for Codex, including dependency-aware milestone planning and maintainable software documentation.",
           "interface": {
             "displayName": "Codex Utilities",
-            "shortDescription": "Plan executable milestones safely.",
-            "longDescription": "Use broadly reusable workflow utilities, beginning with dependency-aware milestone planning that preserves capacity and approval boundaries.",
+            "shortDescription": "Plan milestones and document software.",
+            "longDescription": "Use broadly reusable workflow utilities for dependency-aware milestone planning and maturity-scaled software documentation.",
             "developerName": "Aboubakar Koïta",
             "category": "Developer Tools",
             "capabilities": [
@@ -40,7 +42,7 @@
               "Write"
             ],
             "defaultPrompt": [
-              "Use Codex Utilities to plan an executable milestone."
+              "Use Codex Utilities to plan a milestone or improve software documentation."
             ]
           },
           "marketplace": {

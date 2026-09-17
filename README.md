@@ -58,12 +58,12 @@ format.
 
 | Plugin | Platform | Install as | What it does |
 | --- | --- | --- | --- |
-| [utilities](plugins/claude/utilities/) | Claude Code | `utilities@agent-toolkit` | General-purpose, project-agnostic workflow skills, currently dependency-aware milestone planning. |
-| [codex-utilities](plugins/codex/codex-utilities/) | Codex | `codex-utilities@agent-toolkit` | General-purpose, project-agnostic workflow skills, currently dependency-aware milestone planning. |
+| [utilities](plugins/claude/utilities/) | Claude Code | `utilities@agent-toolkit` | General-purpose milestone-planning and software-documentation workflows. |
+| [codex-utilities](plugins/codex/codex-utilities/) | Codex | `codex-utilities@agent-toolkit` | General-purpose milestone-planning and software-documentation workflows. |
 
-The utilities plugin currently ships `plan-milestone`; future additions must
-remain broadly reusable and independent of the specialized Maestro, Security,
-and setup capabilities.
+The utilities plugin ships `document-software` and `plan-milestone`; future
+additions must remain broadly reusable and independent of the specialized
+Maestro, Security, and setup capabilities.
 
 ### Standalone
 
@@ -120,6 +120,7 @@ plugin — individual skills can be installed without their plugin:
 npx skills add akoita/agent-toolkit --skill maestro -g -a claude-code
 npx skills add akoita/agent-toolkit --skill codex-maestro -g -a codex
 npx skills add akoita/agent-toolkit --skill security-audit -g -a claude-code
+npx skills add akoita/agent-toolkit --skill document-software -g -a codex
 npx skills add akoita/agent-toolkit --skill plan-milestone -g -a codex
 npx skills add akoita/agent-toolkit --skill setup-agent-toolkit -g -a codex
 ```
