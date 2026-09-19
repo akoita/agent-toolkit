@@ -51,7 +51,7 @@ class CodexMaestroContractTests(unittest.TestCase):
         self.assertIn("only supported route", readme)
         self.assertIn("did not establish", readme)
         self.assertIn("does not write user-owned agent configuration", readme)
-        self.assertIn("Version 0.7.2", readme)
+        self.assertIn("Version 0.7.4", readme)
         self.assertIn("--agent-only --force", readme)
         self.assertNotIn("gpt-6-astra", readme)
 

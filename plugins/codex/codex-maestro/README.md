@@ -81,10 +81,11 @@ back up local changes before replacement, especially agent TOMLs, because they
 are user-owned configuration. Windows and WSL have separate homes and
 installations.
 
-## Updating from 0.7.1
+## Updating from 0.7.3
 
-Version 0.7.2 replaces the solo default with Sol/medium plus Luna/max custom
-agents. After updating a native plugin, explicitly refresh its agent files:
+Version 0.7.4 corrects the worker effort to the supported Luna/max route while
+keeping the Sol/medium root. After updating a native plugin, explicitly refresh
+its agent files:
 
 ```bash
 python <path>/skills/codex-maestro/scripts/install.py --agent-only --force
