@@ -2,7 +2,7 @@
 name: codex-maestro
 description: >-
   Analyze, plan, delegate, review, and verify non-trivial software changes with
-  a gpt-5.6-sol root at medium effort and gpt-5.6-luna workers at max effort.
+  a gpt-6-sol root at medium effort and gpt-6-luna workers at max effort.
   Keep requirements, architecture, final review, and publication in the root.
   Use for features, fixes, refactors, configuration, and multi-step debugging;
   skip trivial edits and pure analysis or review.
@@ -25,9 +25,9 @@ The only supported route is:
 
 | Responsibility | Model | Effort | Agent type |
 | --- | --- | --- | --- |
-| Root maestro | `gpt-5.6-sol` | `medium` | root task |
-| Implementation | `gpt-5.6-luna` | `max` | `implementation_worker` |
-| Exploration | `gpt-5.6-luna` | `max` | `exploration_worker` |
+| Root maestro | `gpt-6-sol` | `medium` | root task |
+| Implementation | `gpt-6-luna` | `max` | `implementation_worker` |
+| Exploration | `gpt-6-luna` | `max` | `exploration_worker` |
 
 Do not silently substitute another root model, generic worker, or reasoning
 effort. A skill cannot change an already-running root model. If routing

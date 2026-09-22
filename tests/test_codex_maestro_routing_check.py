@@ -83,10 +83,11 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             rollout = root / "root.jsonl"
             self.write_agents(root)
             for model, effort, expected in (
-                ("gpt-5.6-sol", "medium", 0),
+                ("gpt-6-sol", "medium", 0),
+                ("gpt-5.6-sol", "medium", 1),
                 ("gpt-6-astra", "medium", 1),
-                ("gpt-5.6-sol", "high", 1),
-                ("gpt-5.6-luna", "max", 1),
+                ("gpt-6-sol", "high", 1),
+                ("gpt-6-luna", "max", 1),
             ):
                 with self.subTest(model=model, effort=effort):
                     self.write_rollout(rollout, model=model, effort=effort)
@@ -118,7 +119,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             implementation = root / "agents" / "implementation-worker.toml"
             implementation.write_text(
                 'name = "implementation_worker"\n'
-                'model = "gpt-5.6-luna"\n'
+                'model = "gpt-6-luna"\n'
                 'model_reasoning_effort = "ultra"\n'
                 'sandbox_mode = "workspace-write"\n',
                 encoding="utf-8",
@@ -126,6 +127,16 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             result = routing.agent_templates_check(root / "agents")
             self.assertEqual(result["status"], "fail")
             self.assertIn("model_reasoning_effort", result["details"]["failures"][0])
+            implementation.write_text(
+                'name = "implementation_worker"\n'
+                'model = "gpt-5.6-luna"\n'
+                'model_reasoning_effort = "max"\n'
+                'sandbox_mode = "workspace-write"\n',
+                encoding="utf-8",
+            )
+            result = routing.agent_templates_check(root / "agents")
+            self.assertEqual(result["status"], "fail")
+            self.assertIn("model", result["details"]["failures"][0])
 
     def test_worker_rollout_supports_both_roles_and_rejects_mismatches(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -135,7 +146,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                 with self.subTest(role=role):
                     self.write_rollout(
                         rollout,
-                        model="gpt-5.6-luna",
+                        model="gpt-6-luna",
                         effort="max",
                         role=role,
                         parent="root-1",
@@ -144,9 +155,10 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                         routing.verify_worker_rollout(rollout, role)["status"], "ok"
                     )
             for model, effort, role in (
-                ("gpt-5.6-luna", "ultra", "implementation_worker"),
-                ("gpt-5.6-sol", "max", "implementation_worker"),
-                ("gpt-5.6-luna", "max", "exploration_worker"),
+                ("gpt-5.6-luna", "max", "implementation_worker"),
+                ("gpt-6-luna", "ultra", "implementation_worker"),
+                ("gpt-6-sol", "max", "implementation_worker"),
+                ("gpt-6-luna", "max", "exploration_worker"),
             ):
                 with self.subTest(model=model, effort=effort, role=role):
                     self.write_rollout(
@@ -162,7 +174,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                         )["status"],
                         "fail",
                     )
-            self.write_rollout(rollout, model="gpt-5.6-luna", effort="max")
+            self.write_rollout(rollout, model="gpt-6-luna", effort="max")
             self.assertEqual(
                 routing.verify_worker_rollout(
                     rollout, "implementation_worker"
@@ -228,7 +240,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                     json.dumps(
                         {
                             "type": "turn_context",
-                            "payload": {"model": "gpt-5.6-sol", "effort": "low"},
+                            "payload": {"model": "gpt-6-sol", "effort": "low"},
                         }
                     )
                     + "\n"

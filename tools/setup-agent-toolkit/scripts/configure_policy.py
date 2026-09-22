@@ -16,7 +16,7 @@ POLICIES = {
     "codex": """## Orchestration policy
 
 - Use `$codex-maestro` for non-trivial implementation and multi-step debugging.
-- Use `gpt-5.6-sol` at medium effort in the root with `gpt-5.6-luna` at max
+- Use `gpt-6-sol` at medium effort in the root with `gpt-6-luna` at max
   effort for bounded implementation and read-only exploration workers.
 - Keep requirements, architecture, analysis, planning, final review,
   verification, publication, and user communication in the root.

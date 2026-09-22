@@ -107,7 +107,7 @@ class CodexMaestroInstallerTests(unittest.TestCase):
                     encoding="utf-8"
                 )
             )
-            self.assertEqual(implementation["model"], "gpt-5.6-luna")
+            self.assertEqual(implementation["model"], "gpt-6-luna")
             self.assertEqual(implementation["model_reasoning_effort"], "max")
             implementation_instructions = " ".join(
                 implementation["developer_instructions"].split()
@@ -118,7 +118,7 @@ class CodexMaestroInstallerTests(unittest.TestCase):
             )
             self.assertIn("Never overwrite, reset", implementation_instructions)
             self.assertIn("Do not create subagents", implementation_instructions)
-            self.assertEqual(exploration["model"], "gpt-5.6-luna")
+            self.assertEqual(exploration["model"], "gpt-6-luna")
             self.assertEqual(exploration["model_reasoning_effort"], "max")
             self.assertEqual(exploration["sandbox_mode"], "read-only")
             exploration_instructions = " ".join(
@@ -133,7 +133,7 @@ class CodexMaestroInstallerTests(unittest.TestCase):
             )
             self.assertEqual(
                 runner_defaults(),
-                {"DEFAULT_MODEL": "gpt-5.6-luna", "DEFAULT_EFFORT": "max"},
+                {"DEFAULT_MODEL": "gpt-6-luna", "DEFAULT_EFFORT": "max"},
             )
             self.assertFalse((codex_home / "agents" / "luna-worker.toml").exists())
 
