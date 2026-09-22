@@ -1,7 +1,7 @@
 # codex-maestro
 
 Analyze, plan, delegate, review, and verify software changes with a
-**Sol/medium root and Luna/max workers**. This is the only supported route.
+**GPT-6 Sol/medium root and GPT-6 Luna/max workers**. This is the only supported route.
 Requirements, architecture, final review, publication, and user communication
 stay in the root task.
 
@@ -38,9 +38,9 @@ install the required custom agents:
 python <path>/skills/codex-maestro/scripts/install.py --agent-only
 ```
 
-Start a fresh Codex task using `gpt-5.6-sol` at `medium` effort and invoke
+Start a fresh Codex task using `gpt-6-sol` at `medium` effort and invoke
 `$codex-maestro`. It delegates bounded implementation and read-only exploration
-to `gpt-5.6-luna` agents at `max` effort while retaining planning, review,
+to `gpt-6-luna` agents at `max` effort while retaining planning, review,
 verification, and external side effects in the root.
 
 Before substantive work, the skill runs:
@@ -81,10 +81,10 @@ back up local changes before replacement, especially agent TOMLs, because they
 are user-owned configuration. Windows and WSL have separate homes and
 installations.
 
-## Updating from 0.7.1
+## Updating from 0.7.4
 
-Version 0.7.2 replaces the solo default with Sol/medium plus Luna/max custom
-agents. After updating a native plugin, explicitly refresh its agent files:
+Version 0.7.5 updates the supported route to GPT-6 Sol/medium and GPT-6
+Luna/max. After updating a native plugin, explicitly refresh its agent files:
 
 ```bash
 python <path>/skills/codex-maestro/scripts/install.py --agent-only --force
@@ -121,7 +121,7 @@ is:
 
 ```markdown
 - Use `$codex-maestro` for non-trivial implementation and multi-step debugging.
-- Use a `gpt-5.6-sol` root at medium effort with `gpt-5.6-luna` workers at max.
+- Use a `gpt-6-sol` root at medium effort with `gpt-6-luna` workers at max.
 - Keep requirements, architecture, planning, final review, and publication in
   the root; delegate only bounded work with verified routing.
 - Preserve unrelated user changes and prevent worker publication or nesting.

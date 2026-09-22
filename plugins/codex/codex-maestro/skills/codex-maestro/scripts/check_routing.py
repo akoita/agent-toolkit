@@ -9,9 +9,9 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
-DEFAULT_ROOT_MODEL = "gpt-5.6-sol"
+DEFAULT_ROOT_MODEL = "gpt-6-sol"
 EXPECTED_ROOT_EFFORT = "medium"
-EXPECTED_WORKER_MODEL = "gpt-5.6-luna"
+EXPECTED_WORKER_MODEL = "gpt-6-luna"
 EXPECTED_WORKER_EFFORT = "max"
 EXPECTED_WORKER_ROLES = ("implementation_worker", "exploration_worker")
 AGENT_REQUIREMENTS = {
