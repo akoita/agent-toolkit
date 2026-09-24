@@ -9,7 +9,7 @@ The full workflow is in [SKILL.md](skills/maestro/SKILL.md).
 ## What it ships
 
 - the `maestro` skill;
-- three custom agents in [`agents/`](agents/): an Opus implementation worker, a
+- three custom agents in [`agents/`](agents/): an Opus 5.5 implementation worker, a
   Sonnet mechanical worker, and an economical read-only explorer.
 
 ## Install
@@ -56,8 +56,8 @@ resume, and worktree behavior this skill relies on.
 ## Model routing
 
 Routing is capability-based rather than fixed to model names. Use `best` or
-`fable` for an unusually difficult main session, `opus` at high effort for
-correctness-sensitive implementation, `sonnet` at medium or high effort for
+`fable` for an unusually difficult main session, Opus 5.5
+(`claude-opus-5-5`) at high effort for correctness-sensitive implementation, `sonnet` at medium or high effort for
 mechanical work, and the provided Haiku explorer for economical read-only
 discovery.
 
@@ -83,7 +83,7 @@ it short — the detailed procedure stays in the skill, loaded only when relevan
   installed `maestro` skill.
 - Use a few subagents for independent bounded work, agent teams only when
   workers must communicate, and dynamic workflows for large repeatable fan-out.
-- Prefer documented model aliases and capability-based effort: `opus` at high
+- Prefer capability-based effort: Opus 5.5 (`claude-opus-5-5`) at high
   effort for correctness-sensitive work and `sonnet` at medium or high effort
   for mechanical work.
 - Do not orchestrate trivial edits, pure analysis or review, or tasks where the

@@ -41,7 +41,7 @@ POLICIES = {
   installed `maestro` skill.
 - Use a few subagents for independent bounded work, agent teams only when
   workers must communicate, and dynamic workflows for large repeatable fan-out.
-- Prefer documented model aliases and capability-based effort: `opus` at high
+- Prefer capability-based effort: Opus 5.5 (`claude-opus-5-5`) at high
   effort for correctness-sensitive work and `sonnet` at medium or high effort
   for mechanical work.
 - Do not orchestrate trivial edits, pure analysis or review, or tasks where the

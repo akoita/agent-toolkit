@@ -55,7 +55,7 @@ class ConfigurePolicyTests(unittest.TestCase):
         self.assertIn("no authority to publish", codex)
         self.assertNotIn("gpt-6-astra", codex)
         self.assertIn("dynamic workflows", claude)
-        self.assertIn("`opus`", claude)
+        self.assertIn("`claude-opus-5-5`", claude)
         self.assertNotIn("Mythos", claude)
 
     def test_rejects_malformed_or_duplicate_markers(self) -> None:

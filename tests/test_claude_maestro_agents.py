@@ -16,7 +16,7 @@ AGENTS_ROOT = (
 class ClaudeMaestroAgentTests(unittest.TestCase):
     def test_expected_agents_are_bounded_and_use_current_aliases(self) -> None:
         expected = {
-            "maestro-opus-implementation.md": ("opus", "high"),
+            "maestro-opus-implementation.md": ("claude-opus-5-5", "high"),
             "maestro-sonnet-mechanical.md": ("sonnet", "medium"),
         }
 
