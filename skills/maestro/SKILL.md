@@ -23,17 +23,18 @@ regressions instead of relying on a universal benchmark percentage.
 
 ## Choose the session and worker models
 
-Claude Code exposes capability aliases rather than requiring version-pinned
-names:
+Claude Code accepts capability aliases and full model IDs. This skill pins
+Opus to Opus 5.5 by ID and uses aliases for the other tiers:
 
 - `best` selects Fable when the organization has access, otherwise the latest
   Opus. Use it for the main session when the task is unusually difficult and
   the automatic fallback is acceptable.
 - `fable` explicitly selects the longest-running, highest-capability tier. Use
   it deliberately, not by default: see the escalation triggers below.
-- `opus` selects the current Opus family. Since Opus 5 this is the routine
-  default for the maestro session and for correctness-sensitive workers at
-  `high` effort (features, fixes, refactors, tests).
+- `claude-opus-5-5` pins Opus 5.5. Use it at `high` effort as the routine
+  default for the maestro session and for correctness-sensitive workers
+  (features, fixes, refactors, tests). Do not substitute the bare `opus` alias:
+  it follows the current Opus family and can move past 5.5.
 - `sonnet` selects the current Sonnet family. Use a Sonnet worker at `medium`
   or `high` effort for well-specified, low-risk, mechanical work.
 
@@ -56,11 +57,11 @@ session (or a single review pass) to `fable` when any of these hold:
   expensive to discover late;
 - the item is a critical review gate where a missed subtle defect has major
   project impact;
-- Opus at `high` effort has already failed or produced conflicting analyses on
+- Opus 5.5 at `high` effort has already failed or produced conflicting analyses on
   a reasoning-heavy item.
 
 Everything else — routine orchestration, planning over clear requirements, and
-all implementation work — stays on `opus` or below. Do not run Fable as the
+all implementation work — stays on Opus 5.5 at `high` or below. Do not run Fable as the
 standing session model merely because it is available; record why any Fable
 escalation happened in the final report. As always, treat these price and
 capability claims as hypotheses to re-measure on your own repositories as the
@@ -71,6 +72,8 @@ availability can differ across the Anthropic API, Bedrock, Google Cloud's Agent
 Platform, Foundry, gateways, plans, and organization allowlists. Provider
 administrators should pin the corresponding `ANTHROPIC_DEFAULT_*_MODEL`
 variables or model overrides when rollout control and reproducibility matter.
+`claude-opus-5-5` is the Anthropic API ID; on another provider or gateway, use
+that provider's ID for Opus 5.5.
 Check `/status` and the active configuration before claiming a model ran.
 
 Do not make `max` the routine worker setting. It removes the normal constraint
@@ -80,7 +83,8 @@ when the risk justifies it. Record the reason in the final report.
 
 Reusable definitions in this distribution:
 
-- `maestro-opus-implementation`: Opus/high for correctness-sensitive work.
+- `maestro-opus-implementation`: Opus 5.5 (`claude-opus-5-5`)/high for
+  correctness-sensitive work.
 - `maestro-sonnet-mechanical`: Sonnet/medium for mechanical changes; raise an
   individual invocation to high when needed.
 - `maestro-economical-explorer`: Haiku, strictly read-only exploration.
@@ -234,8 +238,8 @@ verification.
 Allow one targeted fix round by default. For a small residual issue, fix it in
 the main session. If the plan was wrong, revise it before delegating again. If a
 Sonnet mechanical item exposes real judgment or repeated failure, escalate it
-to Opus/high; use max only with a documented risk or failure reason. If Opus at
-high effort repeatedly fails on a reasoning-heavy item, move that item's
+to Opus 5.5/high; use max only with a documented risk or failure reason. If
+Opus 5.5 at high effort repeatedly fails on a reasoning-heavy item, move that item's
 analysis (not the bulk implementation) to a `fable` session per the escalation
 triggers above.
 
