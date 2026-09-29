@@ -1,7 +1,7 @@
 ---
-name: maestro-opus-implementation
+name: maestro-sonnet-implementation
 description: Implements bounded correctness-sensitive work from a detailed maestro-approved plan. Use for features, bug fixes, refactors, and tests where subtle errors are costly.
-model: claude-opus-5-5
+model: claude-sonnet-5-5
 effort: high
 tools: Read, Edit, Write, Bash, Glob, Grep
 disallowedTools: Agent

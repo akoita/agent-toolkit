@@ -9,7 +9,7 @@ The full workflow is in [SKILL.md](skills/maestro/SKILL.md).
 ## What it ships
 
 - the `maestro` skill;
-- three custom agents in [`agents/`](agents/): an Opus 5.5 implementation worker, a
+- three custom agents in [`agents/`](agents/): a Sonnet 5.5 implementation worker, a
   Sonnet mechanical worker, and an economical read-only explorer.
 
 ## Install
@@ -33,7 +33,9 @@ Restart Claude Code afterwards; `/reload-plugins` does not pick up a version
 change. A manual install is removed by deleting what it created — the skill at
 `~/.claude/skills/maestro` and the three agent files in `~/.claude/agents/`.
 Those agent files are user-owned configuration, so inspect them before
-deleting. See [Uninstalling](../../../docs/uninstalling.md).
+deleting. Installs from before 0.7.7 also have
+`~/.claude/agents/maestro-opus-implementation.md`, which the Sonnet 5.5
+`maestro-sonnet-implementation` agent replaces. See [Uninstalling](../../../docs/uninstalling.md).
 
 ## Manual install
 
@@ -57,7 +59,8 @@ resume, and worktree behavior this skill relies on.
 
 Routing is capability-based rather than fixed to model names. Use `best` or
 `fable` for an unusually difficult main session, Opus 5.5
-(`claude-opus-5-5`) at high effort for correctness-sensitive implementation, `sonnet` at medium or high effort for
+(`claude-opus-5-5`) at high effort for the routine maestro session, Sonnet 5.5
+(`claude-sonnet-5-5`) at high effort for correctness-sensitive implementation, `sonnet` at medium or high effort for
 mechanical work, and the provided Haiku explorer for economical read-only
 discovery.
 
@@ -83,7 +86,7 @@ it short — the detailed procedure stays in the skill, loaded only when relevan
   installed `maestro` skill.
 - Use a few subagents for independent bounded work, agent teams only when
   workers must communicate, and dynamic workflows for large repeatable fan-out.
-- Prefer capability-based effort: Opus 5.5 (`claude-opus-5-5`) at high
+- Prefer capability-based effort: Sonnet 5.5 (`claude-sonnet-5-5`) at high
   effort for correctness-sensitive work and `sonnet` at medium or high effort
   for mechanical work.
 - Do not orchestrate trivial edits, pure analysis or review, or tasks where the
