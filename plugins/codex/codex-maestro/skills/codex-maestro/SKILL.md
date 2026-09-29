@@ -2,7 +2,7 @@
 name: codex-maestro
 description: >-
   Analyze, plan, delegate, review, and verify non-trivial software changes with
-  a gpt-6-sol root at medium effort and gpt-6-luna workers at max effort.
+  a gpt-6.1-sol root at medium effort and gpt-6-luna workers at max effort.
   Keep requirements, architecture, final review, and publication in the root.
   Use for features, fixes, refactors, configuration, and multi-step debugging;
   skip trivial edits and pure analysis or review.
@@ -10,8 +10,8 @@ description: >-
 
 # Codex Maestro
 
-Use a Sol/medium root as the maestro and Luna/max custom agents for bounded
-implementation and read-only exploration. The root owns requirements,
+Use a GPT-6.1 Sol/medium root as the maestro and Luna/max custom agents for
+bounded implementation and read-only exploration. The root owns requirements,
 architecture, planning, final review, verification, publication, and all
 user-facing communication.
 
@@ -25,13 +25,14 @@ The only supported route is:
 
 | Responsibility | Model | Effort | Agent type |
 | --- | --- | --- | --- |
-| Root maestro | `gpt-6-sol` | `medium` | root task |
+| Root maestro | `gpt-6.1-sol` | `medium` | root task |
 | Implementation | `gpt-6-luna` | `max` | `implementation_worker` |
 | Exploration | `gpt-6-luna` | `max` | `exploration_worker` |
 
 Do not silently substitute another root model, generic worker, or reasoning
 effort. A skill cannot change an already-running root model. If routing
-evidence does not match, stop and ask the user to start a fresh Sol/medium task.
+evidence does not match, stop and ask the user to start a fresh GPT-6.1 Sol/medium
+task.
 Changing the route requires an explicit user override and independent runtime
 verification; it is not a Maestro preset.
 

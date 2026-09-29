@@ -48,7 +48,8 @@ class ConfigurePolicyTests(unittest.TestCase):
         codex = configure_policy.managed_block("codex", "\n")
         claude = configure_policy.managed_block("claude", "\n")
 
-        self.assertIn("`gpt-6-sol` at medium effort", codex)
+        self.assertIn("`gpt-6.1-sol` at medium effort", codex)
+        self.assertNotIn("`gpt-6-sol` at medium effort", codex)
         self.assertIn("`gpt-6-luna` at max", codex)
         self.assertIn("fail-closed root and worker routing checks", codex)
         self.assertIn("bounded tasks with explicit ownership", codex)
