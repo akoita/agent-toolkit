@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the supported Sol/medium root and Luna/max workers."""
+"""Verify the supported GPT-6.1 Sol/medium root and Luna/max workers."""
 from __future__ import annotations
 
 import argparse
@@ -9,7 +9,7 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
-DEFAULT_ROOT_MODEL = "gpt-6-sol"
+DEFAULT_ROOT_MODEL = "gpt-6.1-sol"
 EXPECTED_ROOT_EFFORT = "medium"
 EXPECTED_WORKER_MODEL = "gpt-6-luna"
 EXPECTED_WORKER_EFFORT = "max"
@@ -34,7 +34,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", dest="json_output", action="store_true")
     parser.add_argument("--profile", choices=("default",), default="default",
-                        help="the Sol/Luna route is the only supported preset")
+                        help="the GPT-6.1 Sol/Luna route is the only supported preset")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--enforce", action="store_true",
                       help="verify installed agents and the current root route")

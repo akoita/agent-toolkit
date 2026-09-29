@@ -1,7 +1,7 @@
 # codex-maestro
 
 Analyze, plan, delegate, review, and verify software changes with a
-**GPT-6 Sol/medium root and GPT-6 Luna/max workers**. This is the only supported route.
+**GPT-6.1 Sol/medium root and GPT-6 Luna/max workers**. This is the only supported route.
 Requirements, architecture, final review, publication, and user communication
 stay in the root task.
 
@@ -38,7 +38,7 @@ install the required custom agents:
 python <path>/skills/codex-maestro/scripts/install.py --agent-only
 ```
 
-Start a fresh Codex task using `gpt-6-sol` at `medium` effort and invoke
+Start a fresh Codex task using `gpt-6.1-sol` at `medium` effort and invoke
 `$codex-maestro`. It delegates bounded implementation and read-only exploration
 to `gpt-6-luna` agents at `max` effort while retaining planning, review,
 verification, and external side effects in the root.
@@ -49,7 +49,7 @@ Before substantive work, the skill runs:
 python <path>/skills/codex-maestro/scripts/check_routing.py --enforce
 ```
 
-The checker validates the installed agent definitions and persisted Sol/medium
+The checker validates the installed agent definitions and persisted GPT-6.1 Sol/medium
 root route. Each new worker receives a minimal handshake before its real task;
 verify its exact persisted rollout with:
 
@@ -81,10 +81,11 @@ back up local changes before replacement, especially agent TOMLs, because they
 are user-owned configuration. Windows and WSL have separate homes and
 installations.
 
-## Updating from 0.7.4
+## Updating to 0.7.8
 
-Version 0.7.5 updates the supported route to GPT-6 Sol/medium and GPT-6
-Luna/max. After updating a native plugin, explicitly refresh its agent files:
+Version 0.7.8 updates the orchestrator to GPT-6.1 Sol at medium effort.
+Workers remain GPT-6 Luna at max effort. After updating a native plugin,
+verify its agent files and refresh them if needed:
 
 ```bash
 python <path>/skills/codex-maestro/scripts/install.py --agent-only --force
@@ -121,7 +122,7 @@ is:
 
 ```markdown
 - Use `$codex-maestro` for non-trivial implementation and multi-step debugging.
-- Use a `gpt-6-sol` root at medium effort with `gpt-6-luna` workers at max.
+- Use a `gpt-6.1-sol` root at medium effort with `gpt-6-luna` workers at max.
 - Keep requirements, architecture, planning, final review, and publication in
   the root; delegate only bounded work with verified routing.
 - Preserve unrelated user changes and prevent worker publication or nesting.

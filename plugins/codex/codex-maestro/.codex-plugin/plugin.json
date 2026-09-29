@@ -1,7 +1,7 @@
 {
   "name": "codex-maestro",
-  "version": "0.7.7",
-  "description": "Experimental Sol/medium root workflow with Luna/max workers for bounded implementation and exploration.",
+  "version": "0.7.8",
+  "description": "Experimental GPT-6.1 Sol/medium root workflow with Luna/max workers for bounded implementation and exploration.",
   "author": {
     "name": "Aboubakar Koïta",
     "url": "https://github.com/akoita"
@@ -16,8 +16,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Codex Maestro",
-    "shortDescription": "Orchestrate changes with Sol and Luna workers.",
-    "longDescription": "Experimental Sol/medium root workflow with Luna/max workers for bounded implementation and exploration.",
+    "shortDescription": "Orchestrate with GPT-6.1 Sol and GPT-6 Luna workers.",
+    "longDescription": "Experimental GPT-6.1 Sol/medium root workflow with Luna/max workers for bounded implementation and exploration.",
     "developerName": "Aboubakar Koïta",
     "category": "Developer Tools",
     "capabilities": [

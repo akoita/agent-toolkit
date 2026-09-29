@@ -77,16 +77,17 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
             code = routing.main([*args, "--json"])
         return code, json.loads(output.getvalue())
 
-    def test_default_enforce_requires_sol_medium_and_luna_max_agents(self) -> None:
+    def test_default_enforce_requires_gpt_6_1_sol_medium_and_luna_max_agents(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             rollout = root / "root.jsonl"
             self.write_agents(root)
             for model, effort, expected in (
-                ("gpt-6-sol", "medium", 0),
+                ("gpt-6.1-sol", "medium", 0),
+                ("gpt-6-sol", "medium", 1),
                 ("gpt-5.6-sol", "medium", 1),
                 ("gpt-6-astra", "medium", 1),
-                ("gpt-6-sol", "high", 1),
+                ("gpt-6.1-sol", "high", 1),
                 ("gpt-6-luna", "max", 1),
             ):
                 with self.subTest(model=model, effort=effort):
@@ -240,7 +241,7 @@ class CodexMaestroRoutingCheckTests(unittest.TestCase):
                     json.dumps(
                         {
                             "type": "turn_context",
-                            "payload": {"model": "gpt-6-sol", "effort": "low"},
+                            "payload": {"model": "gpt-6.1-sol", "effort": "low"},
                         }
                     )
                     + "\n"
