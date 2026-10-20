@@ -2,7 +2,7 @@
 
 Every tool here is free software or a genuinely free tier and runs from a
 command line with no account. Version numbers are the latest releases observed
-on 2026-07-29; check for a newer one rather than pinning to these.
+on 2026-10-20; check for a newer one rather than pinning to these.
 
 ## SAST
 
@@ -69,7 +69,7 @@ as the thorough one; they overlap deliberately.
 ### Go
 
 ```bash
-gosec -fmt sarif -out gosec.sarif ./...     # v2.28.0
+gosec -fmt sarif -out gosec.sarif ./...     # v2.29.0
 ```
 
 Suppress with `// #nosec G402 -- reason`. The reason after `--` is not optional
@@ -78,7 +78,7 @@ in review even though the tool accepts its absence.
 ### Ruby
 
 ```bash
-brakeman -f sarif -o brakeman.sarif          # v8.0.5
+brakeman -f sarif -o brakeman.sarif          # v8.1.0
 ```
 
 Rails-aware, and considerably more accurate on a Rails application than any
@@ -87,12 +87,13 @@ generic engine.
 ### JavaScript and TypeScript
 
 ```bash
-npm install --save-dev eslint-plugin-security   # v4 (4.0.1 observed)
+npm install --save-dev eslint-plugin-security   # v4 (4.2.0 observed)
 ```
 
-It ships roughly fourteen rules. Treat it as a floor, not a scanner, and layer
-`microsoft/eslint-plugin-sdl` on top for a wider set. Neither replaces
-`opengrep` for this ecosystem.
+It ships fifteen rules. Treat it as a floor, not a scanner.
+`@microsoft/eslint-plugin-sdl` adds a wider set, but upstream marked it no
+longer actively maintained in August 2026 (last release 1.1.0), so pin it and
+expect no fixes. Neither replaces `opengrep` for this ecosystem.
 
 ### Rust
 
@@ -108,7 +109,7 @@ cargo deny check                  # licences, bans, advisories, sources
 ### osv-scanner — the default
 
 ```bash
-osv-scanner scan source -r ./ --format sarif --output osv.sarif   # v2.4.0
+osv-scanner scan source -r ./ --format sarif --output-file osv.sarif   # v2.7.0
 ```
 
 Exit codes are 0 (packages found, no vulnerabilities), 1 (vulnerabilities
@@ -127,23 +128,24 @@ osv-scanner scan source -r ./ --offline-vulnerabilities --download-offline-datab
 
 ```bash
 trivy fs --scanners vuln,secret,misconfig --severity HIGH,CRITICAL \
-  --ignore-unfixed --exit-code 1 --format sarif -o trivy.sarif .   # v0.72.0
+  --ignore-unfixed --exit-code 1 --format sarif -o trivy.sarif .   # v0.76.0
 ```
 
 One binary covers dependencies, secrets, and misconfiguration. Note that Trivy
 exits 0 on findings unless `--exit-code` is passed, and `--ignore-unfixed`
 keeps unfixable transitive advisories out of a gate.
 
-Its vulnerability database is distributed as an OCI artifact from `ghcr.io`,
-and `TOOMANYREQUESTS` is a common CI failure. Cache `~/.cache/trivy` between
+Its vulnerability database is distributed as an OCI artifact from
+`mirror.gcr.io`, falling back to `ghcr.io`, and registry rate limiting
+(`TOOMANYREQUESTS`) is a common CI failure. Cache `~/.cache/trivy` between
 runs, or use `--db-repository` to point at a mirror, or `--skip-db-update` when
 a recent database is already present.
 
 ### syft plus grype — SBOM first
 
 ```bash
-syft . -o cyclonedx-json=sbom.cdx.json                       # v1.50.0
-grype sbom:./sbom.cdx.json -o sarif --fail-on high            # v0.116.1
+syft . -o cyclonedx-json=sbom.cdx.json                       # v1.55.0
+grype sbom:./sbom.cdx.json -o sarif --fail-on high            # v0.121.0
 ```
 
 Use this split when the SBOM is a deliverable in its own right — for a release,
@@ -180,7 +182,7 @@ alert under years of rotated test keys.
 ### trufflehog
 
 ```bash
-trufflehog git file://. --results=verified --json --fail     # v3.96.0
+trufflehog git file://. --results=verified --json --fail     # v3.99.3
 ```
 
 AGPL-3.0, so check the licence position before embedding it in a product;
@@ -190,7 +192,8 @@ secret is found.
 `--results=verified` means TruffleHog authenticated the credential against the
 live service — a verified result is a real, currently-valid secret and deserves
 an immediate response. Treat `unknown` results as "not confirmed clean" rather
-than as clean. There is no SARIF output; parse the JSON.
+than as clean. Since v3.97.0, `--sarif` in place of `--json` emits SARIF, buffered until the
+scan ends; otherwise parse the JSON.
 
 After a leak, **rotate first**. History rewriting with
 `git filter-repo --replace-text` is cleanup, not remediation: the credential
@@ -213,12 +216,15 @@ comments still work there, so a migration does not require rewriting them.
 ### checkov — Terraform-heavy repositories
 
 ```bash
-pip install checkov                                          # 3.3.8
+pip install checkov                                          # 3.3.30
 checkov -d . --compact --framework terraform,kubernetes \
   --output sarif --output-file-path .
 ```
 
-Gate with `--hard-fail-on CRITICAL` and `--soft-fail-on LOW`. Adopt on an
+Gate with `--hard-fail-on CRITICAL` and `--soft-fail-on LOW`. Checks carry
+severities only through the Prisma Cloud platform integration (an API key);
+without it, severity criteria match nothing and every failed check hard-fails,
+so gate by check ID instead. Adopt on an
 existing repository through its baseline workflow, so only new failures fail:
 
 ```bash
@@ -295,7 +301,7 @@ and `report` with `template: sarif-json` for SARIF output. In GitHub Actions,
 ### nuclei
 
 ```bash
-nuclei -u https://target -severity critical,high -sarif-export r.sarif   # v3.11.0
+nuclei -u https://target -severity critical,high -sarif-export r.sarif   # v3.11.1
 ```
 
 A signature matcher. Excellent for known CVEs, exposed panels, and default
@@ -305,13 +311,13 @@ application is supposed to do.
 ### schemathesis
 
 ```bash
-uvx schemathesis run https://app/openapi.json --checks all -n 100       # v4.24.3
+uvx schemathesis run https://app/openapi.json --checks all -n 100       # v4.32.2
 ```
 
 The best free API fuzzer and cheap enough to run on a pull request. Its
 `ignored_auth` check is the standout: it detects endpoints that return data
-without enforcing the authorization the specification declares. No SARIF
-output; read the report.
+without enforcing the authorization the specification declares. `-n` caps
+test cases per operation. No SARIF output; read the report.
 
 ## Fuzzing
 
@@ -326,7 +332,7 @@ tests:
 go test -fuzz=FuzzParse -fuzztime=60s ./pkg/...
 ```
 
-`cargo fuzz` needs a nightly toolchain. AFL++ v5.02c remains the reference for
+`cargo fuzz` needs a nightly toolchain. AFL++ v5.03c remains the reference for
 native targets. OSS-Fuzz is not available for private products, and
 ClusterFuzzLite is in maintenance mode, so a private repository runs its own.
 

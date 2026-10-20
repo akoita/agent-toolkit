@@ -91,7 +91,7 @@ go rather than chaining with `&&`, because a nonzero status usually means
 
 ```bash
 opengrep scan -f rules/ . --sarif-output="$OUT/opengrep.sarif"; echo "opengrep=$?"
-osv-scanner scan source -r ./ --format sarif --output "$OUT/osv.sarif"; echo "osv=$?"
+osv-scanner scan source -r ./ --format sarif --output-file "$OUT/osv.sarif"; echo "osv=$?"
 gitleaks dir . --report-format sarif --report-path "$OUT/gitleaks.sarif" --redact; echo "gitleaks=$?"
 ```
 
@@ -113,7 +113,7 @@ sarif diff "$OUT/base" "$OUT/head"   # what this change introduced
 
 `sarif summary` is the digest to read first and `sarif diff` is what turns a
 full-tree scan into a pull-request signal. Tools with no SARIF output —
-`trufflehog`, `schemathesis` — are summarized separately and their counts added
+`schemathesis`, or `trufflehog` run with `--json` — are summarized separately and their counts added
 to the coverage table by hand.
 
 SARIF 2.1.0 is the only version these tools emit, and it has limits worth

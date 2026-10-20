@@ -11,7 +11,7 @@ Capture each exit code explicitly and compare it against this table.
 
 ```bash
 set +e
-osv-scanner scan source -r ./ --format sarif --output osv.sarif
+osv-scanner scan source -r ./ --format sarif --output-file osv.sarif
 osv_status=$?
 set -e
 case "$osv_status" in
@@ -27,7 +27,7 @@ esac
 | Tool | Exit code behavior |
 | --- | --- |
 | `osv-scanner` | 0 packages found and clean; 1 vulnerabilities found; 1–126 reserved for result-related errors; 127 general error; **128 no packages found**; 129–255 non-result errors |
-| `trivy` | 0 always, **unless `--exit-code N` is passed**; then N on findings at or above `--severity` |
+| `trivy` | 0 on findings **unless `--exit-code N` is passed**, then N on findings at or above `--severity`; 1 on a runtime error |
 | `grype` | 0 clean; **`--fail-on <severity>` exits 2**, not 1 |
 | `gitleaks` | 1 when leaks are found |
 | `trufflehog` | **183 when `--fail` is set and a verified secret is found** |
@@ -36,6 +36,7 @@ esac
 | `conftest` | 1 on a policy failure |
 | `kube-linter` | 1 on a lint failure |
 | `checkov` | 1 on a failed check; tune with `--hard-fail-on` and `--soft-fail-on` |
+| `schemathesis` | 0 pass; 1 check failure; **2 nothing tested, or a schema, configuration, or internal error**; 130 interrupted |
 | `codex-security` | 0 pass; 1 finding at or above `--fail-on-severity` on a completed scan; 2 invalid input, incomplete coverage, or runtime error; 130 interrupted; 143 terminated |
 | `codecrucible` | 0 clean; 1 error; **2 findings at or above `--fail-on-severity`** — inverted relative to `codex-security` |
 
@@ -59,7 +60,7 @@ results are read at all.
 | Semgrep and opengrep | `// nosemgrep` or `// nosemgrep: rule-id` |
 | Checkov | `#checkov:skip=CKV_AWS_20:reason` |
 | Gitleaks | `#gitleaks:allow` on the line, or a fingerprint in `.gitleaksignore` |
-| Trivy | `#trivy:ignore:AVD-DS-0002` |
+| Trivy | `#trivy:ignore:AVD-GCP-0051` |
 | Bandit | `# nosec B602` |
 | gosec | `// #nosec G402 -- reason` |
 | tfsec (legacy, now handled by Trivy) | `#tfsec:ignore:AWS001` |
