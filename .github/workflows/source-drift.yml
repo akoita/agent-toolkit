@@ -1,0 +1,92 @@
+name: source-drift
+
+# Weekly check of the authority sources that skills pin or cite. Findings land
+# in one tracking issue; nothing here edits a skill. See
+# docs/contributing.md#authority-sources.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-drift
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      status: ${{ steps.check.outputs.status }}
+      report: ${{ steps.check.outputs.report }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The token only raises the GitHub API rate limit; this job cannot write.
+      - name: Check authority sources
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          python3 .github/scripts/check_sources.py \
+            --markdown report.md --json report.json
+          status=$?
+          set -e
+          if [ "$status" -eq 2 ]; then
+            echo "::error::.github/authority-sources.json is invalid"
+            exit 1
+          fi
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+          delimiter="REPORT_$(openssl rand -hex 16)"
+          {
+            echo "status=$status"
+            echo "report<<$delimiter"
+            cat report.md
+            echo "$delimiter"
+          } >> "$GITHUB_OUTPUT"
+
+  # Separate job so the issue-writing token never shares a process with code
+  # that fetches third-party content.
+  report:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      STATUS: ${{ needs.check.outputs.status }}
+      REPORT: ${{ needs.check.outputs.report }}
+      TITLE: Authority source drift report
+    steps:
+      - name: Open, update, or close the tracking issue
+        run: |
+          number="$(gh issue list --state open --search "\"$TITLE\" in:title" \
+            --json number,title \
+            --jq 'map(select(.title == env.TITLE)) | .[0].number // empty')"
+          if [ "$STATUS" = "0" ]; then
+            if [ -n "$number" ]; then
+              gh issue close "$number" \
+                --comment "Every authority source is current as of this run."
+            fi
+            exit 0
+          fi
+          printf '%s\n' "$REPORT" > report.md
+          if [ -z "$number" ]; then
+            gh issue create --title "$TITLE" --body-file report.md
+            exit 0
+          fi
+          gh issue view "$number" --json body --jq .body \
+            | grep -v '^_Checked on' > previous.md || true
+          grep -v '^_Checked on' report.md > current.md || true
+          gh issue edit "$number" --body-file report.md
+          if ! diff -qBw previous.md current.md > /dev/null; then
+            gh issue comment "$number" \
+              --body "Findings changed since the last run; the description holds the current report."
+          fi

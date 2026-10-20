@@ -113,6 +113,24 @@ fixed locations and keep native-only metadata in the repository-owned
 adapter; the portable source, native packages, and catalogs must all pass their
 check modes before review.
 
+## Authority sources
+
+Pinned releases and cited sources are registered in
+`.github/authority-sources.json`. In a tracked file, every URL and every
+trailing `# vX.Y.Z` release comment must have an entry naming its canonical
+file, publisher, and `verified_on` date; `tests/test_authority_sources.py`
+rejects anything unregistered and any marker or URL the file no longer
+contains. Placeholder hosts in examples go under `example_urls`.
+
+The weekly `source-drift` workflow runs
+`python .github/scripts/check_sources.py` and keeps one
+**Authority source drift report** issue current. Run it locally the same way;
+`--validate-only` checks the manifest without network access. To resolve a
+finding, update the canonical skill file, sync the mirrors, update the entry's
+`pinned`, `marker`, or `url` and its `verified_on`, and bump the package
+version. [ADR 0003](decisions/0003-authority-source-drift.md) records the
+design and the proposed agent-review stage.
+
 ## Conventions
 
 - Keep every skill project-agnostic: no repository-specific paths, secrets, or
