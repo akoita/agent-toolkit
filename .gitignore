@@ -1,2 +1,4 @@
 __pycache__/
 *.py[cod]
+source-review-brief.json
+source-review-summary.md

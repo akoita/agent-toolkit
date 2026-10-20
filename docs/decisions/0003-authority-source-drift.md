@@ -1,6 +1,6 @@
 # ADR 0003: Check authority sources for drift on a schedule
 
-- Status: Accepted (stages 1 and 2); stages 3 and 4 proposed
+- Status: Accepted (stages 1–3); stage 4 proposed
 - Date: 2026-10-20
 - Scope: Maintainer tooling; no shipped skill changes
 
@@ -42,12 +42,14 @@ different answers per installation.
    and marks claims due for review after `review_after_days`. The weekly
    `source-drift` workflow keeps one tracking issue current. It never edits a
    skill.
-3. **Agent review (proposed).** For flagged entries only, an agent reads the
-   current source and proposes a draft pull request. It uses the Developer
-   Knowledge MCP for `publisher: google` entries and ordinary fetching for the
-   rest, and classifies each change as a direct source claim, an adaptation, or
-   separately established guidance, as the August 2026 research note does. The
-   checker's `--json` output is its input contract.
+3. **Agent review.** After each drift run, or on demand, the `source-review`
+   workflow gives the flagged entries to a pinned Claude Code release, which
+   reads each current source and proposes a draft pull request. It uses the
+   Developer Knowledge MCP for `publisher: google` entries when that key is
+   configured and ordinary fetching for the rest, and classifies each change as
+   a direct source claim, an adaptation, or separately established guidance, as
+   the August 2026 research note does. The checker's `--json` output is its
+   input contract and `.github/source-review-prompt.md` its instructions.
 4. **Discovery (proposed).** A monthly, separate job searches the topics the
    skills cover and writes a note under `docs/research/`, without editing
    skills.
@@ -58,9 +60,13 @@ different answers per installation.
   sources cannot enter unregistered.
 - Fetched content is untrusted. The checker accepts only version strings and
   sanitized redirect targets into the report, and the issue-writing token runs
-  in a job that fetches nothing. A stage 3 agent must be confined to draft pull
-  requests on a bot branch, following `security-ai`'s runtime-hardening
-  guidance.
+  in a job that fetches nothing.
+- The review agent runs with `--bare`, `--strict-mcp-config`, and
+  `--permission-mode dontAsk`, edits only paths its allowlist names, and holds
+  no repository write token. Its patch is published by a separate job only
+  after `source_review.py verify` confirms it modifies nothing but Markdown and
+  manifest JSON and contains no credential value, so a prompt-injected agent
+  can at worst propose a misleading draft pull request for human review.
 - `verified_on` dates were seeded from the dates the skills already record:
   2026-07-29 for the toolchain observations and 2026-08-03 for the Google
   research analysis.

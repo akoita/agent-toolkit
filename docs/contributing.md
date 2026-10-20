@@ -129,7 +129,30 @@ The weekly `source-drift` workflow runs
 finding, update the canonical skill file, sync the mirrors, update the entry's
 `pinned`, `marker`, or `url` and its `verified_on`, and bump the package
 version. [ADR 0003](decisions/0003-authority-source-drift.md) records the
-design and the proposed agent-review stage.
+design.
+
+After each drift run, the `source-review` workflow can hand the flagged
+sources to Claude Code, which re-reads them and opens a **draft** pull request
+with the skill, manifest, and version changes and a summary of its evidence.
+It also runs on demand from the Actions tab, optionally for named source ids.
+The agent job cannot write to the repository; a separate job applies its patch
+only if `.github/scripts/source_review.py verify` accepts it: modified Markdown
+under `plugins/` or `skills/`, plugin manifests, catalogs, and the source
+manifest, with no new, deleted, renamed, or binary files and no credential
+values. Treat the pull request as a lead: check its evidence before marking it
+ready.
+
+| Setting | Kind | Purpose |
+| --- | --- | --- |
+| `ANTHROPIC_API_KEY` | secret | Required; without it the review is skipped |
+| `GOOGLE_DEVELOPER_KNOWLEDGE_API_KEY` | secret | Optional; adds Google's Developer Knowledge MCP for `publisher: google` sources. Create it in a Google Cloud project with the Developer Knowledge API enabled and restrict the key to that API |
+| `SOURCE_REVIEW_TOKEN` | secret | Optional fine-grained token with contents and pull-request write; without it the pull request is opened with `GITHUB_TOKEN`, which does not trigger CI on it |
+| `SOURCE_REVIEW_MODEL` | variable | Defaults to `claude-opus-5-5` |
+| `SOURCE_REVIEW_MAX_BUDGET_USD` | variable | Spend cap per run; defaults to `10` |
+
+Using `GITHUB_TOKEN` also requires **Allow GitHub Actions to create and approve
+pull requests** under the repository's Actions settings. No new review starts
+while a `source-review/*` pull request is open.
 
 ## Conventions
 
