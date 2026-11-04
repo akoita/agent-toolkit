@@ -95,6 +95,13 @@ otherwise update inbound links and leave a short moved notice when external
 links are likely. Separate transient implementation plans from durable current
 state, and archive them only when they retain historical value.
 
+## Write useful, concise, complete prose
+
+Before writing or rewriting any documentation prose, read
+[references/writing.md](references/writing.md). It sets the reader-first
+structure, length budgets, sentence rules, command conventions, and the review
+checklist to run on the diff before committing.
+
 ## Write for the document lifecycle
 
 Use [references/templates.md](references/templates.md) when authoring an
