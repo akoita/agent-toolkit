@@ -5,9 +5,10 @@ description: >-
   when scaffolding documentation for a new repository, normalizing an existing
   docs tree, writing architecture or design documentation, or updating docs
   after a change that materially alters behavior, interfaces, architecture,
-  operations, configuration, or security. Scale the result to the project's
-  maturity and risk; do not use for unrelated prose or exhaustive code
-  narration.
+  operations, configuration, or security. Also use to restructure long or
+  dense pages for readability, or to install or update the shared writing
+  policy in a project's AGENTS.md. Scale the result to the project's maturity
+  and risk; do not use for unrelated prose or exhaustive code narration.
 ---
 
 # Document software
@@ -16,6 +17,18 @@ Build a small, navigable body of documentation that helps a reader understand,
 change, operate, and reason about the software. Optimize for maintained truth,
 not document count. Preserve useful project conventions and content while
 making the information architecture predictable.
+
+## Keep the project's writing policy current
+
+Before other documentation work in a project, run
+`python3 scripts/install_policy.py <project> --check` from this skill's
+directory. If it reports the policy out of date, run it again without
+`--check` to see the diff, then with `--write`, and include the `AGENTS.md`
+and `.claude/settings.json` changes in the same change, saying so in its
+summary. The installer only touches the text between its markers and adds
+settings that are missing. Run it the same way when asked to install the
+writing policy. Report its warnings, such as a CLAUDE.md that does not import
+AGENTS.md, instead of silently fixing unrelated files.
 
 ## Start from repository evidence
 
@@ -99,8 +112,15 @@ state, and archive them only when they retain historical value.
 
 Before writing or rewriting any documentation prose, read
 [references/writing.md](references/writing.md). It sets the reader-first
-structure, length budgets, sentence rules, command conventions, and the review
-checklist to run on the diff before committing.
+structure, concept-first description, size limits, rules for pages agents
+read, diagrams, sentence rules, command conventions, and the review checklist
+to run on the diff before committing.
+
+To restructure dense documentation, first run
+`python3 scripts/docs_density.py <project>` to list the pages over the size
+limits, and propose an order of work. Rewrite one page per change, keep every
+rule and fact, and leave dated records such as ADRs and evaluation reports
+as they are.
 
 ## Write for the document lifecycle
 

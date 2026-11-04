@@ -44,6 +44,56 @@ usually needs to become two documents, or one with clearly separated parts.
 - **Restructure any prose block longer than about 120 words** into shorter
   paragraphs, a list, or a table.
 
+- **Open every page the same way:** one or two sentences on what it covers
+  and who it is for, then a contents list when it has more than four
+  sections.
+- **Headings name concepts or tasks, never issue numbers.** Write "Targeted
+  revisions", and link the issue from the text if it matters.
+
+## Describe by concept, not as a changelog
+
+A current-state page says what the system does now, organized by concept.
+Readers should never replay versions to learn the present.
+
+- Do not narrate versions ("v7 keeps v6 and adds..."). State the current
+  behavior, then keep history to one compact table per item: version, what
+  changed, issue link.
+- Incident stories ("on the 1 November run, the critic missed...") belong in
+  the linked issue or evaluation report, not inside the rule they motivated.
+- Dated records are exempt: ADRs, evaluation reports, release evidence and
+  postmortems describe a moment and are not restyled. At most, add a two-line
+  summary at the top.
+
+## Size limits
+
+Long pages hide information from humans and overflow an agent's context.
+Treat these as triggers to restructure, not as targets:
+
+| Unit | Restructure when it exceeds | Usual fix |
+| --- | --- | --- |
+| Paragraph | About 120 words or four sentences | Split, or turn into a list or table |
+| Section | About 150 lines | Sub-headings, a table, or a page of its own |
+| Page | About 4,000 words or 500 lines | Split by concept and link from a short map page |
+
+Run [scripts/docs_density.py](../scripts/docs_density.py) to find the pages
+that break these limits before choosing what to rewrite.
+
+## Write for agents too
+
+Coding agents read documentation in pieces: one section from a search, a page
+loaded into a limited context. Pages that work for them also work for people
+who skim.
+
+- Make each section stand on its own. Avoid "as above", "the previous
+  section" and pronouns whose subject sits on another screen.
+- Name things exactly as the code does, every time: package, command, setting,
+  file path.
+- Put lookup material in tables (options, routes, error codes, settings), so
+  a single row answers a question.
+- Keep headings stable once other pages or issues link to them; they are
+  anchors. When a heading must change, update its inbound links.
+- Link with relative paths to the canonical page instead of restating it.
+
 Length budgets keep each type honest:
 
 | Type | Budget | Must contain |
@@ -95,10 +145,15 @@ Length budgets keep each type honest:
 
 ## Diagrams
 
-Draw a diagram only when it answers a question that prose answers badly, such
-as how components connect or how a request flows. Keep its source editable
-(Mermaid or similar), use the code's names, and add one sentence saying what
-to read from it.
+Draw a diagram for every flow, state machine or component map: how a request
+moves, how a job changes state, which component calls which. Prose describes
+these badly. Skip diagrams that only restate a list.
+
+- Prefer Mermaid in the Markdown, so the diagram is versioned, diffable and
+  readable as text by agents. Use an image only when the platform cannot
+  render Mermaid, and keep its source next to it.
+- Use the code's names for nodes, and keep one diagram to about 12 nodes.
+- Add one sentence before or after saying what to read from it.
 
 ## Review before you commit
 
@@ -107,5 +162,7 @@ Read your diff as the reader would, then check:
 1. Does the first sentence of each new section state its point?
 2. Can the reader finish the task with only this document and its links?
 3. Is there a sentence, paragraph, or section the reader would not miss?
-4. Do every command, path, and name match the repository?
-5. Did you remove what this change made stale?
+4. Does each section still make sense when read alone?
+5. Do every command, path, and name match the repository?
+6. Does a flow, state machine or component map have its diagram?
+7. Did you remove what this change made stale?
