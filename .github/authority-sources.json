@@ -25,77 +25,77 @@
       "marker": "# 1.9.4",
       "publisher": "PyCQA",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "gosec",
       "kind": "github-release",
       "package": "securego/gosec",
-      "pinned": "2.28.0",
-      "marker": "# v2.28.0",
+      "pinned": "2.30.0",
+      "marker": "# v2.30.0",
       "publisher": "securego",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "brakeman",
       "kind": "rubygems",
       "package": "brakeman",
-      "pinned": "8.0.5",
-      "marker": "# v8.0.5",
+      "pinned": "8.1.0",
+      "marker": "# v8.1.0",
       "publisher": "presidentbeef",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "eslint-plugin-security",
       "kind": "npm",
       "package": "eslint-plugin-security",
-      "pinned": "4.0.1",
-      "marker": "(4.0.1 observed)",
+      "pinned": "4.2.1",
+      "marker": "(4.2.1 observed)",
       "publisher": "eslint-community",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "osv-scanner",
       "kind": "github-release",
       "package": "google/osv-scanner",
-      "pinned": "2.4.0",
-      "marker": "# v2.4.0",
+      "pinned": "2.7.0",
+      "marker": "# v2.7.0",
       "publisher": "google",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "trivy",
       "kind": "github-release",
       "package": "aquasecurity/trivy",
-      "pinned": "0.72.0",
-      "marker": "# v0.72.0",
+      "pinned": "0.76.1",
+      "marker": "# v0.76.1",
       "publisher": "aquasecurity",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "syft",
       "kind": "github-release",
       "package": "anchore/syft",
-      "pinned": "1.50.0",
-      "marker": "# v1.50.0",
+      "pinned": "1.56.0",
+      "marker": "# v1.56.0",
       "publisher": "anchore",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "grype",
       "kind": "github-release",
       "package": "anchore/grype",
-      "pinned": "0.116.1",
-      "marker": "# v0.116.1",
+      "pinned": "0.121.1",
+      "marker": "# v0.121.1",
       "publisher": "anchore",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "gitleaks",
@@ -105,27 +105,27 @@
       "marker": "# v8.30.1",
       "publisher": "gitleaks",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "trufflehog",
       "kind": "github-release",
       "package": "trufflesecurity/trufflehog",
-      "pinned": "3.96.0",
-      "marker": "# v3.96.0",
+      "pinned": "3.99.8",
+      "marker": "# v3.99.8",
       "publisher": "trufflesecurity",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "checkov",
       "kind": "pypi",
       "package": "checkov",
-      "pinned": "3.3.8",
-      "marker": "# 3.3.8",
+      "pinned": "3.4.3",
+      "marker": "# 3.4.3",
       "publisher": "bridgecrew",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "kube-linter",
@@ -135,7 +135,7 @@
       "marker": "# v0.8.3",
       "publisher": "stackrox",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "zap-action-af",
@@ -145,37 +145,37 @@
       "marker": "zaproxy/action-af@v0.3.0",
       "publisher": "zaproxy",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "nuclei",
       "kind": "github-release",
       "package": "projectdiscovery/nuclei",
-      "pinned": "3.11.0",
-      "marker": "# v3.11.0",
+      "pinned": "3.11.1",
+      "marker": "# v3.11.1",
       "publisher": "projectdiscovery",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "schemathesis",
       "kind": "pypi",
       "package": "schemathesis",
-      "pinned": "4.24.3",
-      "marker": "# v4.24.3",
+      "pinned": "4.33.0",
+      "marker": "# v4.33.0",
       "publisher": "schemathesis",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "aflplusplus",
       "kind": "github-release",
       "package": "AFLplusplus/AFLplusplus",
-      "pinned": "5.02c",
-      "marker": "AFL++ v5.02c",
+      "pinned": "5.03c",
+      "marker": "AFL++ v5.03c",
       "publisher": "AFLplusplus",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "sarif-tools",
@@ -185,7 +185,7 @@
       "marker": "# 3.0.5",
       "publisher": "microsoft",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "opengrep-install-script",
@@ -194,25 +194,25 @@
       "publisher": "opengrep",
       "claim": "opengrep's official installer is the documented install path for the default SAST engine.",
       "files": ["plugins/portable/security/skills/security-scan/references/toolchain.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "cisa-kev-feed",
       "kind": "url",
       "url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
       "publisher": "cisa",
-      "claim": "The CISA Known Exploited Vulnerabilities catalog is published as JSON at this address and decides P0 triage.",
+      "claim": "CISA publishes its Known Exploited Vulnerabilities catalog as JSON at this address; the skill uses catalog membership for P0 triage.",
       "files": ["plugins/portable/security/skills/security-scan/SKILL.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "first-epss-api",
       "kind": "url",
       "url": "https://api.first.org/data/v1/epss?cve=CVE-2021-44228",
       "publisher": "first",
-      "claim": "FIRST serves EPSS scores per CVE from this API; EPSS >= 0.1 with CVSS >= 7 ranks P1.",
+      "claim": "FIRST serves per-CVE EPSS scores from this API; the skill applies its own EPSS >= 0.1 and CVSS >= 7 threshold for P1 triage.",
       "files": ["plugins/portable/security/skills/security-scan/SKILL.md"],
-      "verified_on": "2026-07-29"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "chrome-stronger-with-every-update",
@@ -226,20 +226,20 @@
         "plugins/portable/security/skills/security-audit/references/vulnerability-lifecycle.md",
         "plugins/portable/security/skills/security-ai/references/restricted-vulnerability-analysis.md"
       ],
-      "verified_on": "2026-08-03"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "chromium-ai-generated-security-bugs-faq",
       "kind": "url",
       "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/security/ai-generated-security-bugs-faq.md",
       "publisher": "google",
-      "claim": "Chromium's AI-generated security bugs FAQ (April 2026) sets the evidence bar for model-produced vulnerability reports.",
+      "claim": "Chromium’s AI-generated security bugs FAQ (April 2026) describes security-boundary context, justified severity corrections, proof-of-concept handling, and disclosure of model-produced reports.",
       "files": [
         "plugins/portable/security/skills/security-audit/references/security-context-and-knowledge-base.md",
         "plugins/portable/security/skills/security-audit/references/vulnerability-lifecycle.md",
         "plugins/portable/security/skills/security-ai/references/restricted-vulnerability-analysis.md"
       ],
-      "verified_on": "2026-08-03"
+      "verified_on": "2026-11-04"
     },
     {
       "id": "gtig-supply-chain-mitigation",
@@ -248,7 +248,7 @@
       "publisher": "google",
       "claim": "GTIG, 30 July 2026: tiered inventories, SBOM and ABOM, release-age gates, lifecycle-script controls, short-lived CI identity, and attack-chain mapping motivate the T0-T4 baseline.",
       "files": ["plugins/portable/security/skills/security-supply-chain/references/tiered-baseline.md"],
-      "verified_on": "2026-08-03"
+      "verified_on": "2026-11-04"
     }
   ]
 }
