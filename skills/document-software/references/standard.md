@@ -148,7 +148,8 @@ owner or review date.
 
 ## Quality bar
 
-Good project documentation is findable, scoped, current, and testable. It:
+Good project documentation is findable, scoped, current, and testable.
+[writing.md](writing.md) sets the sentence- and paragraph-level rules. It:
 
 - leads with the reader's goal and relevant system boundary;
 - distinguishes facts, decisions, proposals, and uncertainty;
