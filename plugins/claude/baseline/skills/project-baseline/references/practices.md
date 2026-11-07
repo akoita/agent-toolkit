@@ -27,15 +27,17 @@ engineering guides. Keep the file under about 4,000 words; move recipes to
 
 `CLAUDE.md` contains the line `@AGENTS.md`, so Claude Code reads the same
 rules as other agents. Keep Claude-only notes below that line.
+`scripts/apply.py --practice claude-imports-agents` creates the file or adds
+the import under its first heading.
 
 ### toolkit-plugins
 
 The repository's tracked `.claude/settings.json` enables
 `utilities@agent-toolkit` and `baseline@agent-toolkit` from the
 `agent-toolkit` marketplace. Cloud and teammate sessions then load the
-skills without a per-machine install. `install_policy.py` from
-`document-software` adds the marketplace and the utilities plugin; add the
-baseline entry beside it. Make sure `.gitignore` does not hide the file.
+skills without a per-machine install. `scripts/apply.py --practice
+toolkit-plugins` adds the marketplace and both plugins and keeps every other
+setting. Make sure `.gitignore` does not hide the file.
 
 ### agent-access
 
