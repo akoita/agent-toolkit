@@ -168,5 +168,5 @@ changes.
 
 Applies when the repository ships releases: a release workflow, a
 `CHANGELOG.md` or a `RELEASING.md`. A runbook, or a release section in the
-contribution guide, gives the preflight check, the tag and publish steps,
+README or contribution guide, gives the preflight check, the tag and publish steps,
 how to verify the release and how to roll it back.

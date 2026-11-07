@@ -248,6 +248,17 @@ class ProjectBaselineEngineeringChecksTests(unittest.TestCase):
         self.assertEqual(results["one-command-gate"].status, "present")
         self.assertEqual(results["dependency-updates"].status, "missing")
 
+    def test_release_section_in_readme_counts_as_procedure(self) -> None:
+        root = self.project(
+            {
+                "README.md": "# App\n\n## Deploying a release\n\nTag and push.\n",
+                ".github/workflows/release.yml": "on: push\n",
+            }
+        )
+        results = self.results(root)
+        self.assertEqual(results["release-procedure"].status, "present", results["release-procedure"].evidence)
+        self.assertIn("README.md", results["release-procedure"].evidence)
+
 
 if __name__ == "__main__":
     unittest.main()

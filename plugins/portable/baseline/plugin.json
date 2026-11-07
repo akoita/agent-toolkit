@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "baseline",
-  "version": "0.7.15",
+  "version": "0.7.16",
   "description": "Audit a repository against shared engineering practices (agents, docs, quality, delivery, security, release), and adopt the ones that apply.",
   "author": {
     "name": "Aboubakar Koïta",
