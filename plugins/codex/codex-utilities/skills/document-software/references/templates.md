@@ -202,3 +202,97 @@ recover.>
 
 <Stop conditions, evidence to collect, and the real escalation route if known.>
 ```
+
+## Feature catalog
+
+```markdown
+# Features
+
+<One sentence: what this catalog covers and who reads it.>
+
+| Feature | Status | Where it runs | Agent access | What it does |
+| --- | --- | --- | --- | --- |
+| [<Feature name>](<feature-page>.md) | available | <Runtimes or editions> | <CLI command, API route or MCP tool, or "none"> | <One line, in the user's words> |
+
+Status is one of `available`, `partial`, `planned` or `retired`.
+<One sentence on when to update a row, such as "in the same change as the
+feature".>
+```
+
+Keep one row per feature a user would name. Link each row to its page. List
+`planned` features only when a decision or issue backs them, and keep
+`retired` rows until links to them are gone.
+
+## Feature page
+
+```markdown
+# <Feature name>
+
+<One paragraph: what the feature does for the user, and its status.>
+
+## What it does
+
+<The behavior the user sees, by concept. Name the main rules or limits that
+shape it.>
+
+## Where it runs
+
+<Runtimes, editions, plans or platforms that have it, and any that do not.>
+
+## How to use it
+
+<The shortest path to the result, with the real commands, screens or calls.>
+
+## How to test it
+
+<The tests that protect it and how to run them, plus a manual check when one
+matters.>
+
+## Surfaces
+
+<Every place it is reachable: screens, CLI commands, API routes, agent tools.
+Use a table when there are several.>
+
+## Limits
+
+<Known gaps, size or rate limits, and what it deliberately does not do.>
+
+## Related
+
+<Code entry points, decisions, designs and guides. Links only.>
+```
+
+Keep a feature page under about 150 lines. Link reference pages for exact
+contracts instead of copying them.
+
+## Engineering guide
+
+```markdown
+# <Verb phrase: the kind of change, such as "Add an API route">
+
+<One sentence: when to use this guide and the result it produces.>
+
+## Before you start
+
+<Rules from AGENTS.md that apply, and what to read first. Link, do not copy.>
+
+## Steps
+
+<Numbered steps, each naming the file or command it touches, in the order a
+contributor does them.>
+
+## Check your change
+
+<The focused commands to run and what passing looks like.>
+
+## Common mistakes
+
+<Mistakes reviewers have seen more than once, each with its fix.>
+
+## Related
+
+<Example changes, decisions and reference pages.>
+```
+
+Link each guide from an `AGENTS.md` table of "When you are changing X, read
+Y" rows, so agents find it before they start.

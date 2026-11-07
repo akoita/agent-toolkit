@@ -145,6 +145,22 @@ Diagrams must answer a real stakeholder question. Prefer editable,
 version-controlled source such as Mermaid when the repository supports it.
 Explain the point of the diagram in text and keep names consistent with code.
 
+## Keep a feature catalog and engineering guides
+
+For an application or service with several user-visible features, keep the
+feature catalog in `docs/features/`; for a repository where the same kinds of
+change recur, keep engineering guides in `docs/engineering/`.
+[references/standard.md](references/standard.md) defines both, and
+[references/templates.md](references/templates.md) has their page shapes.
+
+- Build the catalog from code, tests and configuration, not from plans.
+  Mark a feature `partial` when a surface or runtime is missing, and say
+  which in its page.
+- When a change adds, removes or changes a user-visible feature, update its
+  catalog row and page in the same change.
+- Write an engineering guide from a real past change, and link it from the
+  project's `AGENTS.md`. Keep rules in `AGENTS.md` and steps in the guide.
+
 ## Maintain documentation with changes
 
 For a material software change, identify the smallest set of authoritative
@@ -158,8 +174,10 @@ so readers do not have to reconstruct the current system from old proposals.
 
 ## Verify the result
 
-Use the repository's documentation checks when available. Otherwise perform
-focused checks appropriate to the edits:
+Use the repository's documentation checks when available, and run
+`python3 scripts/docs_check.py <project>` from this skill's directory. It
+checks local links, the feature catalog and engineering-guide links, and
+exits 1 on a problem. Then perform focused checks appropriate to the edits:
 
 - every local link and referenced path resolves;
 - the root README and `docs/README.md`, when present, expose the important entry

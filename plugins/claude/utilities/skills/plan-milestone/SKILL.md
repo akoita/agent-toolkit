@@ -5,8 +5,8 @@ description: >-
   roadmap and planning context, milestone history, open issues, and dependency
   relationships; balance candidates across business value, usability, known
   issues, and new needs, then propose a goal-shaped milestone. Use when a user
-  asks to plan a milestone or sprint across multiple issues. Keep tracker
-  writes behind explicit approval; do not use for starting or finishing one
+  asks to plan a milestone or sprint across multiple issues, or to close one
+  and update its feature catalog. Keep tracker writes behind explicit approval; do not use for starting or finishing one
   issue.
 ---
 
@@ -160,3 +160,14 @@ issue status, capacity, or the open milestone changed, stop and present a
 revised proposal for approval. Only then use the configured tracker’s native
 create/edit operations, verify the resulting milestone and assignments, and
 report what changed. Do not silently widen the approved scope.
+
+## Close a milestone
+
+When asked to close or wrap up a milestone, check its exit criteria against
+merged changes and closed issues, then bring the project's current-state
+documentation up to date before closing it. If the project keeps a feature
+catalog, such as `docs/features/README.md`, update the row and page of every
+feature the milestone added, changed or retired, and set each status from
+the delivered evidence, not from the plan. Propose these edits as one change
+for review. Report unfinished issues and where they go next; moving them is a
+tracker write and needs the same explicit approval as planning.

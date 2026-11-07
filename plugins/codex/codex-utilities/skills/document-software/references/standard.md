@@ -51,6 +51,8 @@ projects may combine it:
 | Consequential rationale | `docs/decisions/` or an established ADR location | Preserve history by superseding records. |
 | Proposed consequential changes | `docs/design/` or an established RFC location | A proposal is never the sole current-state reference after delivery. |
 | How to perform recurring tasks | README or `docs/guides/` | Organize around reader goals, not code layout. |
+| What the product does now, feature by feature | `docs/features/` catalog | One row and one status per feature; the row changes with the feature. |
+| How to make a recurring kind of change | `docs/engineering/` guides, linked from `AGENTS.md` | Recipes for contributors and agents; rules stay in `AGENTS.md`. |
 | How to operate and recover the deployed system | `docs/operations/` | Create only for operated software. |
 | Exact lookup material | `docs/reference/` or generated reference site | Generate from authoritative sources where practical. |
 
@@ -94,6 +96,8 @@ docs/
   design/                   # created with the first real proposal
   guides/                   # task-oriented developer or user guidance
   reference/                # contracts and lookup material
+  features/                 # capability catalog, once users see several features
+  engineering/              # contributor recipes, once a kind of change recurs
 ```
 
 Only `docs/README.md` and the architecture overview are baseline files. The
@@ -110,7 +114,7 @@ views:
 docs/
   operations/               # deploy, observe, troubleshoot, recover
   security/                 # threat model, controls, response boundaries
-  product/ or features/     # capability catalog and user-visible behavior
+  product/                  # product context beyond the feature catalog
   data/                     # ownership, lifecycle, migration, retention
 ```
 
@@ -118,11 +122,32 @@ Do not create every conditional area merely because the profile is
 operational. A dedicated security or data document is useful only when it
 contains project-specific truth and has a maintenance owner.
 
+## Feature catalog and engineering guides
+
+These two areas answer the questions readers and agents ask most: "what can
+it do today?" and "how do I add one more of these?"
+
+- **Feature catalog.** `docs/features/README.md` holds one table: Feature,
+  Status, Where it runs, Agent access, What it does. Status is one of
+  `available`, `partial`, `planned` or `retired`. Each row links a page of
+  at most about 150 lines. The catalog replaces "current state" tables in
+  roadmaps; a roadmap links it instead.
+- **Engineering guides.** `docs/engineering/` holds one recipe per recurring
+  kind of change, such as adding an API route or a database migration.
+  `AGENTS.md` keeps the rules and links each guide from a short table.
+  Write a guide on the second time a kind of change needs explaining, not
+  in advance.
+
+Use `scripts/docs_check.py` to keep both honest: it checks the catalog's
+status values and links, that every feature page is listed, and that every
+engineering guide is linked. [templates.md](templates.md) has all three
+page shapes.
+
 ## Document types and lifecycles
 
 | Type | Truth represented | Typical states | Maintenance rule |
 | --- | --- | --- | --- |
-| README / guide / reference / architecture overview | Current | current, deprecated | Change with behavior; remove stale instructions. |
+| README / guide / reference / architecture overview / feature page / engineering guide | Current | current, deprecated | Change with behavior; remove stale instructions. |
 | Design document / RFC | Proposed change and review | draft, in review, accepted, implemented, abandoned, superseded | Update during design and implementation; link the delivered current state. |
 | ADR | Decision at a point in time | proposed, accepted, deprecated, superseded | Do not rewrite an accepted decision's outcome; supersede it. |
 | Plan | Intended delivery sequence | active, complete, cancelled | Remove when it has no durable value; otherwise archive away from current-state entry points. |
