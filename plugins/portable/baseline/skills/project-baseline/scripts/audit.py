@@ -518,7 +518,7 @@ def check_release_procedure(root: Path) -> tuple[str, str]:
     for page in docs_pages(root):
         if "releas" in page.name.lower():
             return "present", f"found {page.relative_to(root).as_posix()}"
-    for name in ("CONTRIBUTING.md", "AGENTS.md", "docs/contributing.md"):
+    for name in ("README.md", "CONTRIBUTING.md", "AGENTS.md", "docs/contributing.md"):
         if any("releas" in heading for heading in headings(read(root / name))):
             return "present", f"{name} has a release section"
     return "missing", "no written release procedure"
