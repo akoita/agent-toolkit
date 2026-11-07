@@ -145,5 +145,122 @@ class InstallPolicyTests(unittest.TestCase):
             self.assertIn("up to date", output)
 
 
+class DocsCheckTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.check = load("docs_check")
+
+    def project(self, files: dict[str, str]) -> Path:
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        root = Path(directory.name)
+        for name, text in files.items():
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+        return root
+
+    def messages(self, root: Path) -> list[str]:
+        return [
+            f"{problem.level} {problem.path} {problem.message}"
+            for problem in self.check.check(root, list(self.check.DEFAULT_EXCLUDES))
+        ]
+
+    def test_valid_catalog_and_guides_pass(self) -> None:
+        root = self.project(
+            {
+                "AGENTS.md": "Read [routes](docs/engineering/api-route.md).\n",
+                "docs/features/README.md": "\n".join(
+                    [
+                        "# Features",
+                        "",
+                        "| Feature | Status | Where it runs | Agent access | What it does |",
+                        "| --- | --- | --- | --- | --- |",
+                        "| [Export](export.md) | `available` | web | none | Exports. |",
+                    ]
+                ),
+                "docs/features/export.md": "# Export\n\nSee [site](https://x.test).\n",
+                "docs/engineering/api-route.md": "# Add an API route\n",
+            }
+        )
+        self.assertEqual(self.messages(root), [])
+        code, _ = run(self.check, str(root))
+        self.assertEqual(code, 0)
+
+    def test_reports_broken_links_but_ignores_code(self) -> None:
+        root = self.project(
+            {
+                "README.md": "\n".join(
+                    [
+                        "[gone](docs/missing.md) and `[code](nope.md)`",
+                        "```",
+                        "[fenced](nope.md)",
+                        "```",
+                        "[ok](README.md#top) [anchor](#top)",
+                        "[ref]: docs/also-missing.md",
+                    ]
+                )
+            }
+        )
+        self.assertEqual(
+            self.messages(root),
+            [
+                "error README.md broken link: docs/missing.md",
+                "error README.md broken link: docs/also-missing.md",
+            ],
+        )
+        code, _ = run(self.check, str(root))
+        self.assertEqual(code, 1)
+
+    def test_reports_bad_status_unlisted_and_long_feature_pages(self) -> None:
+        root = self.project(
+            {
+                "docs/features/README.md": "\n".join(
+                    [
+                        "| Feature | Status |",
+                        "| --- | --- |",
+                        "| [Export](export.md) | shipped |",
+                    ]
+                ),
+                "docs/features/export.md": "# Export\n",
+                "docs/features/import.md": "line\n" * 151,
+            }
+        )
+        self.assertEqual(
+            self.messages(root),
+            [
+                "error docs/features/README.md status 'shipped' is not one of "
+                "available, partial, planned, retired",
+                "error docs/features/import.md feature page is not in the catalog",
+                "warning docs/features/import.md feature page has 151 lines; "
+                "keep it under 150",
+            ],
+        )
+
+    def test_reports_catalog_without_status_column(self) -> None:
+        root = self.project({"docs/features/README.md": "| Feature |\n| --- |\n"})
+        self.assertEqual(
+            self.messages(root),
+            ["error docs/features/README.md missing column: status"],
+        )
+
+    def test_reports_unlinked_engineering_guide(self) -> None:
+        root = self.project(
+            {
+                "AGENTS.md": "# Rules\n",
+                "docs/engineering/README.md": "[A](a.md)\n",
+                "docs/engineering/a.md": "# A\n",
+                "docs/engineering/b.md": "# B\n",
+            }
+        )
+        self.assertEqual(
+            self.messages(root),
+            [
+                "error docs/engineering/b.md engineering guide is not linked "
+                "from AGENTS.md or docs/engineering/README.md"
+            ],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

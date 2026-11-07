@@ -8,7 +8,8 @@ bundle ships:
   the shared writing guide, and installs its policy in each project's
   `AGENTS.md`;
 - `plan-milestone`, which produces dependency-aware, capacity-coherent
-  milestone proposals and keeps tracker writes behind explicit approval.
+  milestone proposals, keeps tracker writes behind explicit approval, and
+  updates the feature catalog when a milestone closes.
 
 Future additions must remain broadly reusable rather than becoming specialized
 orchestration, security, or setup capabilities.
@@ -42,6 +43,23 @@ updates the text between its markers in `AGENTS.md` and enables
 `utilities@agent-toolkit` in `.claude/settings.json`. Agents using the skill
 run the same check before other documentation work. To find a project's
 densest pages, run `python3 scripts/docs_density.py /path/to/project`.
+
+## Keep a feature catalog and engineering guides
+
+`document-software` defines two shared doc areas: a feature catalog in
+`docs/features/` (one row and status per feature) and engineering guides in
+`docs/engineering/` (recipes for recurring changes, linked from
+`AGENTS.md`). Its `references/templates.md` has the page shapes. Check a
+project from the skill directory:
+
+```bash
+python3 scripts/docs_check.py /path/to/project
+```
+
+It reports broken local links, catalog rows with a status other than
+`available`, `partial`, `planned` or `retired`, feature pages missing from
+the catalog, and unlinked guides, and exits 1 on any of them. Run it in the
+project's CI to keep the catalog honest.
 
 The skill body is generated from the portable source under
 [`plugins/portable/utilities/`](../../portable/utilities/); edit that source
