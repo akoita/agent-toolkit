@@ -112,11 +112,16 @@ class ProjectBaselineAuditTests(unittest.TestCase):
                 "docs/architecture/overview.md": "# Architecture\n",
                 "docs/features/README.md": "| Feature | Status | Agent access |\n| --- | --- | --- |\n",
                 "docs/engineering/add-route.md": "# Add a route\n",
-                ".github/workflows/ci.yml": "run: python3 docs_check.py .\n",
+                ".github/workflows/ci.yml": "on: [pull_request]\njobs:\n  t:\n    steps:\n      - run: python3 docs_check.py . && gitleaks detect\n",
+                ".github/pull_request_template.md": "## Summary\n",
+                "SECURITY.md": "# Security\n",
+                "docs/security/threat-model.md": "# Threat model\n",
             }
         )
         statuses = self.statuses(root)
-        self.assertEqual(set(statuses.values()), {"present"}, statuses)
+        self.assertEqual(set(statuses.values()), {"present", "not-applicable"}, statuses)
+        self.assertEqual(statuses["threat-model"], "present")
+        self.assertEqual(statuses["lockfile"], "not-applicable")
         code, _ = self.run_main(str(root), "--check")
         self.assertEqual(code, 0)
 
@@ -165,6 +170,83 @@ class ProjectBaselineAuditTests(unittest.TestCase):
         (root / ".agent-toolkit" / "baseline.json").write_text("{", encoding="utf-8")
         code, _ = self.run_main(str(root))
         self.assertEqual(code, 2)
+
+
+class ProjectBaselineEngineeringChecksTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.audit = load()
+
+    def project(self, files: dict[str, str]) -> Path:
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        root = Path(directory.name)
+        for name, text in files.items():
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+        return root
+
+    def results(self, root: Path) -> dict[str, object]:
+        return {result.id: result for result in self.audit.audit(root)}
+
+    def test_node_project_with_good_practices(self) -> None:
+        root = self.project(
+            {
+                "package.json": json.dumps(
+                    {"packageManager": "pnpm@10.0.0", "scripts": {"validate": "x", "security:secrets": "y"}}
+                ),
+                "pnpm-lock.yaml": "",
+                ".github/dependabot.yml": "version: 2\n",
+                ".github/workflows/release.yml": "on: push\njobs:\n  r:\n    steps:\n      - uses: actions/checkout@0123456789abcdef0123456789abcdef01234567 # v5\n      - uses: ./local\n",
+                "RELEASING.md": "# Releasing\n",
+            }
+        )
+        results = self.results(root)
+        for practice in (
+            "one-command-gate",
+            "pinned-toolchain",
+            "lockfile",
+            "dependency-updates",
+            "secrets-scan",
+            "pinned-actions",
+            "release-procedure",
+        ):
+            with self.subTest(practice=practice):
+                self.assertEqual(results[practice].status, "present", results[practice].evidence)
+        self.assertEqual(results["ci-on-prs"].status, "missing")
+
+    def test_gaps_in_a_code_repository(self) -> None:
+        root = self.project(
+            {
+                "pyproject.toml": "[project]\nrequires-python = '>=3.11'\n",
+                ".github/workflows/ci.yml": "on: pull_request\njobs:\n  t:\n    steps:\n      - uses: actions/checkout@v5\n      - uses: actions/setup-python@0123456789abcdef0123456789abcdef01234567\n",
+            }
+        )
+        results = self.results(root)
+        self.assertEqual(results["pinned-toolchain"].status, "partial")
+        self.assertEqual(results["lockfile"].status, "missing")
+        self.assertEqual(results["one-command-gate"].status, "missing")
+        self.assertEqual(results["ci-on-prs"].status, "present")
+        self.assertEqual(results["pinned-actions"].status, "partial")
+        self.assertIn("actions/checkout@v5", results["pinned-actions"].evidence)
+        self.assertEqual(results["pr-template"].status, "missing")
+        self.assertEqual(results["security-policy"].status, "missing")
+        self.assertEqual(results["release-procedure"].status, "not-applicable")
+
+    def test_terraform_repository_counts_as_code(self) -> None:
+        root = self.project(
+            {
+                "envs/prod/main.tf": 'terraform {\n  required_version = "1.9.0"\n}\n',
+                "envs/prod/.terraform.lock.hcl": "",
+                "Makefile": "check:\n\tterraform fmt -check\n",
+            }
+        )
+        results = self.results(root)
+        self.assertEqual(results["pinned-toolchain"].status, "present")
+        self.assertEqual(results["lockfile"].status, "present")
+        self.assertEqual(results["one-command-gate"].status, "present")
+        self.assertEqual(results["dependency-updates"].status, "missing")
 
 
 if __name__ == "__main__":

@@ -69,8 +69,8 @@ Maestro, Security, and setup capabilities.
 
 | Plugin | Platform | Install as | What it does |
 | --- | --- | --- | --- |
-| [baseline](plugins/claude/baseline/) | Claude Code | `baseline@agent-toolkit` | Audits a new or existing repository against shared agent and documentation practices and adopts the ones that apply. |
-| [codex-baseline](plugins/codex/codex-baseline/) | Codex | `codex-baseline@agent-toolkit` | Audits a new or existing repository against shared agent and documentation practices and adopts the ones that apply. |
+| [baseline](plugins/claude/baseline/) | Claude Code | `baseline@agent-toolkit` | Audits a new or existing repository against shared agent, docs, quality, delivery, security and release practices and adopts the ones that apply. |
+| [codex-baseline](plugins/codex/codex-baseline/) | Codex | `codex-baseline@agent-toolkit` | Audits a new or existing repository against shared agent, docs, quality, delivery, security and release practices and adopts the ones that apply. |
 
 `project-baseline` owns the list of practices, a read-only audit and a
 previewed apply step for the mechanical ones. Each practice's content stays
