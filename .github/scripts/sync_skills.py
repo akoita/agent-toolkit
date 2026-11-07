@@ -30,6 +30,9 @@ CODEX_SECURITY_SKILLS = ROOT / "plugins" / "codex" / "codex-security" / "skills"
 CODEX_MAESTRO_SKILLS = ROOT / "plugins" / "codex" / "codex-maestro" / "skills"
 CLAUDE_UTILITIES_SKILLS = ROOT / "plugins" / "claude" / "utilities" / "skills"
 CODEX_UTILITIES_SKILLS = ROOT / "plugins" / "codex" / "codex-utilities" / "skills"
+PORTABLE_BASELINE_SKILLS = ROOT / "plugins" / "portable" / "baseline" / "skills"
+CLAUDE_BASELINE_SKILLS = ROOT / "plugins" / "claude" / "baseline" / "skills"
+CODEX_BASELINE_SKILLS = ROOT / "plugins" / "codex" / "codex-baseline" / "skills"
 # Authored once in the portable package, shipped by both native packages too.
 SECURITY_SKILLS = (
     "security-audit",
@@ -41,10 +44,12 @@ SECURITY_SKILLS = (
     "security-ai",
 )
 UTILITIES_SKILLS = ("document-software", "plan-milestone")
+BASELINE_SKILLS = ("project-baseline",)
 CANONICAL_SKILLS = {
     "maestro": ROOT / "plugins" / "claude" / "maestro" / "skills" / "maestro",
     "codex-maestro": PORTABLE_CODEX_MAESTRO_SKILLS / "codex-maestro",
     **{name: PORTABLE_UTILITIES_SKILLS / name for name in UTILITIES_SKILLS},
+    **{name: PORTABLE_BASELINE_SKILLS / name for name in BASELINE_SKILLS},
     "setup-agent-toolkit": ROOT / "tools" / "setup-agent-toolkit",
     **{name: PORTABLE_SECURITY_SKILLS / name for name in SECURITY_SKILLS},
 }
@@ -63,6 +68,8 @@ def mirrors_for(name: str) -> list[Path]:
         )
     if name in UTILITIES_SKILLS:
         mirrors.extend([CLAUDE_UTILITIES_SKILLS / name, CODEX_UTILITIES_SKILLS / name])
+    if name in BASELINE_SKILLS:
+        mirrors.extend([CLAUDE_BASELINE_SKILLS / name, CODEX_BASELINE_SKILLS / name])
     return mirrors
 
 
