@@ -19,6 +19,7 @@ PACKAGE_ROOTS = {
     "codex-maestro": ROOT / "plugins" / "portable" / "codex-maestro",
     "security": ROOT / "plugins" / "portable" / "security",
     "utilities": ROOT / "plugins" / "portable" / "utilities",
+    "baseline": ROOT / "plugins" / "portable" / "baseline",
 }
 MANIFEST_PATHS = {
     name: package / "plugin.json" for name, package in PACKAGE_ROOTS.items()
@@ -39,6 +40,7 @@ EXPECTED_SKILLS = {
         "security-threat-model",
     },
     "utilities": {"document-software", "plan-milestone"},
+    "baseline": {"project-baseline"},
 }
 
 SPEC = importlib.util.spec_from_file_location("sync_plugin_adapters", SYNC_SCRIPT)
@@ -353,11 +355,16 @@ class GeneratedAdapterTests(unittest.TestCase):
                 for path in sync_plugin_adapters.MARKETPLACES.values()
             }
             generated_names = {
-                sync_plugin_adapters.CLAUDE_MARKETPLACE: ("security", "utilities"),
+                sync_plugin_adapters.CLAUDE_MARKETPLACE: (
+                    "security",
+                    "utilities",
+                    "baseline",
+                ),
                 sync_plugin_adapters.CODEX_MARKETPLACE: (
                     "codex-maestro",
                     "codex-security",
                     "codex-utilities",
+                    "codex-baseline",
                 ),
             }
             for path, names in generated_names.items():

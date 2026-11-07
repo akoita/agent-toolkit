@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "statuses": ["present", "partial", "missing", "declined", "not-applicable", "review"],
+  "practices": [
+    {
+      "id": "agents-md",
+      "group": "agents",
+      "title": "AGENTS.md holds the repository rules",
+      "applies": "always",
+      "owner": "project-baseline",
+      "fix": "Write AGENTS.md from references/practices.md#agents-md; keep rules, link guides."
+    },
+    {
+      "id": "claude-imports-agents",
+      "group": "agents",
+      "title": "CLAUDE.md imports AGENTS.md",
+      "applies": "always",
+      "owner": "project-baseline",
+      "fix": "Create CLAUDE.md containing the line @AGENTS.md."
+    },
+    {
+      "id": "toolkit-plugins",
+      "group": "agents",
+      "title": "Agent Toolkit plugins are enabled for the repository",
+      "applies": "always",
+      "owner": "document-software",
+      "fix": "Run document-software scripts/install_policy.py <project> --write, then enable baseline@agent-toolkit in .claude/settings.json."
+    },
+    {
+      "id": "agent-access",
+      "group": "agents",
+      "title": "Agents can reach every agent-relevant product feature",
+      "applies": "application",
+      "owner": "security-ai",
+      "fix": "List each feature's agent surface (CLI, API or MCP tool) in the feature catalog; review new MCP servers with security-ai."
+    },
+    {
+      "id": "writing-policy",
+      "group": "docs",
+      "title": "The shared writing policy is installed in AGENTS.md",
+      "applies": "always",
+      "owner": "document-software",
+      "fix": "Run document-software scripts/install_policy.py <project> --check, then --write."
+    },
+    {
+      "id": "readme",
+      "group": "docs",
+      "title": "The root README is the front door",
+      "applies": "always",
+      "owner": "document-software",
+      "fix": "Write README.md with purpose, status, quick start, verification and documentation links."
+    },
+    {
+      "id": "docs-map",
+      "group": "docs",
+      "title": "docs/README.md maps the documentation",
+      "applies": "docs-tree",
+      "owner": "document-software",
+      "fix": "Add docs/README.md from document-software references/templates.md (Documentation map)."
+    },
+    {
+      "id": "architecture-overview",
+      "group": "docs",
+      "title": "A current architecture overview exists",
+      "applies": "docs-tree",
+      "owner": "document-software",
+      "fix": "Add docs/architecture/overview.md from document-software references/templates.md."
+    },
+    {
+      "id": "feature-catalog",
+      "group": "docs",
+      "title": "A feature catalog lists what the product does now",
+      "applies": "application",
+      "owner": "document-software",
+      "fix": "Add docs/features/README.md and one page per feature from document-software references/templates.md."
+    },
+    {
+      "id": "engineering-guides",
+      "group": "docs",
+      "title": "Engineering guides cover recurring kinds of change",
+      "applies": "docs-tree",
+      "owner": "document-software",
+      "fix": "Add docs/engineering/<guide>.md for a recurring change and link it from AGENTS.md."
+    },
+    {
+      "id": "docs-check-ci",
+      "group": "docs",
+      "title": "CI checks documentation links and the catalog",
+      "applies": "ci-and-docs",
+      "owner": "document-software",
+      "fix": "Run document-software scripts/docs_check.py (or an equivalent link checker) in CI."
+    }
+  ]
+}

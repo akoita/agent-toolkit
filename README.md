@@ -65,6 +65,17 @@ The utilities plugin ships `document-software` and `plan-milestone`; future
 additions must remain broadly reusable and independent of the specialized
 Maestro, Security, and setup capabilities.
 
+### Baseline
+
+| Plugin | Platform | Install as | What it does |
+| --- | --- | --- | --- |
+| [baseline](plugins/claude/baseline/) | Claude Code | `baseline@agent-toolkit` | Audits a new or existing repository against shared agent and documentation practices and adopts the ones that apply. |
+| [codex-baseline](plugins/codex/codex-baseline/) | Codex | `codex-baseline@agent-toolkit` | Audits a new or existing repository against shared agent and documentation practices and adopts the ones that apply. |
+
+`project-baseline` owns the list of practices and a read-only audit; each
+practice's content stays in the skill that owns it, mostly
+`document-software`.
+
 ### Standalone
 
 | Skill | Platform | What it does |
@@ -101,6 +112,7 @@ The capability plugins on Claude Code, for example:
 claude plugin install maestro@agent-toolkit
 claude plugin install security@agent-toolkit
 claude plugin install utilities@agent-toolkit
+claude plugin install baseline@agent-toolkit
 ```
 
 The utilities plugin on Codex:
@@ -122,6 +134,7 @@ npx skills add akoita/agent-toolkit --skill codex-maestro -g -a codex
 npx skills add akoita/agent-toolkit --skill security-audit -g -a claude-code
 npx skills add akoita/agent-toolkit --skill document-software -g -a codex
 npx skills add akoita/agent-toolkit --skill plan-milestone -g -a codex
+npx skills add akoita/agent-toolkit --skill project-baseline -g -a claude-code
 npx skills add akoita/agent-toolkit --skill setup-agent-toolkit -g -a codex
 ```
 

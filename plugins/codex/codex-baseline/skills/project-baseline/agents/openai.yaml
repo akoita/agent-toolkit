@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Baseline"
+  short_description: "Audit a repository against shared practices"
+  default_prompt: "Use $project-baseline to audit this repository against the Agent Toolkit practices and propose the changes worth adopting."

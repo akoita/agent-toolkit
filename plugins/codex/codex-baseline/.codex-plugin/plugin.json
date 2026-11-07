@@ -1,0 +1,34 @@
+{
+  "name": "codex-baseline",
+  "version": "0.7.13",
+  "description": "Audit a new or existing repository against shared agent and documentation practices for Codex, and adopt the ones that apply.",
+  "author": {
+    "name": "Aboubakar Koïta",
+    "url": "https://github.com/akoita"
+  },
+  "homepage": "https://github.com/akoita/agent-toolkit",
+  "repository": "https://github.com/akoita/agent-toolkit",
+  "keywords": [
+    "baseline",
+    "bootstrap",
+    "audit",
+    "agents",
+    "documentation",
+    "best-practices"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Baseline",
+    "shortDescription": "Audit a repository against shared practices.",
+    "longDescription": "Check a new or existing repository against the Agent Toolkit practice catalog, propose the changes worth adopting, and record which practices it adopts or declines.",
+    "developerName": "Aboubakar Koïta",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use Codex Baseline to audit this repository against the shared practices."
+    ]
+  }
+}
