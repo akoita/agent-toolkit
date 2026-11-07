@@ -1,7 +1,7 @@
 {
   "name": "baseline",
-  "version": "0.7.14",
-  "description": "Audit a new or existing repository against shared agent and documentation practices for Claude Code, and adopt the ones that apply.",
+  "version": "0.7.15",
+  "description": "Audit a new or existing repository against shared engineering practices (agents, docs, quality, delivery, security, release) for Claude Code, and adopt the ones that apply.",
   "author": {
     "name": "Aboubakar Koïta"
   },

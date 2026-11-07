@@ -2,9 +2,9 @@
 name: project-baseline
 description: >-
   Audit a new or existing repository against the Agent Toolkit practice
-  catalog (agent instructions, toolkit plugins, documentation, feature
-  catalog, engineering guides, docs checks) and propose the changes worth
-  adopting, each delegated to the skill that owns it. Use when asked to apply
+  catalog (agent instructions, documentation, feature catalog, engineering
+  guides, quality gate, delivery, security and release) and propose the
+  changes worth adopting, each delegated to the skill that owns it. Use when asked to apply
   good practices to a project, bootstrap a new repository, check a repository
   for drift, or record which practices a project adopts or declines. Read-only
   until the person approves a specific change.

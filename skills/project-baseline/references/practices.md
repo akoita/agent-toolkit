@@ -91,3 +91,82 @@ guide from a real past change; an empty directory does not count.
 Applies when the repository has CI and a docs tree. CI runs
 `document-software`'s `docs_check.py` or an equivalent link checker, so
 broken links and stale catalog rows fail the build.
+
+## Quality
+
+### one-command-gate
+
+Applies to repositories with code. One command runs every check a pull
+request must pass: format, lint, types, tests and any custom guards, such
+as `pnpm validate`, `make check` or `nox`. `AGENTS.md` names it, so an
+agent runs the same gate as CI before opening a pull request.
+
+### pinned-toolchain
+
+Applies to repositories with code. The runtime and package manager versions
+are pinned in a file tools read, such as `.nvmrc`, `packageManager` in
+`package.json`, `.python-version`, `rust-toolchain.toml`, `.tool-versions`
+or Terraform's `required_version`. A bounded range such as
+`requires-python` counts as partial.
+
+### lockfile
+
+Applies to repositories with code. The package manager's lockfile is
+committed, and CI installs from it with the frozen or locked flag. For
+Terraform, each root commits `.terraform.lock.hcl`.
+
+## Delivery
+
+### pr-template
+
+Applies to GitHub repositories. `.github/pull_request_template.md` asks for
+a summary, the checks run, and whether documentation changed. Keep it short:
+a template nobody fills in is noise.
+
+### ci-on-prs
+
+Applies to GitHub repositories. A workflow triggered by `pull_request` runs
+the quality gate, and the branch rules require it before merge. The audit
+checks the trigger; check the required status in the repository settings.
+
+## Security
+
+### security-policy
+
+Applies to every repository. `SECURITY.md` says how to report a
+vulnerability privately, which versions get fixes, and what response to
+expect.
+
+### dependency-updates
+
+Applies to repositories with code. Dependabot or Renovate opens update pull
+requests, with a cooldown so new releases age before adoption.
+`security-supply-chain` covers the intake policy.
+
+### secrets-scan
+
+Applies to every repository. A secret scanner such as gitleaks or
+trufflehog runs in a pre-commit hook and in CI. `security-scan` covers the
+choice and its suppression syntax.
+
+### pinned-actions
+
+Applies when the repository has GitHub workflows. Every third-party
+`uses:` reference is pinned to a full commit SHA, with the version in a
+trailing comment. Partial means some references are still tags.
+
+### threat-model
+
+Applies to applications and services. A threat model under `docs/security/`
+names the trust boundaries, assets, entry points and ranked abuse paths.
+Build it with `security-threat-model` and update it when a boundary
+changes.
+
+## Release
+
+### release-procedure
+
+Applies when the repository ships releases: a release workflow, a
+`CHANGELOG.md` or a `RELEASING.md`. A runbook, or a release section in the
+contribution guide, gives the preflight check, the tag and publish steps,
+how to verify the release and how to roll it back.

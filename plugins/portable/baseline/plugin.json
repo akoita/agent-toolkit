@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "baseline",
-  "version": "0.7.14",
-  "description": "Audit a repository against shared agent and documentation practices, and adopt the ones that apply.",
+  "version": "0.7.15",
+  "description": "Audit a repository against shared engineering practices (agents, docs, quality, delivery, security, release), and adopt the ones that apply.",
   "author": {
     "name": "Aboubakar Koïta",
     "url": "https://github.com/akoita"
@@ -22,7 +22,7 @@
       "adapters": {
         "claude": {
           "name": "baseline",
-          "description": "Audit a new or existing repository against shared agent and documentation practices for Claude Code, and adopt the ones that apply.",
+          "description": "Audit a new or existing repository against shared engineering practices (agents, docs, quality, delivery, security, release) for Claude Code, and adopt the ones that apply.",
           "marketplace": {
             "source": "./plugins/claude/baseline",
             "description": "Audit a repository against shared practices and adopt the ones that apply."
@@ -30,7 +30,7 @@
         },
         "codex": {
           "name": "codex-baseline",
-          "description": "Audit a new or existing repository against shared agent and documentation practices for Codex, and adopt the ones that apply.",
+          "description": "Audit a new or existing repository against shared engineering practices (agents, docs, quality, delivery, security, release) for Codex, and adopt the ones that apply.",
           "interface": {
             "displayName": "Codex Baseline",
             "shortDescription": "Audit a repository against shared practices.",

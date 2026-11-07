@@ -4,8 +4,8 @@ Audit a new or existing repository against the Agent Toolkit practice
 catalog for Claude Code, and adopt the practices that apply. The bundle ships
 `project-baseline`, which:
 
-- checks agent instructions, toolkit plugins, documentation, the feature
-  catalog, engineering guides and docs checks, reading the repository only;
+- checks 22 practices in six groups (agents, docs, quality, delivery,
+  security, release), reading the repository only;
 - proposes the changes worth making, each delegated to the skill that owns
   the practice, such as `document-software`;
 - records which practices the project adopts or declines in

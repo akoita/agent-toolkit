@@ -1,6 +1,13 @@
 {
   "schema_version": 1,
-  "statuses": ["present", "partial", "missing", "declined", "not-applicable", "review"],
+  "statuses": [
+    "present",
+    "partial",
+    "missing",
+    "declined",
+    "not-applicable",
+    "review"
+  ],
   "practices": [
     {
       "id": "agents-md",
@@ -89,6 +96,94 @@
       "applies": "ci-and-docs",
       "owner": "document-software",
       "fix": "Run document-software scripts/docs_check.py (or an equivalent link checker) in CI."
+    },
+    {
+      "id": "one-command-gate",
+      "group": "quality",
+      "title": "One command runs the full quality gate",
+      "applies": "code",
+      "owner": "project-baseline",
+      "fix": "Add one script (for example `validate` or `make check`) that runs format, lint, type and test checks, and name it in AGENTS.md."
+    },
+    {
+      "id": "pinned-toolchain",
+      "group": "quality",
+      "title": "The toolchain version is pinned",
+      "applies": "code",
+      "owner": "project-baseline",
+      "fix": "Pin the runtime and package manager (.nvmrc, packageManager, .python-version, rust-toolchain.toml or .tool-versions)."
+    },
+    {
+      "id": "lockfile",
+      "group": "quality",
+      "title": "Dependencies are locked",
+      "applies": "code",
+      "owner": "security-supply-chain",
+      "fix": "Commit the package manager's lockfile and install from it in CI."
+    },
+    {
+      "id": "pr-template",
+      "group": "delivery",
+      "title": "Pull requests use a template",
+      "applies": "github",
+      "owner": "project-baseline",
+      "fix": "Add .github/pull_request_template.md with summary, verification and documentation lines."
+    },
+    {
+      "id": "ci-on-prs",
+      "group": "delivery",
+      "title": "CI runs on every pull request",
+      "applies": "github",
+      "owner": "security-scan",
+      "fix": "Add a workflow triggered on pull_request that runs the quality gate."
+    },
+    {
+      "id": "security-policy",
+      "group": "security",
+      "title": "SECURITY.md says how to report a vulnerability",
+      "applies": "always",
+      "owner": "security-audit",
+      "fix": "Add SECURITY.md with the reporting channel and supported versions."
+    },
+    {
+      "id": "dependency-updates",
+      "group": "security",
+      "title": "Dependency updates are automated",
+      "applies": "code",
+      "owner": "security-supply-chain",
+      "fix": "Add .github/dependabot.yml or a Renovate config with a cooldown."
+    },
+    {
+      "id": "secrets-scan",
+      "group": "security",
+      "title": "Commits are scanned for secrets",
+      "applies": "always",
+      "owner": "security-scan",
+      "fix": "Run gitleaks, trufflehog or an equivalent in pre-commit and CI."
+    },
+    {
+      "id": "pinned-actions",
+      "group": "security",
+      "title": "CI actions are pinned to commit SHAs",
+      "applies": "workflows",
+      "owner": "security-supply-chain",
+      "fix": "Pin every `uses:` to a full commit SHA with a version comment."
+    },
+    {
+      "id": "threat-model",
+      "group": "security",
+      "title": "A threat model covers the deployed system",
+      "applies": "application",
+      "owner": "security-threat-model",
+      "fix": "Build a threat model with security-threat-model and keep it under docs/security/."
+    },
+    {
+      "id": "release-procedure",
+      "group": "release",
+      "title": "Releases follow a written, checked procedure",
+      "applies": "releases",
+      "owner": "document-software",
+      "fix": "Write the release steps (preflight, tag, publish, verify, roll back) as a runbook and link it from AGENTS.md."
     }
   ]
 }
