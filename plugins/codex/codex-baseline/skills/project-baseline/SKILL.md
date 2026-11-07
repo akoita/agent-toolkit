@@ -70,9 +70,17 @@ make and which to decline.
 ## Apply after approval
 
 Make each approved group of changes on its own branch and pull request,
-following the project's delivery rules. Use the owning skill's own installer
-or procedure, for example `document-software`'s `install_policy.py` for the
-writing policy, and run its check after writing. Run the project's own
+following the project's delivery rules.
+
+- **Mechanical practices** (`claude-imports-agents`, `toolkit-plugins`):
+  run `python3 scripts/apply.py <project> --practice <id>`, show the diff
+  it prints, and re-run with `--write` after approval. It keeps existing
+  text and settings.
+- **Other practices:** use the owning skill's installer or procedure, for
+  example `document-software`'s `install_policy.py` for the writing policy,
+  and write content such as `AGENTS.md` sections from repository evidence.
+
+Re-run the audit after writing to confirm each row is `present`. Run the project's own
 quality gate before opening the pull request.
 
 ## Record decisions
@@ -92,6 +100,13 @@ committed with the change that applies them:
     }
   }
 }
+```
+
+Write decisions with `scripts/apply.py`, previewing first:
+
+```bash
+python3 scripts/apply.py /path/to/project --adopt feature-catalog
+python3 scripts/apply.py /path/to/project --decline docs-check-ci --reason "Checked by the docs site build."
 ```
 
 `decline` needs a reason and stops the practice being proposed again.

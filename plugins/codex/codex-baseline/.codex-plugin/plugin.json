@@ -1,6 +1,6 @@
 {
   "name": "codex-baseline",
-  "version": "0.7.13",
+  "version": "0.7.14",
   "description": "Audit a new or existing repository against shared agent and documentation practices for Codex, and adopt the ones that apply.",
   "author": {
     "name": "Aboubakar Koïta",

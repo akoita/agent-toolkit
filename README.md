@@ -72,9 +72,9 @@ Maestro, Security, and setup capabilities.
 | [baseline](plugins/claude/baseline/) | Claude Code | `baseline@agent-toolkit` | Audits a new or existing repository against shared agent and documentation practices and adopts the ones that apply. |
 | [codex-baseline](plugins/codex/codex-baseline/) | Codex | `codex-baseline@agent-toolkit` | Audits a new or existing repository against shared agent and documentation practices and adopts the ones that apply. |
 
-`project-baseline` owns the list of practices and a read-only audit; each
-practice's content stays in the skill that owns it, mostly
-`document-software`.
+`project-baseline` owns the list of practices, a read-only audit and a
+previewed apply step for the mechanical ones. Each practice's content stays
+in the skill that owns it, mostly `document-software`.
 
 ### Standalone
 

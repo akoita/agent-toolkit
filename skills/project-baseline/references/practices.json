@@ -16,15 +16,15 @@
       "title": "CLAUDE.md imports AGENTS.md",
       "applies": "always",
       "owner": "project-baseline",
-      "fix": "Create CLAUDE.md containing the line @AGENTS.md."
+      "fix": "Run scripts/apply.py <project> --practice claude-imports-agents."
     },
     {
       "id": "toolkit-plugins",
       "group": "agents",
       "title": "Agent Toolkit plugins are enabled for the repository",
       "applies": "always",
-      "owner": "document-software",
-      "fix": "Run document-software scripts/install_policy.py <project> --write, then enable baseline@agent-toolkit in .claude/settings.json."
+      "owner": "project-baseline",
+      "fix": "Run scripts/apply.py <project> --practice toolkit-plugins."
     },
     {
       "id": "agent-access",
