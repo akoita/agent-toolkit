@@ -77,6 +77,42 @@ Reachability still outranks all of it. A P0 CVE in a code path the application
 never executes is a lower operational priority than a P1 in a request handler,
 and saying so explicitly is more useful than a sorted list.
 
+### Fresh-patch override
+
+KEV and EPSS are lagging signals. Apply this override before the ladder above:
+
+| Condition | Rank |
+| --- | --- |
+| Fix published within the last ~14 days, internet-facing component, public patch diff or advisory | At least P1, regardless of EPSS and KEV status |
+| Same, and a verified working public PoC exists, or the component is remote and unauthenticated | P0 |
+
+Why: Google Threat Intelligence Group (*AI Threat Tracker: Agentic Threat
+Activity Crosses a Significant Threshold*, 2026-11-16) reports threat actors
+running LLM pipelines that diff popular web applications before and after a
+patch, then draft and run exploits with no human in the loop. Its example is
+PaperCut (late August 2026, two chained bugs giving unauthenticated RCE):
+working exploits within a day of disclosure and a mass campaign four days
+after. KEV listing and EPSS uplift trail real exploitation by days, and those
+days are now the whole window. Record the fix publication date so the window
+is visible, and re-run the ladder as the patch ages out of the 14-day band.
+
+Reachability still applies and keeps its precedence: the override raises the
+rank of a reachable component, not of one whose vulnerable code path the
+application never executes.
+
+### Public proof-of-concept claims
+
+A public PoC's existence is a lead, not evidence. Per the same GTIG report, a
+PHP case (October 2026) saw a PoC video and patched code public before the
+official patch date, then hundreds of non-functional, likely LLM-generated PoCs
+flooded in and cost defenders verification time.
+
+- Verify in an isolated, disposable environment against a matching vulnerable
+  version before a PoC is allowed to set a P0.
+- Never run a PoC on a workstation or host that holds credentials.
+- A broken or non-functional PoC does not lower priority. Attackers work from
+  the patch diff, not from the PoC.
+
 ## Suppression
 
 Suppress in this order, and prefer the earliest option that works:

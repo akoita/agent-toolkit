@@ -23,13 +23,14 @@ reporting false precision.
 | Reproduction → fix | `<n>` | `<duration>` | `<duration>` | `<duration>` | `<notes>` |
 | Fix → release | `<n>` | `<duration>` | `<duration>` | `<duration>` | `<notes>` |
 | Release → deployed/adopted | `<n>` | `<duration>` | `<duration>` | `<duration>` | `<notes>` |
+| Public fix → deployed/adopted (attacker n-day window) | `<n>` | `<duration>` | `<duration>` | `<duration>` | `<notes>` |
 | Discovery → deployed/adopted | `<n>` | `<duration>` | `<duration>` | `<duration>` | `<notes>` |
 
 ## Finding-level audit trail
 
-| Finding | Severity | Discovered | Triaged | Reproduced | Fixed | Released | Deployed/adopted | Status |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `<id>` | `<severity>` | `<UTC>` | `<UTC>` | `<UTC/N/A>` | `<UTC>` | `<UTC/N/A>` | `<UTC/N/A>` | `<state>` |
+| Finding | Severity | Discovered | Triaged | Reproduced | Fixed | Fix public | Released | Deployed/adopted | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `<id>` | `<severity>` | `<UTC>` | `<UTC>` | `<UTC/N/A>` | `<UTC>` | `<UTC/N/A>` | `<UTC/N/A>` | `<UTC/N/A>` | `<state>` |
 
 ## Interpretation and action
 

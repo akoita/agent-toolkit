@@ -116,6 +116,50 @@ agent can reach.
 rather than citing a framework that does not cover it, and treat the absence
 as a reason for a conservative, rail-enforced design.
 
+## Stolen model access (LLMjacking)
+
+LLMjacking is the use of stolen cloud or model-provider credentials to consume
+someone else's model and GPU capacity. Agent-side token budgets do not bound it,
+because the attacker is not running your agent.
+
+Figures reported by Google Threat Intelligence Group (GTIG) and Mandiant, AI
+Threat Tracker, 2026-11-16 (vendor-reported, not independently verified):
+
+- billing spikes within hours; single-day fraudulent charges over USD 100,000;
+  worst cases about USD 1 million cumulative;
+- initial access from credentials leaked in public GitHub repositories, and
+  session hijack via deceptive sites;
+- persistence through new IAM or service accounts and admin policies attached
+  to service roles; a "burn and rotate" pattern of creating and deleting
+  short-lived service accounts to evade rate limits;
+- enabling LLM services and pay-as-you-go subscriptions on the compromised
+  account; GPU provisioning and quota-increase requests to run tooling and
+  resale relays;
+- resale storefronts ("LLM Mixers") selling stolen access at USD 0.10 to 25 per
+  million tokens, so spend is driven by buyers and is not bounded by the
+  attacker's own usage.
+
+Checklist:
+
+- Treat model-provider and gateway keys (OpenAI, Anthropic, Google Gemini and
+  Vertex, Azure OpenAI, AWS Bedrock, OpenRouter, LiteLLM master and virtual
+  keys) as production credentials: secret scanning on every push and in
+  history, scoped keys, and a tested rotation procedure.
+- Set provider-side budget and billing alerts, and hard caps where the provider
+  offers them. Agent-side token budgets only bound your own agents.
+- Alert in cloud audit logs on: service accounts created and deleted within a
+  short window; new admin policy attachments to service roles; AI or model APIs
+  newly enabled; quota-increase requests; unexpected GPU instance provisioning.
+- Audit self-hosted LLM gateways (LiteLLM-style) for admin key exposure, and
+  for whether limited virtual keys can reach admin functions. Check the patch
+  level. GTIG reports **CVE-2026-40217**, a LiteLLM sandbox escape that elevates
+  a virtual key to admin; **this is reported, not verified against a CVE
+  record**, so confirm the affected and fixed versions in the vendor advisory
+  before quoting a floor.
+- Keep a runbook for a billing spike: revoke the key first, then enumerate
+  accounts, policies, enabled APIs, quotas, and GPU resources created in the
+  window, regardless of their names.
+
 ## Audit logging
 
 An agent log is adequate only if an incident can be reconstructed from it.
@@ -199,6 +243,16 @@ repository-controlled settings file could specify hook commands that executed
 at project-open time, **before the trust dialog**. Per the CVE record, Claude
 Code versions before 1.0.111 were affected.
 
+The same surface is exploited in the wild. Google Threat Intelligence Group
+(GTIG), AI Threat Tracker, 2026-11-16, reported the DPRK-linked actor
+MIDNIGHT NEPTUNE modifying `.claude/settings.json` in victims' internal
+repositories, after initial access, so that starting Claude Code downloaded the
+SOMBERMEME backdoor. The same report describes fake-recruiter profiles and
+"ClickFix" lures (a fake meeting platform prompting the target to run a
+"diagnostic" script) as the delivery route, and GitHub personal access tokens
+named after Microsoft Copilot to disguise lateral movement. No unpatched flaw is
+needed: a committed settings file is enough once someone opens the repository.
+
 Review checklist:
 
 - Read every line of skill and settings files, including a check for
@@ -209,6 +263,14 @@ Review checklist:
 - No committed auto-approve or bypass-permission defaults.
 - No `allow` rules that widen network or shell scope, and no wildcard `Bash`
   or fetch rules.
+- Check the other auto-run surfaces too: MCP server configuration, VS Code
+  tasks with `runOn: folderOpen`, and devcontainer lifecycle commands
+  (`postCreateCommand`, `postStartCommand`, `initializeCommand`). Review them in
+  a diff, or in a freshly cloned third-party repository (for example a
+  recruiter's take-home project) before opening it in an agent or editor.
+- Inventory tokens and service accounts by creator and scope, not by name.
+  Names that imitate a legitimate tool (GTIG: PATs named after Copilot) are
+  camouflage.
 - Skills declare their network destinations and dependencies. No
   `curl | bash`, no unpinned downloads, no `@latest` in an install step.
 - Secret scanning in CI, plus credential-file exclusions so an agent run

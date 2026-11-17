@@ -173,6 +173,11 @@ the report is an artifact that gets stored.
 Suppress with a fingerprint in `.gitleaksignore` or a trailing `#gitleaks:allow`
 comment on the line.
 
+Model-provider and LLM-gateway keys are high-value targets: stolen keys are
+used for LLMjacking and resold. Confirm the active ruleset covers the providers
+the project uses, and add custom rules for self-hosted gateway key formats the
+default rules do not know.
+
 Gitleaks is regex-only with no verification step, so on any repository with
 history a baseline is mandatory. Without one the first run buries every real
 alert under years of rotated test keys.
