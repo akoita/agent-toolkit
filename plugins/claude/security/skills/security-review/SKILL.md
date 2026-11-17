@@ -18,6 +18,10 @@ gate. Run-to-run instability makes a model verdict unfit to block a merge, and
 the first time a gate fails on a commit that passed an hour ago it loses its
 authority for good. Say what you found, cite where, and let a human decide.
 
+For LLM tools that review a diff (`/security-review`, the GitHub Action on
+trusted PRs, Gemini CLI `/security:analyze`), see
+`security-audit/references/llm-security-tools.md`. Their output stays advisory.
+
 ## Establish the diff
 
 ```bash

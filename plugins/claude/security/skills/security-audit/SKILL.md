@@ -235,6 +235,8 @@ the pass that produced it.
   remediation controls, and patch-gap measurement.
 - `references/llm-assisted-review.md` — evidence, tier-scoped repeated
   discovery, and separate-context critic rules.
+- `references/llm-security-tools.md` — choosing among vendor and accessible
+  LLM security tools by constraint: local-only, free, PR review, deep scan.
 - `assets/trust-boundary-SECURITY.template.md` — nested engineering context;
   it is not a repository disclosure policy.
 - `assets/finding-intake.template.json` — machine-readable lifecycle intake.
@@ -246,7 +248,14 @@ Two published tools do LLM-driven scanning. Drive them when the user has them;
 never depend on either, and never let their absence stop an audit. Both ship
 their own agent skills, so wrap them rather than duplicating their guidance.
 
+To choose among these and the vendor and accessible alternatives (local-only,
+free for public repositories, diff review, hosted), see
+`references/llm-security-tools.md`. Its tools are advisory leads for this
+skill's triage, never a gate.
+
 ### OpenAI Codex Security CLI
+
+Formerly Aardvark.
 
 Apache-2.0, TypeScript, distributed as the npm package
 `@openai/codex-security` (https://github.com/openai/codex-security). Requires
