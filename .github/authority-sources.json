@@ -8,6 +8,7 @@
     "plugins/portable/security/skills/security-scan/references/toolchain.md",
     "plugins/portable/security/skills/security-audit/references/security-context-and-knowledge-base.md",
     "plugins/portable/security/skills/security-audit/references/llm-assisted-review.md",
+    "plugins/portable/security/skills/security-audit/references/llm-security-tools.md",
     "plugins/portable/security/skills/security-audit/references/vulnerability-lifecycle.md",
     "plugins/portable/security/skills/security-ai/references/restricted-vulnerability-analysis.md",
     "plugins/portable/security/skills/security-supply-chain/references/tiered-baseline.md"
@@ -249,6 +250,136 @@
       "claim": "GTIG, 30 July 2026: tiered inventories, SBOM and ABOM, release-age gates, lifecycle-script controls, short-lived CI identity, and attack-chain mapping motivate the T0-T4 baseline.",
       "files": ["plugins/portable/security/skills/security-supply-chain/references/tiered-baseline.md"],
       "verified_on": "2026-11-04"
+    },
+    {
+      "id": "claude-code-security-review-docs",
+      "kind": "url",
+      "url": "https://code.claude.com/docs/en/security",
+      "publisher": "anthropic",
+      "claim": "Claude Code documents /security-review as a built-in pass over pending changes.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
+    },
+    {
+      "id": "claude-code-security-review-action",
+      "kind": "url",
+      "url": "https://github.com/anthropics/claude-code-security-review",
+      "publisher": "anthropic",
+      "claim": "The Action is MIT-licensed, diff-aware, and its README states it is not hardened against prompt injection.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
+    },
+    {
+      "id": "claude-security-plugin",
+      "kind": "url",
+      "url": "https://claude.com/product/claude-security",
+      "publisher": "anthropic",
+      "claim": "The claude-security plugin (v0.12.0, beta) scans, verifies findings, and drafts patches; it trusts the repository and adds no isolation.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
+    },
+    {
+      "id": "claude-security-guidance-plugin",
+      "kind": "url",
+      "url": "https://code.claude.com/docs/en/security-guidance",
+      "publisher": "anthropic",
+      "claim": "The security-guidance plugin reviews edits, the diff at end of turn, and commits Claude makes.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
+    },
+    {
+      "id": "anthropic-cyber-verification-program",
+      "kind": "url",
+      "url": "https://support.claude.com/en/articles/14604842",
+      "publisher": "anthropic",
+      "claim": "The Cyber Verification Program reduces cyber safeguards for vetted defenders on paid plans; it is not a tool.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
+    },
+    {
+      "id": "openai-codex-security-repo",
+      "kind": "url",
+      "url": "https://github.com/openai/codex-security",
+      "publisher": "openai",
+      "claim": "Codex Security CLI and SDK (formerly Aardvark) is Apache-2.0 with OpenAI, Bedrock, OpenRouter, and Fireworks providers.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
+    },
+    {
+      "id": "google-codemender",
+      "kind": "url",
+      "url": "https://cloud.google.com/blog/products/identity-security/find-and-fix-software-vulnerabilities-with-codemender",
+      "publisher": "google",
+      "claim": "CodeMender is Pre-GA since 2026-07-22 for Google Cloud enterprise customers, with zero source-code retention stated.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
+    },
+    {
+      "id": "google-fairwind-program",
+      "kind": "url",
+      "url": "https://deepmind.google/fairwind-program/",
+      "publisher": "google",
+      "claim": "Fairwind Program gives vetted-only access to Gemini cyber models.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
+    },
+    {
+      "id": "gemini-cli-security-extension",
+      "kind": "url",
+      "url": "https://github.com/gemini-cli-extensions/security",
+      "publisher": "google",
+      "claim": "The Apache-2.0 Gemini CLI extension provides /security:analyze and /security:scan-deps as first-pass analysis.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
+    },
+    {
+      "id": "github-copilot-autofix",
+      "kind": "url",
+      "url": "https://docs.github.com/en/code-security/concepts/code-scanning/copilot-autofix-for-code-scanning",
+      "publisher": "github",
+      "claim": "Copilot Autofix suggests fixes for CodeQL alerts, free on public repositories, with no training on alert data.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
+    },
+    {
+      "id": "protectai-vulnhuntr",
+      "kind": "url",
+      "url": "https://github.com/protectai/vulnhuntr",
+      "publisher": "protectai",
+      "claim": "Vulnhuntr is a Python-only, AGPL-3.0 call-chain tracer with experimental Ollama support.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
+    },
+    {
+      "id": "semgrep-assistant-overview",
+      "kind": "url",
+      "url": "https://docs.semgrep.dev/semgrep-assistant/overview",
+      "publisher": "semgrep",
+      "claim": "Semgrep Multimodal (formerly Assistant) triages and autofixes inside the Semgrep AppSec Platform.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
+    },
+    {
+      "id": "snyk-agent-fix",
+      "kind": "url",
+      "url": "https://docs.snyk.io/scan-with-snyk/snyk-code/manage-code-vulnerabilities/fix-code-vulnerabilities-automatically",
+      "publisher": "snyk",
+      "claim": "Snyk Agent Fix (formerly DeepCode AI Fix) fixes Snyk Code findings and rescans.",
+      "files": ["plugins/portable/security/skills/security-audit/references/llm-security-tools.md"],
+      "verified_on": "2026-11-17",
+      "review_after_days": 60
     }
   ]
 }
