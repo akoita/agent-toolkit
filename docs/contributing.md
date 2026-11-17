@@ -129,7 +129,17 @@ The weekly `source-drift` workflow runs
 finding, update the canonical skill file, sync the mirrors, update the entry's
 `pinned`, `marker`, or `url` and its `verified_on`, and bump the package
 version. [ADR 0003](decisions/0003-authority-source-drift.md) records the
-design and the proposed agent-review stage.
+design.
+
+When a run finds sources needing attention, an agent job can propose those
+updates as a draft pull request on a `bot/source-drift-*` branch. It needs an
+`ANTHROPIC_API_KEY` repository secret, skips cleanly without one, and skips
+while a bot pull request is open. Repository settings must allow GitHub Actions
+to create pull requests. The agent never holds a write token, and its patch is
+limited to skills, plugin catalogs, the manifest, and `docs/research/`. It is
+unreviewed machine output: check every claim against its source, and close and
+reopen the pull request to run `tests` and `version-gate`, which
+`GITHUB_TOKEN` pull requests do not trigger.
 
 ## Conventions
 
