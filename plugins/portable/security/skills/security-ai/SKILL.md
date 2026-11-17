@@ -156,8 +156,9 @@ useful. A report that states a wrong version floor gets a real fix skipped.
   indirect injection, exfiltration in the rendering layer, defensive design
   patterns, RAG and vector-store access control.
 - `references/agent-runtime-hardening.md` — permission rules, sandbox ladder,
-  egress control, credential isolation, spend limits, audit logging,
-  reliability evaluation, blast radius, and skill-shipping repositories.
+  egress control, credential isolation, spend limits, stolen model access
+  (LLMjacking), audit logging, reliability evaluation, blast radius, and
+  skill-shipping repositories.
 - `references/mcp-server-review.md` — MCP specification `2026-07-28`
   authorization requirements, ecosystem risks the specification does not
   cover, and scanners.

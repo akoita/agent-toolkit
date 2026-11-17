@@ -69,6 +69,17 @@ is high, in roughly this order:
    something that runs with repository credentials. Treat it as production
    code: check trigger types, permissions, and any use of untrusted input in a
    shell step.
+10. **Agent and editor auto-execution config.** A diff touching
+    `.claude/settings*.json` (hooks, permission `allow` rules), `.mcp.json` or
+    MCP server entries, `CLAUDE.md`, `AGENTS.md`, `SKILL.md`,
+    `.vscode/tasks.json` (`runOn: folderOpen`), `.vscode/settings.json`,
+    `.devcontainer/devcontainer.json` (`postCreateCommand`,
+    `postStartCommand`, `initializeCommand`), or a git hook installer runs on a
+    teammate's machine, unreviewed, once they open the repository. Google
+    Threat Intelligence Group reported a DPRK actor planting a backdoor
+    download in a victim's `.claude/settings.json` (2026-11-16). Treat as High
+    until a human reads it; escalate when the command fetches from the network
+    or decodes a blob.
 
 ## Read the surrounding context
 

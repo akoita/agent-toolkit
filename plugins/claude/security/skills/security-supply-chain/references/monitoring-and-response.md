@@ -106,6 +106,13 @@ below are the reusable minimum.
   workstation authorize?
 - Can recovery occur from a known-clean device without importing compromised
   configuration or caches?
+- Did the device open a repository or run a script supplied by an outside party
+  (a recruiter take-home, an interview "diagnostic", a ClickFix-style
+  copy-paste prompt)?
+- Which agent or editor auto-run configs did that repository contain (agent
+  settings and hooks, MCP config, folder-open tasks, devcontainer lifecycle
+  commands)?
+- Which tokens were created during the window, regardless of their names?
 
 ### Payment, custody, or signing authority
 

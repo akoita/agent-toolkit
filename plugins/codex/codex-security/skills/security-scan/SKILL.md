@@ -140,7 +140,10 @@ curl -fsSL "https://api.first.org/data/v1/epss?cve=CVE-2021-44228"
 ```
 
 In the CISA KEV catalog is P0. Otherwise EPSS ≥ 0.1 with CVSS ≥ 7 is P1, CVSS
-≥ 9 alone is P2, and everything else is backlog.
+≥ 9 alone is P2, and everything else is backlog. A fix published in the last
+~14 days for an internet-facing component overrides this ladder upward (at
+least P1); see the fresh-patch override in
+`security-audit/references/triage-and-false-positives.md`.
 
 Suppress in preference order: tune the rule, then allowlist the path, then
 baseline, and only then an inline suppression with a mandatory justification

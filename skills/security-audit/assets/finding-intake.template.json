@@ -76,6 +76,7 @@
     "triaged_at": null,
     "reproduced_at": null,
     "fixed_at": null,
+    "fix_public_at": null,
     "released_at": null,
     "deployed_or_adopted_at": null,
     "closed_at": null
